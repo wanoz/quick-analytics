@@ -13,9 +13,9 @@ Currently, only Python scripts and Jupyter notebooks are included in this packag
 Place input data (csv, xlsx files) in the "Data" folder if using the Jupyter notebook template examples.
 
 ## Requirements
-- Python 3 (download at: https://www.python.org/downloads/)
+- Python 3 (download from: https://www.python.org/downloads/)
 
-- Install rest of the library packages:
+- Install library packages:
   - Numpy
   - Scipy
   - Pandas
