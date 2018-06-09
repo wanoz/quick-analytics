@@ -12,6 +12,26 @@ Currently, only Python scripts and Jupyter notebooks are included in this packag
 ### Note
 Place input data (csv, xlsx files) in the "Data" folder if using the Jupyter notebook template examples.
 
+## Requirements
+- Python 3
+- Numpy
+- Scipy
+- Pandas
+- Matplotlib
+- Seaborn
+- Sklearn
+- Tensorflow
+```
+$ pip install numpy
+$ pip install scipy
+$ pip install pandas
+$ pip install matplotlib
+$ pip install seaborn
+$ pip install scikit-learn
+$ pip install tensorflow
+
+```
+
 ## Future updates
 - More Python Jupyter notebook examples that cover different model implementations
 - Functionality that allows comparison of model performance under collaboration (by recording model parameters that are used by different Jupyter notebooks), aiming improve productivity between potential team members working from a shared workspace.
