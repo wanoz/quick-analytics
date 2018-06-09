@@ -1,7 +1,7 @@
 # Quick Analytics
 
 ## Background and motivation
-When creating scripts and building tools for data analytics (including various machine learning tasks), there seems to be many components that are commonly used across multiple frameworks and libraries. These components are often re-used and re-deployed in a customised fashion to suit a spectrum of analytics or machine learning model building tasks. The intention here is to accumulate these scripts in one place and reduce the amount of code one has to do for carrying out analytics tasks.
+When creating scripts and building tools for data analytics (including machine learning), there seems to be many components that are commonly used across multiple frameworks and libraries. These components are often re-used and re-deployed in a customised fashion to suit a spectrum of analytics or machine learning model building tasks. The intention here is to accumulate these scripts in one place and reduce the amount of code one has to do for carrying out analytics tasks.
 
 ## Content inclusions
 Currently, only Python scripts and Jupyter notebooks are included in this package. These cover Sklearn and Keras/Tensorflow implementations of:
