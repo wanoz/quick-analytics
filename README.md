@@ -14,13 +14,17 @@ Place input data (csv, xlsx files) in the "Data" folder if using the Jupyter not
 
 ## Requirements
 - Python 3
-- Numpy
-- Scipy
-- Pandas
-- Matplotlib
-- Seaborn
-- Sklearn
-- Tensorflow
+Download at: https://www.python.org/downloads/
+
+- Install rest of the library packages:
+-- Python
+-- Numpy
+-- Scipy
+-- Pandas
+-- Matplotlib
+-- Seaborn
+-- Sklearn
+-- Tensorflow
 ```
 $ pip install numpy
 $ pip install scipy
