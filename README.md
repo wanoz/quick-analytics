@@ -16,7 +16,6 @@ Place input data (csv, xlsx files) in the "Data" folder if using the Jupyter not
 - Python 3 (download at: https://www.python.org/downloads/)
 
 - Install rest of the library packages:
-  - Python
   - Numpy
   - Scipy
   - Pandas
