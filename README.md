@@ -34,6 +34,6 @@ $ pip install tensorflow
 ```
 
 ## Future updates
-- More Python Jupyter notebook examples that cover different model implementations
+- More Python Jupyter notebook examples that cover different explorative analytics environments and different model implementations.
 - Functionality that allows comparison of model performance under collaboration (by recording model parameters that are used by different Jupyter notebooks), aiming improve productivity between potential team members working from a shared workspace.
 - Implementations of data preprocessing and modelling in R.
