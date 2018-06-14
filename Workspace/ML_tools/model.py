@@ -11,7 +11,7 @@ def set_nn(input_features, hidden_layers=2, hidden_units=8, hidden_activation='r
     """
     Setup a neural network model using the Tensorflow Keras python library.
 
-    Parameters:
+    Arguments:
     -----------
     input_features : integer, number of input features
     hidden_layers : integer, number of hidden layer(s) in the neural network
@@ -74,7 +74,7 @@ def set_conv_nn(input_shape=(128, 128), conv_layers=2, kernel_size=(5, 5), conv_
     """
     Setup a convolution neural network model using the Tensorflow Keras python library.
 
-    Parameters:
+    Arguments:
     -----------
     input_shape : tuple, shape of the input features (pixel resolution)
     conv_layers : int, number of convolution layers
@@ -163,7 +163,7 @@ def train_nn_keras(X_train, y_train, X_dev, y_dev, nn_model, nn_model_info, lear
     """
     Train a neural network model using the Tensorflow Keras python library.
 
-    Parameters:
+    Arguments:
     -----------
     X_train : input training samples
     y_train : target training samples
@@ -216,7 +216,7 @@ def train_nn(train_dataset, nn_model, nn_model_info, learning_rate=0.01, num_epo
     """
     Train a neural network model using the Tensorflow python library.
 
-    Parameters:
+    Arguments:
     -----------
     X_train : input training samples
     y_train : target training samples
@@ -357,7 +357,7 @@ def train_svm_sklearn(X_train, y_train, C=1, gamma=1):
     """
     Train a SVM model using the Sklearn python library.
 
-    Parameters:
+    Arguments:
     -----------
     X_train : input training samples
     y_train : target training samples
@@ -392,7 +392,7 @@ def train_lgr_sklearn(X_train, y_train):
     """
     Train a Logistic Regression model using the Sklearn python library.
 
-    Parameters:
+    Arguments:
     -----------
     X_train : input training samples
     y_train : target training samples
@@ -421,7 +421,7 @@ def train_rforest_sklearn(X_train, y_train, max_depth=None, max_features=None, m
     """
     Train a Random Forest model using the Sklearn python library.
 
-    Parameters:
+    Arguments:
     -----------
     X_train : input training samples
     y_train : target training samples
@@ -460,7 +460,7 @@ def train_adaboost_sklearn(X_train, y_train, n_estimators=50, learning_rate=1):
     """
     Train an Adaboost model using the Sklearn python library.
 
-    Parameters:
+    Arguments
     -----------
     X_train : input training samples
     y_train : target training samples
@@ -492,7 +492,7 @@ def train_dtree_sklearn(X_train, y_train, max_depth=None, max_features=None, min
     """
     Train a Decision Tree model using the Sklearn python library.
 
-    Parameters:
+    Arguments:
     -----------
     X_train : input training samples
     y_train : target training samples
@@ -529,7 +529,7 @@ def train_nb_sklearn(X_train, y_train):
     """
     Train a Naive Bayes model using the Sklearn python library.
 
-    Parameters:
+    Arguments:
     -----------
     X_train : input training samples
     y_train : target training samples

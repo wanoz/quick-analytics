@@ -21,7 +21,7 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
     """
     Generate a simple plot of the test and training learning curve.
 
-    Parameters
+    Arguments:
     ----------
     estimator : object type that implements the "fit" and "predict" methods
         An object of that type which is cloned for each validation.
@@ -89,7 +89,7 @@ def evaluate_model(X_test, y_test, y, model):
     """
     Evaluate a pre-trained model using the Sklearn python library.
 
-    Parameters:
+    Arguments:
     -----------
     X_test : test input samples
     y_test : test target samples
@@ -158,7 +158,7 @@ def plot_loss_accuracy(train_loss_results, train_accuracy_results):
     """
     Plot loss and accuracy curves on the neural network training process.
 
-    Parameters:
+    Arguments:
     -----------
     train_loss_results : all loss values per training iteration
     train_accuracy_results : all accuracy values per training iteration
@@ -180,7 +180,7 @@ def plot_history_keras(history):
     """
     Plot history of neural network training process.
 
-    Parameters:
+    Arguments:
     -----------
     history : output data from the training process
     """
