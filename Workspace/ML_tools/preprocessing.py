@@ -31,7 +31,7 @@ def datasets_overview(df_list, df_names):
     Arguments:
     -----------
     df_list : pd.dataframe, list of dataframes as input.
-    df_names : list, list containing the names assigned to the dataframes in respective order.
+    df_names : list, list containing the names assigned to the dataframes in their respective order.
 
     Returns:
     -----------
