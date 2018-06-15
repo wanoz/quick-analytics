@@ -120,7 +120,7 @@ def compare_difference(df_other, df_train):
         {'Features(s) not found in the training dataset': diff_col_names})
     return df_difference
 
-
+# Checks unique value labels, counts and the relative representations in the dataset.
 def unique_values(df, header):
     """
     Helper function that outputs a table containing the unique label, the coresponding entries count and the relatively representation of the data in the dataset.
@@ -151,8 +151,8 @@ def unique_values(df, header):
   
     return df_unique
 
-
-def relative_representation(df, header_list, min_threshold=5):
+# Checks the unique value labels, counts and relative representations for the provided column headers in the dataset.
+def relative_representation(df, header_list, min_threshold=100):
     """
     Helper function that outputs a summary table of categorical values where their relative prevelance is less than a given threshold (min_threshold).
 
@@ -188,6 +188,7 @@ def relative_representation(df, header_list, min_threshold=5):
 
     return df_relative_rep
 
+# Check the correlations of the features with respect to a target column header in the dataset.
 def correlations_check(df, target_header, categorical_encoding='one_hot'):
     """
     Helper function that outputs a table of feature correlations against a specified column in the dataset.
@@ -223,6 +224,7 @@ def correlations_check(df, target_header, categorical_encoding='one_hot'):
     
     return df_correlations
 
+# Plot the correlations of the features with respect to a target column header in the dataset.
 def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
     Helper function that outputs a plot of feature correlations against a specified column in the dataset.
@@ -259,10 +261,10 @@ def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 
     ax = sns.barplot(data=df, x=target_header, y=df.index.tolist(), palette=sns_palette)
     ax.set_xlabel(x_label_desc)
 
-
+# Check the relative proportion of data that contain missing value in the dataset.
 def missing_values_table(df):
     """
-    Helper function that outputs a summary table of the proportion of data that are missing with respect to each column.
+    Helper function that outputs a summary table of the proportion of data that contain missing value in the dataset.
 
     Arguments:
     -----------
@@ -315,8 +317,6 @@ def get_continuous_mean(df, feature_heading, random_scaling=0.01):
     return df_continuous_mean
 
 # Apply sklearn scalers and output plots
-
-
 def check_stats_scalers(df, feature_heading):
     # Set scaled data headers
     original_heading = feature_heading + '_original'
@@ -359,8 +359,6 @@ def check_stats_scalers(df, feature_heading):
     return df_new
 
 # Apply math operation scaling and output plots
-
-
 def check_math_scalers(df, feature_heading):
     """
     Apply different scaler functions to a feature column using Sklearn python library.
@@ -418,8 +416,6 @@ def check_math_scalers(df, feature_heading):
     return df_new
 
 # Perform PCA and output scatter plot
-
-
 def check_pca_scatter(df, scaler='standard', components=2, target_label=None):
     """
     Produce a PCA scattermap after applying scaler functions using Sklearn python library.
@@ -477,9 +473,7 @@ def check_pca_scatter(df, scaler='standard', components=2, target_label=None):
 
     return df_x_pca
 
-# Perform PCA and output heatmap
-
-
+# Perform PCA and output heatmap.
 def check_pca_heatmap(df, scaler='standard', components=2, annot=False):
     """
     Produce a PCA heatmap after applying scaler functions using Sklearn python library.
@@ -536,7 +530,7 @@ def check_pca_heatmap(df, scaler='standard', components=2, annot=False):
 
     return df_comp
 
-
+# Create dataframe for initial step of data analysis using Pandas.
 def create_dataframe(file_name='unknown'):
     """
     Import original data for analysis.
@@ -577,7 +571,7 @@ def create_dataframe(file_name='unknown'):
 
     return df_original
 
-
+# Get the file path of the input dataset - for use in the notebook template).
 def get_filepath(file_name='unknown'):
     """
     Get original data's file path
@@ -602,7 +596,7 @@ def get_filepath(file_name='unknown'):
 
     return file_dir
 
-
+# Train/validation/test split function for specified data proportions of each category.
 def training_split(X, y, train_partition=0.6, dev_partition=0.2, test_partition=0.2, random_state=None):
     """
     Split the data into training, validation and test portions.
@@ -683,7 +677,7 @@ def df_to_tf(X, y):
     tf_dataset = tf.convert_to_tensor(tf_dataset)
     return tf_dataset
 
-
+# Process input image data for computer vision tasks.
 def inspect_image(file_name='unknown', file_type='jpeg', grayscale=False, target_res=128):
     """
     Parse single image as numpy array. Also show image information.
@@ -757,7 +751,7 @@ def inspect_image(file_name='unknown', file_type='jpeg', grayscale=False, target
 
     return img_data
 
-
+# Process all image files in the specified folder for computer vision tasks.
 def parse_image_data(img_folder_names=[], file_type='jpeg', grayscale=False, target_res=128):
     """
     Process images stored in designated folders for model training.
