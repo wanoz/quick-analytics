@@ -26,7 +26,7 @@ from skimage.transform import rescale, resize, downscale_local_mean
 # Get dataframe containing information about the unique labels within the dataset column/array.
 def datasets_overview(df_list, df_names):
     """
-    Helper function that outputs a table that contains high level, and general attributes of the provided dataframes.
+    Helper function that outputs a table containing high level/general statistics of the provided dataframes.
 
     Arguments:
     -----------
