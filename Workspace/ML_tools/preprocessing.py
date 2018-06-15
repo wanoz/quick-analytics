@@ -25,6 +25,18 @@ from skimage.transform import rescale, resize, downscale_local_mean
 
 # Get dataframe containing information about the unique labels within the dataset column/array.
 def datasets_overview(df_list, df_names):
+    """
+    Helper function that outputs a table that contains high level, and general attributes of the provided dataframes.
+
+    Arguments:
+    -----------
+    df_list : pd.dataframe, list of dataframes as input.
+    df_names : list, list containing the names assigned to the dataframes in respective order.
+
+    Returns:
+    -----------
+    df_overview : pd.dataframe, resulting dataframe as output.
+    """
     num_rows = []
     num_cols = []
     total_col_names = []
@@ -109,37 +121,34 @@ def compare_difference(df_other, df_train):
     return df_difference
 
 
-def unique_values(df, target_header):
+def unique_values(df, header):
     """
     Helper function that outputs a table containing the unique label, the coresponding entries count and the relatively representation of the data in the dataset.
 
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed in as input.
-    target_header : string, the column header description to apply analysis on.
+    header : string, the column header description to apply analysis on.
 
     Returns:
     -----------
     df_unique : pd.dataframe, resulting dataframe as output.
     """
-    target_header_desc = target_header
-    target_header_no = '(' + 'Unique values: ' + \
-        str(df[target_header].nunique()) + ')'
-
+    header_no = '(' + 'Unique values: ' + str(df[header].nunique()) + ')'
+  
     # Create unique value result dataframe.
     df_unique = pd.DataFrame(
         {
-            str(target_header_no) + ' ' + target_header_desc: df[target_header].value_counts().index.values,
-            'Number of entries': np.asarray(df[target_header].value_counts())
+            str(header_no) + ' ' + header  : df[header].value_counts().index.values,
+            'Number of examples' : np.asarray(df[header].value_counts())
         }
     )
-
+  
     # Relative prevalence of the data representation amongst all other categories.
     # (expressed in percentage proportion)
-    label_count_sum = df_unique['Number of entries'].sum()
-    df_unique['Relative representation %'] = 100 * \
-        df_unique['Number of entries']/label_count_sum
-
+    label_count_sum = df_unique['Number of examples'].sum()
+    df_unique['Relative representation %'] = 100*df_unique['Number of examples']/label_count_sum
+  
     return df_unique
 
 
@@ -178,6 +187,77 @@ def relative_representation(df, header_list, min_threshold=5):
     df_relative_rep.drop(columns=['index'], inplace=True)
 
     return df_relative_rep
+
+def correlations_check(df, target_header, categorical_encoding='one_hot'):
+    """
+    Helper function that outputs a table of feature correlations against a specified column in the dataset.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input.
+    target_header : string, the column with the header description to run feature correlations against.
+    categorical_encoding : selection of 'one_hot', 'label_encode', the type of encoding method for categorical data.
+
+    Returns:
+    -----------
+    df_correlations : pd.dataframe, resulting dataframe as output.
+    """
+    # Isolate sub-dataset containing categorical values
+    categorical = df.loc[:, df.dtypes == object]
+    
+    # Isolate sub-dataset containing non-categorical values
+    non_categorical = df.loc[:, df.dtypes != object]
+    
+    # Apply encoding to categorical value data
+    if categorical_encoding == 'one_hot':
+        categorical_one_hot = pd.get_dummies(categorical)
+    
+    # Join up categorical and non-categorical sub-datasets
+    df_one_hot = pd.concat([categorical_one_hot, non_categorical], axis=1)
+    
+    # Get the correlation values with respect to the target column
+    df_correlations = pd.DataFrame(df_one_hot.corr()[target_header].sort_values(ascending=False))
+    
+    # Drop the row with the index of the target header (correlation value to this row is 1 - with itself)
+    df_correlations.drop(df_correlations.index[df_correlations.index.get_loc(target_header)], inplace=True)
+    
+    return df_correlations
+
+def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+    """
+    Helper function that outputs a plot of feature correlations against a specified column in the dataset.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input.
+    target_header : string, the column with the header description to run feature correlations against.
+    x_label_desc : string, the x-axis label description.
+    plot_size : tuple, the specified size of the plot chart in the notebook cell.
+    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc).
+    sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
+    sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order).
+
+    Returns:
+    -----------
+    Display of bar chart.
+    """
+    # Define size of the plot figure
+    plt.figure(figsize=plot_size)
+    
+    # Define the style of the Seaborn plot
+    sns.set_style(sns_style)
+    sns.set_context(sns_context)
+    
+    # Set the x-axis limits and marker locations at 0.05 increments
+    x_mag = df[target_header].abs().max()*1.2
+    x_mag = 0.05 * (x_mag // 0.05) + 0.05
+    xticks_range = np.linspace(-x_mag + 0.05, x_mag, int(2*x_mag/0.05))
+    
+    plt.xticks(xticks_range)
+    plt.xlim(xmin=-x_mag, xmax=x_mag)
+    
+    ax = sns.barplot(data=df, x=target_header, y=df.index.tolist(), palette=sns_palette)
+    ax.set_xlabel(x_label_desc)
 
 
 def missing_values_table(df):
