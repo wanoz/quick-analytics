@@ -30,12 +30,12 @@ def datasets_overview(df_list, df_names):
 
     Arguments:
     -----------
-    df_list : pd.dataframe, list of dataframes as input.
-    df_names : list, list containing the names assigned to the dataframes in their respective order.
+    df_list : pd.dataframe, list of dataframes as input
+    df_names : list, list containing the names assigned to the dataframes in their respective order
 
     Returns:
     -----------
-    df_overview : pd.dataframe, resulting dataframe as output.
+    df_overview : pd.dataframe, resulting dataframe as output
     """
     num_rows = []
     num_cols = []
@@ -78,11 +78,11 @@ def compare_common(df_list):
 
     Arguments:
     -----------
-    df_list : pd.dataframe, list of dataframes as input.
+    df_list : pd.dataframe, list of dataframes as input
 
     Returns:
     -----------
-    df_common : pd.dataframe, dataframe detailing the common column features.
+    df_common : pd.dataframe, dataframe detailing the common column features
     """
     common_col_names = []
     for df in df_list:
@@ -103,11 +103,11 @@ def compare_difference(df_other, df_train):
 
     Arguments:
     -----------
-    df_list : pd.dataframe, list of dataframes to be passed in as input.
+    df_list : pd.dataframe, list of dataframes to be passed in as input
 
     Returns:
     -----------
-    df_difference : pd.dataframe, dataframe detailing the different column features.
+    df_difference : pd.dataframe, dataframe detailing the different column features
     """
     train = df_train.columns.tolist()
     other = df_other.columns.tolist()
@@ -123,16 +123,16 @@ def compare_difference(df_other, df_train):
 # Checks unique value labels, counts and the relative representations in the dataset.
 def unique_values(df, header):
     """
-    Helper function that outputs a table containing the unique label, the coresponding entries count and the relatively representation of the data in the dataset.
+    Helper function that outputs a table containing the unique label, the coresponding entries count and the relatively representation of the data in the dataset
 
     Arguments:
     -----------
-    df : pd.dataframe, dataframe to be passed in as input.
-    header : string, the column header description to apply analysis on.
+    df : pd.dataframe, dataframe to be passed in as input
+    header : string, the column header description to apply analysis on
 
     Returns:
     -----------
-    df_unique : pd.dataframe, resulting dataframe as output.
+    df_unique : pd.dataframe, resulting dataframe as output
     """
     header_no = '(' + 'Unique values: ' + str(df[header].nunique()) + ')'
   
@@ -154,17 +154,17 @@ def unique_values(df, header):
 # Checks the unique value labels, counts and relative representations for the provided column headers in the dataset.
 def relative_representation(df, header_list, min_threshold=100):
     """
-    Helper function that outputs a summary table of categorical values where their relative prevelance is less than a given threshold (min_threshold).
+    Helper function that outputs a summary table of categorical values where their relative prevelance is less than a given threshold (min_threshold)
 
     Arguments:
     -----------
-    df : pd.dataframe, dataframe to be passed as input.
-    header_list : list, list of columns headers to be passed in as input.
-    min_threshold : float, the minimum threshold where the categorical value prevalence is considered to be adequately represented.
+    df : pd.dataframe, dataframe to be passed as input
+    header_list : list, list of columns headers to be passed in as input
+    min_threshold : float, the minimum threshold where the categorical value prevalence is considered to be adequately represented
 
     Returns:
     -----------
-    df_relative_rep : pd.dataframe, resulting dataframe as output.
+    df_relative_rep : pd.dataframe, resulting dataframe as output
     """
     # Create dataframe structure
     df_relative_rep = pd.DataFrame({'Column value': [], 'Number of entries': [
@@ -191,17 +191,17 @@ def relative_representation(df, header_list, min_threshold=100):
 # Check the correlations of the features with respect to a target column header in the dataset.
 def correlations_check(df, target_header, categorical_encoding='one_hot'):
     """
-    Helper function that outputs a table of feature correlations against a specified column in the dataset.
+    Helper function that outputs a table of feature correlations against a specified column in the dataset
 
     Arguments:
     -----------
-    df : pd.dataframe, dataframe to be passed as input.
-    target_header : string, the column with the header description to run feature correlations against.
-    categorical_encoding : selection of 'one_hot', 'label_encode', the type of encoding method for categorical data.
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description to run feature correlations against
+    categorical_encoding : selection of 'one_hot', 'label_encode', the type of encoding method for categorical data
 
     Returns:
     -----------
-    df_correlations : pd.dataframe, resulting dataframe as output.
+    df_correlations : pd.dataframe, resulting dataframe as output
     """
     # Isolate sub-dataset containing categorical values
     categorical = df.loc[:, df.dtypes == object]
@@ -231,17 +231,17 @@ def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 
 
     Arguments:
     -----------
-    df : pd.dataframe, dataframe to be passed as input.
-    target_header : string, the column with the header description to run feature correlations against.
-    x_label_desc : string, the x-axis label description.
-    plot_size : tuple, the specified size of the plot chart in the notebook cell.
-    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc).
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description to run feature correlations against
+    x_label_desc : string, the x-axis label description
+    plot_size : tuple, the specified size of the plot chart in the notebook cell
+    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
     sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
-    sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order).
+    sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
 
     Returns:
     -----------
-    Display of bar chart.
+    Display of bar chart
     """
     # Define size of the plot figure
     plt.figure(figsize=plot_size)
@@ -264,15 +264,15 @@ def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 
 # Check the relative proportion of data that contain missing value in the dataset.
 def missing_values_table(df):
     """
-    Helper function that outputs a summary table of the proportion of data that contain missing value in the dataset.
+    Helper function that outputs a summary table of the proportion of data that contain missing value in the dataset
 
     Arguments:
     -----------
-    df : pd.dataframe, dataframe to be passed as input.
+    df : pd.dataframe, dataframe to be passed as input
 
     Returns:
     -----------
-    mis_val_table_ren_columns : pd.dataframe, resulting dataframe as output.
+    mis_val_table_ren_columns : pd.dataframe, resulting dataframe as output
     """
     # Total missing values
     mis_val = df.isnull().sum()
@@ -416,7 +416,7 @@ def check_math_scalers(df, feature_heading):
     return df_new
 
 # Perform PCA and output scatter plot
-def check_pca_scatter(df, scaler='standard', components=2, target_label=None):
+def plot_pca_scatter(df, scaler='standard', components=2, plot_size=(12, 8), target_label=None):
     """
     Produce a PCA scattermap after applying scaler functions using Sklearn python library.
 
@@ -425,6 +425,7 @@ def check_pca_scatter(df, scaler='standard', components=2, target_label=None):
     df : pd.dataframe, dataframe of the input data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     components : integer, number of PCA components
+    plot_size : tuple, the specified size of the plot chart in the notebook cell
     annot : boolean of True or False, display or not display value annotations on the heatmap
 
     Returns:
@@ -468,13 +469,14 @@ def check_pca_scatter(df, scaler='standard', components=2, target_label=None):
     df_x_pca = pd.concat([df_x_pca, df[target_label]], axis=1)
 
     # Plot the PCA scatter plot
+    plt.figure(figsize=plot_size)
     g_pca_scatter = sns.lmplot(data=df_x_pca, x='1st principal component', y='2nd principal component',
                                hue=target_label, fit_reg=False, palette='plasma', size=7, aspect=1.5)
 
     return df_x_pca
 
 # Perform PCA and output heatmap.
-def check_pca_heatmap(df, scaler='standard', components=2, annot=False):
+def plot_pca_heatmap(df, scaler='standard', components=2, plot_size=(12, 8), annot=False):
     """
     Produce a PCA heatmap after applying scaler functions using Sklearn python library.
 
@@ -483,6 +485,7 @@ def check_pca_heatmap(df, scaler='standard', components=2, annot=False):
     df : pd.dataframe, dataframe of the input data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     components : integer, number of PCA components
+    plot_size : tuple, the specified size of the plot chart in the notebook cell
     annot : boolean, choice of true/false for display or not display value annotations on the heatmap
 
     Returns:
@@ -525,7 +528,7 @@ def check_pca_heatmap(df, scaler='standard', components=2, annot=False):
     feature_headings = df.columns.values.tolist()
     df_comp = pd.DataFrame(pca.components_, columns=feature_headings)
     df_comp = df_comp.set_index([column_headers])
-    plt.figure(figsize=(15, 7))
+    plt.figure(figsize=plot_size)
     g_pca_heatmap = sns.heatmap(data=df_comp, annot=annot, cmap='plasma')
 
     return df_comp
