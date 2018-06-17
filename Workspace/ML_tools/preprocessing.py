@@ -188,79 +188,6 @@ def relative_representation(df, header_list, min_threshold=100):
 
     return df_relative_rep
 
-# Check the correlations of the features with respect to a target column header in the dataset.
-def correlations_check(df, target_header, categorical_encoding='one_hot'):
-    """
-    Helper function that outputs a table of feature correlations against a specified column in the dataset
-
-    Arguments:
-    -----------
-    df : pd.dataframe, dataframe to be passed as input
-    target_header : string, the column with the header description to run feature correlations against
-    categorical_encoding : selection of 'one_hot', 'label_encode', the type of encoding method for categorical data
-
-    Returns:
-    -----------
-    df_correlations : pd.dataframe, resulting dataframe as output
-    """
-    # Isolate sub-dataset containing categorical values
-    categorical = df.loc[:, df.dtypes == object]
-    
-    # Isolate sub-dataset containing non-categorical values
-    non_categorical = df.loc[:, df.dtypes != object]
-    
-    # Apply encoding to categorical value data
-    if categorical_encoding == 'one_hot':
-        categorical_one_hot = pd.get_dummies(categorical)
-    
-    # Join up categorical and non-categorical sub-datasets
-    df_one_hot = pd.concat([categorical_one_hot, non_categorical], axis=1)
-    
-    # Get the correlation values with respect to the target column
-    df_correlations = pd.DataFrame(df_one_hot.corr()[target_header].sort_values(ascending=False))
-    
-    # Drop the row with the index of the target header (correlation value to this row is 1 - with itself)
-    df_correlations.drop(df_correlations.index[df_correlations.index.get_loc(target_header)], inplace=True)
-    
-    return df_correlations
-
-# Plot the correlations of the features with respect to a target column header in the dataset.
-def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
-    """
-    Helper function that outputs a plot of feature correlations against a specified column in the dataset.
-
-    Arguments:
-    -----------
-    df : pd.dataframe, dataframe to be passed as input
-    target_header : string, the column with the header description to run feature correlations against
-    x_label_desc : string, the x-axis label description
-    plot_size : tuple, the specified size of the plot chart in the notebook cell
-    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
-    sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
-    sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
-
-    Returns:
-    -----------
-    Display of bar chart
-    """
-    # Define size of the plot figure
-    plt.figure(figsize=plot_size)
-    
-    # Define the style of the Seaborn plot
-    sns.set_style(sns_style)
-    sns.set_context(sns_context)
-    
-    # Set the x-axis limits and marker locations at 0.05 increments
-    x_mag = df[target_header].abs().max()*1.2
-    x_mag = 0.05 * (x_mag // 0.05) + 0.05
-    xticks_range = np.linspace(-x_mag + 0.05, x_mag, int(2*x_mag/0.05))
-    
-    plt.xticks(xticks_range)
-    plt.xlim(xmin=-x_mag, xmax=x_mag)
-    
-    ax = sns.barplot(data=df, x=target_header, y=df.index.tolist(), palette=sns_palette)
-    ax.set_xlabel(x_label_desc)
-
 # Check the relative proportion of data that contain missing value in the dataset.
 def missing_values_table(df):
     """
@@ -300,6 +227,210 @@ def missing_values_table(df):
     # Return the dataframe with missing information
     return mis_val_table_ren_columns
 
+# Check the correlations of the features with respect to a target column header in the dataset.
+def correlations_check(df, target_header, encoder='one_hot'):
+    """
+    Helper function that outputs a table of feature correlations against a specified column in the dataset
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description to run feature correlations against
+    encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+
+    Returns:
+    -----------
+    df_correlations : pd.dataframe, resulting dataframe as output
+    """
+    # Isolate sub-dataset containing categorical values
+    categorical = df.loc[:, df.dtypes == object]
+    
+    # Isolate sub-dataset containing non-categorical values
+    non_categorical = df.loc[:, df.dtypes != object]
+    
+    # Apply encoding to categorical value data
+    if encoder == 'one_hot':
+        categorical_one_hot = pd.get_dummies(categorical)
+    
+    # Join up categorical and non-categorical sub-datasets
+    df_one_hot = pd.concat([categorical_one_hot, non_categorical], axis=1)
+    
+    # Get the correlation values with respect to the target column
+    df_correlations = pd.DataFrame(df_one_hot.corr()[target_header].sort_values(ascending=False))
+    
+    # Drop the row with the index of the target header (correlation value to this row is 1 - with itself)
+    df_correlations.drop(df_correlations.index[df_correlations.index.get_loc(target_header)], inplace=True)
+    
+    return df_correlations
+
+# Perform PCA on the dataset to extract principle components and features contributions.
+def pca_check(df, target_header, encoder='one_hot', imputer='mean', scaler='standard', pca_components=3):
+    """
+    Helper function that outputs PCA transformed data and the associated features contributions
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description of the target label
+    encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+    imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
+    pca_components : int, the number of principle components to be extracted from PCA
+
+    Returns:
+    -----------
+    df_pca : pd.dataframe, resulting dataframe of PCA transformed data as output
+    df_pca_comp : pd.dataframe, resulting dataframe of PCA associated features contributions as output
+    """
+    # Separate features and target data
+    df_y = df[[target_header]]
+    df_x = df.drop(columns=[target_header])
+    
+    # Isolate sub-dataset containing categorical values
+    categorical = df_x.loc[:, df.dtypes == object]
+    
+    # Isolate sub-dataset containing non-categorical values
+    non_categorical = df_x.loc[:, df.dtypes != object]
+    
+    # Apply encoding to categorical value data
+    if encoder == 'one_hot':
+        categorical = pd.get_dummies(categorical)
+        
+    # Join up categorical and non-categorical sub-datasets
+    df_x = pd.concat([categorical, non_categorical], axis=1)
+    feature_columns = df_x.columns
+    
+    # Apply imputation processing to data
+    imputer = Imputer(strategy=imputer)
+    df_x = imputer.fit_transform(df_x)
+    
+    # Apply scaler to data
+    if scaler == 'standard':
+        scaler = StandardScaler()
+        scaler.fit(df_x)
+    elif scaler == 'minmax':
+        scaler = MinMaxScaler()
+        scaler.fit(df_x)
+    else:
+        scaler = RobustScaler()
+        scaler.fit(df_x)
+        
+    df_x = scaler.transform(df_x)
+
+    # Fit data to PCA transformation of specified principle components
+    pca = PCA(n_components=int(pca_components))
+    pca.fit(df_x)
+    x_pca = pca.transform(df_x)
+    
+    # Set header descriptions for displaying PCA results
+    column_headers = ['PC_' + str(pc_index + 1) for pc_index in range(pca_components)]
+    df_x_pca = pd.DataFrame(data=x_pca, columns=column_headers)
+    
+    # Join up categorical and non-categorical sub-datasets
+    df_pca = pd.concat([df_x_pca, df_y], axis=1)
+    
+    # Set table containing PCA components contribution
+    df_pca_comp = pd.DataFrame(data=pca.components_, columns=feature_columns)
+    return df_pca, df_pca_comp
+
+# Plot the correlations of the features with respect to a target column header in the dataset.
+def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+    """
+    Helper function that outputs a plot of feature correlations against a specified column in the dataset.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description to run feature correlations against
+    x_label_desc : string, the x-axis label description
+    plot_size : tuple, the specified size of the plot chart in the notebook cell
+    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
+    sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
+    sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+
+    Returns:
+    -----------
+    Display of bar chart
+    """
+    # Define size of the plot figure
+    plt.figure(figsize=plot_size)
+    
+    # Define the style of the Seaborn plot
+    sns.set_style(sns_style)
+    sns.set_context(sns_context)
+    
+    # Set the x-axis limits and marker locations at 0.05 increments
+    x_mag = df[target_header].abs().max()*1.2
+    x_mag = 0.05 * (x_mag // 0.05) + 0.05
+    
+    n_ticks = int(2*x_mag/0.05)
+    if n_ticks <= 20:
+        tick_interval = 0.05
+    else:
+        tick_interval = 0.1
+    xticks_range = np.linspace(-x_mag + tick_interval, x_mag, int(2*x_mag/tick_interval))
+    
+    plt.xticks(xticks_range)
+    plt.xlim(xmin=-x_mag, xmax=x_mag)
+    
+    plt.xticks(xticks_range)
+    plt.xlim(xmin=-x_mag, xmax=x_mag)
+    
+    ax = sns.barplot(data=df, x=target_header, y=df.index.tolist(), palette=sns_palette)
+    ax.set_xlabel(x_label_desc)
+
+# Plot the PCA features contributions chart with respect to a specified principle component index.
+def plot_pca_contributions(df_pca_comp, pc_index=1, x_label_desc='PC contribution', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+    """
+    Helper function that outputs a plot of PCA features contributions on specified a principle component.
+
+    Arguments:
+    -----------
+    df_pca_comp : pd.dataframe, dataframe containing PCA features contributions to be passed as input
+    pc_index : int, the index of the principle component to be extracted and plotted
+    x_label_desc : string, the x-axis label description
+    plot_size : tuple, the specified size of the plot chart in the notebook cell
+    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
+    sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
+    sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+
+    Returns:
+    -----------
+    Display of bar chart
+    """
+    # Define the size of the plot figure
+    plt.figure(figsize=plot_size)
+    
+    # Define the style of the Seaborn plot
+    sns.set_style(sns_style)
+    sns.set_context(sns_context)
+    
+    # Reshape input dataframe for plotting
+    target_header = 'PC_' + str(pc_index)
+    df = pd.DataFrame(data=df_pca_comp.iloc[pc_index - 1].sort_values(ascending=False))
+    df.columns = [target_header]
+    if df.shape[0] > 30:
+        df_plot = pd.concat([df.head(15), df.tail(15)], axis=0)
+    else:
+        df_plot = df
+    
+    # Set the x-axis limits and marker locations at 0.05 increments
+    x_mag = df_plot[target_header].abs().max()*1.2
+    x_mag = 0.05 * (x_mag // 0.05) + 0.05
+    
+    n_ticks = int(2*x_mag/0.05)
+    if n_ticks <= 20:
+        tick_interval = 0.05
+    else:
+        tick_interval = 0.1
+    xticks_range = np.linspace(-x_mag + tick_interval, x_mag, int(2*x_mag/tick_interval))
+    
+    plt.xticks(xticks_range)
+    plt.xlim(xmin=-x_mag, xmax=x_mag)
+    
+    # Create the plot
+    ax = sns.barplot(data=df_plot, x=target_header, y=df_plot.index.tolist(), palette=sns_palette)
+    ax.set_xlabel(x_label_desc)
 
 # Get dataframe that transforms/encodes discrete numbered features (e.g. 0 or 1, or 2, 10, 15) into continuous set of numbers
 # Note: this adds some degree of randomisation of data, and applying encode based on the average of other samples (with exclusion
