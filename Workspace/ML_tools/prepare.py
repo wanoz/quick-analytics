@@ -298,7 +298,7 @@ def pca_check(df, target_header, encoder='one_hot', imputer='mean', scaler='stan
         
     # Join up categorical and non-categorical sub-datasets
     df_x = pd.concat([categorical, non_categorical], axis=1)
-    feature_columns = df_x.columns
+    feature_headers = df_x.columns
     
     # Apply imputation processing to data
     imputer = Imputer(strategy=imputer)
@@ -323,14 +323,21 @@ def pca_check(df, target_header, encoder='one_hot', imputer='mean', scaler='stan
     x_pca = pca.transform(df_x)
     
     # Set header descriptions for displaying PCA results
-    column_headers = ['PC_' + str(pc_index + 1) for pc_index in range(pca_components)]
-    df_x_pca = pd.DataFrame(data=x_pca, columns=column_headers)
+    pc_headers = ['PC_' + str(pc_index + 1) for pc_index in range(pca_components)]
+    df_x_pca = pd.DataFrame(data=x_pca, columns=pc_headers)
     
     # Join up categorical and non-categorical sub-datasets
     df_pca = pd.concat([df_x_pca, df_y], axis=1)
     
     # Set table containing PCA components contribution
-    df_pca_comp = pd.DataFrame(data=pca.components_, columns=feature_columns)
+    df_pca_comp = pd.DataFrame(data=pca.components_, columns=feature_headers)
+
+    # Get PCA explained variance ratio of top components
+    df_explained_var = pd.DataFrame(data=pca.explained_variance_ratio_, index=pc_headers, columns=['Explained variance %'])
+    df_explained_var['Explained variance %'] = df_explained_var['Explained variance %']*100
+    print('Total explained variance: {:0.2f}%\n'.format(df_explained_var['Explained variance %'].sum()))
+    print(df_explained_var)
+
     return df_pca, df_pca_comp
 
 # Plot the correlations of the features with respect to a target column header in the dataset.
@@ -364,7 +371,7 @@ def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 
     x_mag = 0.05 * (x_mag // 0.05) + 0.05
     
     n_ticks = int(2*x_mag/0.05)
-    if n_ticks <= 20:
+    if n_ticks <= 15:
         tick_interval = 0.05
     else:
         tick_interval = 0.1
@@ -419,7 +426,7 @@ def plot_pca_contributions(df_pca_comp, pc_index=1, x_label_desc='PC contributio
     x_mag = 0.05 * (x_mag // 0.05) + 0.05
     
     n_ticks = int(2*x_mag/0.05)
-    if n_ticks <= 20:
+    if n_ticks <= 15:
         tick_interval = 0.05
     else:
         tick_interval = 0.1
