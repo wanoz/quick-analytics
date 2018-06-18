@@ -717,7 +717,7 @@ def create_dataframe(file_name='unknown'):
     data_dir = os.path.join(base_dir, 'Data')
     file_dir_csv = os.path.join(data_dir, file_name + '.csv')
 
-    file_dir_xlsx = os.path.join(data_dir, file_name + 'xlsx')
+    file_dir_xlsx = os.path.join(data_dir, file_name + '.xlsx')
     df_original = None
 
     try:
