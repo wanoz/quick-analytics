@@ -729,14 +729,14 @@ def create_dataframe(file_name='unknown'):
         print(df_original.describe())
     except:
         try:
-            df_original = pd.read_excel(file_dir_xlsx, sheet_name='sheet1')
+            df_original = pd.read_excel(file_dir_xlsx, sheet_name='Sheet1')
             print('Status: Data imported')
             print('\nData preview:')
             print(df_original.head())
             print('\nContent statistics:')
             print(df_original.describe())
         except:
-            print('Status: No data found!')
+            print('Status: File is unable to be read! Please ensure file content is not corrupted or if the file is of .xlsx format, the sheetname is titled as "Sheet1".')
 
     return df_original
 
