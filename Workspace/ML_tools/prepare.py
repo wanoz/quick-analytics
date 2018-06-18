@@ -393,6 +393,12 @@ def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 
     # Define the style of the Seaborn plot
     sns.set_style(sns_style)
     sns.set_context(sns_context)
+
+    # Reshape input dataframe for plotting
+    if df.shape[0] > 30:
+        df_plot = pd.concat([df.head(15), df.tail(15)], axis=0)
+    else:
+        df_plot = df
     
     # Set the x-axis limits and marker locations at 0.05 increments
     x_mag = df[target_header].abs().max()*1.2
