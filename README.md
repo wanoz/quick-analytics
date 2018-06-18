@@ -23,6 +23,7 @@ Place input data (csv, xlsx files) in the "Data" folder if using the Jupyter not
   - Seaborn
   - Sklearn
   - Tensorflow
+  - Skimage
 ```
 $ pip install numpy
 $ pip install scipy
@@ -31,6 +32,7 @@ $ pip install matplotlib
 $ pip install seaborn
 $ pip install scikit-learn
 $ pip install tensorflow
+$ pip install scikit-image
 ```
 
 ## Future updates
