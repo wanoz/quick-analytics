@@ -227,7 +227,7 @@ def missing_values_table(df):
     # Return the dataframe with missing information
     return mis_val_table_ren_columns
 
-# Check the correlations of the features with respect to a target column header in the dataset.
+# Feature analysis with correlations
 def correlations_check(df, target_header, encoder='one_hot'):
     """
     Helper function that outputs a table of feature correlations against a specified column in the dataset
@@ -266,7 +266,7 @@ def correlations_check(df, target_header, encoder='one_hot'):
     
     return df_correlations
 
-# Perform PCA on the dataset to extract principal components and features contributions.
+# Feature analysis with PCA
 def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='standard', pca_components=10):
     """
     Helper function that outputs PCA transformation and the associated features contributions. Also outputs Scree plots on Eigenvalues and Explained variance attributes.
@@ -320,12 +320,14 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
         scaler.fit(df_x)
         
     df_x = scaler.transform(df_x)
+    print('Preprocessed data...')
 
     # Fit data to PCA transformation of specified principal components
     pca = PCA(n_components=int(pca_components))
     pca.fit(df_x)
     x_pca = pca.transform(df_x)
-    
+    print('Processed PCA...')
+
     # Set header descriptions for displaying PCA results
     pc_headers = ['PC_' + str(pc_index + 1) for pc_index in range(pca_components)]
     df_x_pca = pd.DataFrame(data=x_pca, columns=pc_headers)
@@ -341,7 +343,7 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
     df_explained_var['Explained variance %'] = df_explained_var['Explained variance %']*100
     df_explained_var['Explained variance (cumulative) %'] = df_explained_var['Explained variance %'].cumsum()
     df_explained_var['Eigenvalue'] = pca.explained_variance_
-    print('Total explained variance %: {:0.2f}%\n'.format(df_explained_var['Explained variance %'].sum()))
+    print('\nTotal explained variance %: {:0.2f}%\n'.format(df_explained_var['Explained variance %'].sum()))
     print(df_explained_var)
     print('\n')
     
@@ -370,6 +372,81 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
     leg.legendHandles[1].set_color('Grey')
     
     return df_pca, df_pca_comp
+
+# Feature analysis with logistic regression
+def logistic_reg_features(df, target_header, encoder='one_hot', imputer='median', scaler='standard', reg_C=1, reg_norm='l2'):
+    """
+    Helper function that outputs feature weights from the trained logistic regression model.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description of the target label
+    encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+    imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
+    reg_C : float, regularization parameter for logistic regression (inverse strength of regularization)
+    reg_norm : selection of 'l1', 'l2', the type of L1 or L2 penalty for logistic regression
+
+    Returns:
+    -----------
+    df_features : pd.dataframe, resulting dataframe of model feature weights as output
+    """
+    # Separate features and target data
+    y = df[target_header]
+    df_x = df.drop(columns=[target_header])
+    
+    # Isolate sub-dataset containing categorical values
+    categorical = df_x.loc[:, df_x.dtypes == object]
+    
+    # Isolate sub-dataset containing non-categorical values
+    non_categorical = df_x.loc[:, df_x.dtypes != object]
+    
+    # Apply encoding to categorical value data
+    if encoder == 'one_hot':
+        categorical = pd.get_dummies(categorical)
+        
+    # Join up categorical and non-categorical sub-datasets
+    df_x = pd.concat([categorical, non_categorical], axis=1)
+    feature_headers = df_x.columns
+    
+    # Apply imputation processing to data
+    imputer = Imputer(strategy=imputer, copy=False)
+    df_x = imputer.fit_transform(df_x)
+    
+    # Apply scaler to data
+    if scaler == 'standard':
+        scaler = StandardScaler()
+        scaler.fit(df_x)
+    elif scaler == 'minmax':
+        scaler = MinMaxScaler()
+        scaler.fit(df_x)
+    else:
+        scaler = RobustScaler()
+        scaler.fit(df_x)
+        
+    X = scaler.transform(df_x)
+    print('Preprocessed data...')
+    
+    # Split train and test data for model fitting
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+    
+    # Perform model training and evaluation
+    model = LogisticRegression(C=reg_C, penalty=reg_norm)
+    model.fit(X_train, y_train)
+    print('Trained model...')
+    
+    # Get model accuracy
+    accuracy = model.score(X_test, y_test)
+    
+    # Get the important features from the model in a dataframe format
+    df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
+    df_features.columns=['Feature weight']
+    df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
+    
+    print('Logistic Regression with ' + reg_norm.capitalize() + ' regularization (accuracy: ' + str(accuracy) + ')')
+
+    return df_features
 
 # Plot the correlations of the features with respect to a target column header in the dataset.
 def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
@@ -484,7 +561,7 @@ def plot_pca_scatter(df_pca, target_header, pc_axes=(1, 2), sns_style='white', s
     Arguments:
     -----------
     df_pca : pd.dataframe, PCA components dataframe as input data
-    target_header : str, column header of the target label
+    target_header : string, column header of the target label
     pc_axes : tuple, indicates the principal components to be assigned to the respective x and y axes
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
     sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
