@@ -730,20 +730,12 @@ def create_dataframe(file_name='unknown'):
     df_original = None
 
     try:
-        df_original = pd.read_csv(file_dir_csv, encoding='cp1252')
-        print('Status: Data imported')
-        print('\nData preview:')
-        print(df_original.head())
-        print('\nContent summary:')
-        print(df_original.describe())
+        df_original = pd.read_csv(file_dir_csv, encoding='utf-8')
+        print('Status: ' + file_name + ' imported!')
     except:
         try:
             df_original = pd.read_excel(file_dir_xlsx, sheet_name='Sheet1')
-            print('Status: Data imported')
-            print('\nData preview:')
-            print(df_original.head())
-            print('\nContent statistics:')
-            print(df_original.describe())
+            print('Status: ' + file_name + ' imported!')
         except:
             print('Status: File is unable to be read! Please ensure file content is not corrupted or if the file is of .xlsx format, the sheetname is titled as "Sheet1".')
 
