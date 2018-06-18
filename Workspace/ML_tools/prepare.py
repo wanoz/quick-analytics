@@ -476,6 +476,36 @@ def plot_pca_contributions(df_pca_comp, pc_index=1, x_label_desc='PC contributio
     ax = sns.barplot(data=df_plot, x=target_header, y=df_plot.index.tolist(), palette=sns_palette)
     ax.set_xlabel(x_label_desc)
 
+# Plot 2D scatter of PCA biplot
+def plot_pca_scatter(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_context='talk', sns_palette='plasma'):
+    """
+    Produce a PCA scatter biplot.
+
+    Arguments:
+    -----------
+    df_pca : pd.dataframe, PCA components dataframe as input data
+    target_header : str, column header of the target label
+    pc_axes : tuple, indicates the principal components to be assigned to the respective x and y axes
+    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
+    sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
+    sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+
+    Returns:
+    -----------
+    Display of PCA biplot
+    """
+    
+    # Define the style of the Seaborn plot
+    sns.set_style(sns_style)
+    sns.set_context(sns_context)
+    
+    # Create the plot
+    sns.lmplot(data=df_pca, x='PC_' + str(pc_axes[0]), y='PC_' + str(pc_axes[1]), hue=target_header, fit_reg=False, palette=sns_palette, size=8, aspect=1.5)
+    ax = plt.gca()
+    ax.set_title('PCA biplot')
+    ax.set_xlabel('Principal component ' + str(pc_axes[0]))
+    ax.set_ylabel('Principal component ' + str(pc_axes[1]))
+
 # Get dataframe that transforms/encodes discrete numbered features (e.g. 0 or 1, or 2, 10, 15) into continuous set of numbers
 # Note: this adds some degree of randomisation of data, and applying encode based on the average of other samples (with exclusion
 # of the active data point)
@@ -589,66 +619,6 @@ def check_math_scalers(df, feature_heading):
     sns.kdeplot(sqrt_scaled_data, ax=ax[1][0], shade=True, color='y')
     sns.kdeplot(tanh_scaled_data, ax=ax[1][1], shade=True, color='y')
     return df_new
-
-# Perform PCA and output scatter plot
-def plot_pca_scatter(df, scaler='standard', components=2, plot_size=(12, 8), target_label=None):
-    """
-    Produce a PCA scattermap after applying scaler functions using Sklearn python library.
-
-    Arguments:
-    -----------
-    df : pd.dataframe, dataframe of the input data
-    scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
-    components : integer, number of PCA components
-    plot_size : tuple, the specified size of the plot chart in the notebook cell
-    annot : boolean of True or False, display or not display value annotations on the heatmap
-
-    Returns:
-    -----------
-    df_x_pca : pd.dataframe, dataframe containing PCA transform values
-    """
-    # Apply scaler to data
-    if scaler == 'standard':
-        scaler = StandardScaler()
-        scaler.fit(df)
-    elif scaler == 'minmax':
-        scaler = MinMaxScaler()
-        scaler.fit(df)
-    else:
-        scaler = RobustScaler()
-        scaler.fit(df)
-
-    # Fit data to PCA transformation
-    df_pca = scaler.transform(df)
-
-    # Get the top 2 principal components
-    pca = PCA(n_components=int(components))
-    pca.fit(df_pca)
-    x_pca = pca.transform(df_pca)
-
-    # Set PCA components as per input
-    if components == 2:
-        column_headers = ['1st principal component', '2nd principal component']
-    elif components == 3:
-        column_headers = ['1st principal component',
-                          '2nd principal component', '3rd principal component']
-    elif components == 4:
-        column_headers = ['1st principal component', '2nd principal component',
-                          '3rd principal component', '4th principal component']
-    else:
-        print('Warning: number of components argument entered is less than 2 or greater than 4. Thus, components outputs have been downscaled to 4 components.')
-        column_headers = ['1st principal component', '2nd principal component',
-                          '3rd principal component', '4th principal component']
-
-    df_x_pca = pd.DataFrame(data=x_pca, columns=column_headers)
-    df_x_pca = pd.concat([df_x_pca, df[target_label]], axis=1)
-
-    # Plot the PCA scatter plot
-    plt.figure(figsize=plot_size)
-    g_pca_scatter = sns.lmplot(data=df_x_pca, x='1st principal component', y='2nd principal component',
-                               hue=target_label, fit_reg=False, palette='plasma', size=7, aspect=1.5)
-
-    return df_x_pca
 
 # Perform PCA and output heatmap.
 def plot_pca_heatmap(df, scaler='standard', components=2, plot_size=(12, 8), annot=False):
