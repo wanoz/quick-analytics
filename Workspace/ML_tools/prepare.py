@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, Imputer
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
 from skimage.io import imread, imshow
