@@ -260,6 +260,9 @@ def correlations_check(df, target_header, encoder='one_hot'):
     
     # Drop the row with the index of the target header (correlation value to this row is 1 - with itself)
     df_correlations.drop(df_correlations.index[df_correlations.index.get_loc(target_header)], inplace=True)
+
+    # Drop rows containing NaN
+    df_correlations.dropna(inplace=True)
     
     return df_correlations
 
@@ -401,7 +404,7 @@ def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 
         df_plot = df
     
     # Set the x-axis limits and marker locations at 0.05 increments
-    x_mag = df[target_header].abs().max()*1.2
+    x_mag = df_plot[target_header].abs().max()*1.2
     x_mag = 0.05 * (x_mag // 0.05) + 0.05
     
     n_ticks = int(2*x_mag/0.05)
@@ -417,7 +420,7 @@ def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 
     plt.xticks(xticks_range)
     plt.xlim(xmin=-x_mag, xmax=x_mag)
     
-    ax = sns.barplot(data=df, x=target_header, y=df.index.tolist(), palette=sns_palette)
+    ax = sns.barplot(data=df_plot, x=target_header, y=df_plot.index.tolist(), palette=sns_palette)
     ax.set_xlabel(x_label_desc)
 
 # Plot the PCA features contributions chart with respect to a specified principal component index.
