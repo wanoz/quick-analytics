@@ -263,7 +263,7 @@ def correlations_check(df, target_header, encoder='one_hot'):
     
     return df_correlations
 
-# Perform PCA on the dataset to extract principle components and features contributions.
+# Perform PCA on the dataset to extract principal components and features contributions.
 def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='standard', pca_components=10):
     """
     Helper function that outputs PCA transformation and the associated features contributions. Also outputs Scree plots on Eigenvalues and Explained variance attributes.
@@ -275,7 +275,7 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
     imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
-    pca_components : int, the number of principle components to be extracted from PCA
+    pca_components : int, the number of principal components to be extracted from PCA
 
     Returns:
     -----------
@@ -414,15 +414,15 @@ def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 
     ax = sns.barplot(data=df, x=target_header, y=df.index.tolist(), palette=sns_palette)
     ax.set_xlabel(x_label_desc)
 
-# Plot the PCA features contributions chart with respect to a specified principle component index.
+# Plot the PCA features contributions chart with respect to a specified principal component index.
 def plot_pca_contributions(df_pca_comp, pc_index=1, x_label_desc='PC contribution', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
-    Helper function that outputs a plot of PCA features contributions on specified a principle component.
+    Helper function that outputs a plot of PCA features contributions on specified a principal component.
 
     Arguments:
     -----------
     df_pca_comp : pd.dataframe, dataframe containing PCA features contributions to be passed as input
-    pc_index : int, the index of the principle component to be extracted and plotted
+    pc_index : int, the index of the principal component to be extracted and plotted
     x_label_desc : string, the x-axis label description
     plot_size : tuple, the specified size of the plot chart in the notebook cell
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
@@ -656,7 +656,7 @@ def plot_pca_heatmap(df, scaler='standard', components=2, plot_size=(12, 8), ann
 
     Returns:
     -----------
-    df_comp : pd.dataframe, dataframe containing principle component values
+    df_comp : pd.dataframe, dataframe containing principal component values
     """
     # Apply scaler to data
     if scaler == 'standard':
