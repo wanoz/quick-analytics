@@ -288,10 +288,10 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
     df_x = df.drop(columns=[target_header])
     
     # Isolate sub-dataset containing categorical values
-    categorical = df_x.loc[:, df.dtypes == object]
+    categorical = df_x.loc[:, df_x.dtypes == object]
     
     # Isolate sub-dataset containing non-categorical values
-    non_categorical = df_x.loc[:, df.dtypes != object]
+    non_categorical = df_x.loc[:, df_x.dtypes != object]
     
     # Apply encoding to categorical value data
     if encoder == 'one_hot':
