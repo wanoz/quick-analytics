@@ -737,7 +737,7 @@ def create_dataframe(file_name='unknown'):
             df_original = pd.read_excel(file_dir_xlsx, sheet_name='Sheet1')
             print('Status: ' + file_name + ' imported!')
         except:
-            print('Status: File is unable to be read! Please ensure file content is not corrupted or if the file is of .xlsx format, the sheetname is titled as "Sheet1".')
+            print('Status: ' + file_name + ' is unable to be read! Please ensure file content is not corrupted or if the file is of .xlsx format, the sheetname is titled as "Sheet1".')
 
     return df_original
 
