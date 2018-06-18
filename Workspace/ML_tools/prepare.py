@@ -730,7 +730,7 @@ def create_dataframe(file_name='unknown'):
     df_original = None
 
     try:
-        df_original = pd.read_csv(file_dir_csv, encoding='cp1252')
+        df_original = pd.read_csv(file_dir_csv, encoding='cp1252', low_memory=False)
         print('Status: ' + file_name + ' imported!')
     except:
         try:
