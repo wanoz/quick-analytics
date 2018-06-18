@@ -264,9 +264,9 @@ def correlations_check(df, target_header, encoder='one_hot'):
     return df_correlations
 
 # Perform PCA on the dataset to extract principle components and features contributions.
-def pca_check(df, target_header, encoder='one_hot', imputer='mean', scaler='standard', pca_components=3):
+def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='standard', pca_components=10):
     """
-    Helper function that outputs PCA transformed data and the associated features contributions
+    Helper function that outputs PCA transformation and the associated features contributions. Also outputs Scree plots on Eigenvalues and Explained variance attributes.
 
     Arguments:
     -----------
@@ -281,8 +281,9 @@ def pca_check(df, target_header, encoder='one_hot', imputer='mean', scaler='stan
     -----------
     df_pca : pd.dataframe, resulting dataframe of PCA transformed data as output
     df_pca_comp : pd.dataframe, resulting dataframe of PCA associated features contributions as output
+    Display of Scree plots (Eigenvalue and Explained variance)
     """
-    # Separate features and target data
+        # Separate features and target data
     df_y = df[[target_header]]
     df_x = df.drop(columns=[target_header])
     
@@ -317,7 +318,7 @@ def pca_check(df, target_header, encoder='one_hot', imputer='mean', scaler='stan
         
     df_x = scaler.transform(df_x)
 
-    # Fit data to PCA transformation of specified principle components
+    # Fit data to PCA transformation of specified principal components
     pca = PCA(n_components=int(pca_components))
     pca.fit(df_x)
     x_pca = pca.transform(df_x)
@@ -331,13 +332,40 @@ def pca_check(df, target_header, encoder='one_hot', imputer='mean', scaler='stan
     
     # Set table containing PCA components contribution
     df_pca_comp = pd.DataFrame(data=pca.components_, columns=feature_headers)
-
-    # Get PCA explained variance ratio of top components
+    
+    # Get PCA eigenvalues, explained variance ratio, and cumulative explained variance of top components
     df_explained_var = pd.DataFrame(data=pca.explained_variance_ratio_, index=pc_headers, columns=['Explained variance %'])
     df_explained_var['Explained variance %'] = df_explained_var['Explained variance %']*100
-    print('Total explained variance: {:0.2f}%\n'.format(df_explained_var['Explained variance %'].sum()))
+    df_explained_var['Explained variance (cumulative) %'] = df_explained_var['Explained variance %'].cumsum()
+    df_explained_var['Eigenvalue'] = pca.explained_variance_
+    print('Total explained variance %: {:0.2f}%\n'.format(df_explained_var['Explained variance %'].sum()))
     print(df_explained_var)
-
+    print('\n')
+    
+    # Scree plots
+    custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
+    sns.set_style('white')
+    sns.set_context('talk', rc=custom_rc)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+    df_explained_var['PC']= [pc_index + 1 for pc_index in range(pca_components)]
+    
+    # Eigenvalue plot
+    sns.pointplot(x='PC', y='Eigenvalue', data=df_explained_var, ax=ax1, color='Blue')
+    ax1.set_title('Scree plot')
+    ax1.set_xlabel('Principal component')
+    ax1.set_ylabel('Eigenvalue')
+    
+    # Explained variance plot
+    sns.pointplot(x='PC', y='Explained variance %', data=df_explained_var, ax=ax2, color='Blue')
+    sns.pointplot(x='PC', y='Explained variance (cumulative) %', data=df_explained_var, ax=ax2, color='Grey')
+    ax2.set_title('Explained variance')
+    ax2.set_xlabel('Principal component')
+    ax2.set_ylabel('Explained variance %')
+    ax2.legend(labels=('Variance', 'Variance cumulative'))
+    leg = ax2.get_legend()
+    leg.legendHandles[0].set_color('Blue')
+    leg.legendHandles[1].set_color('Grey')
+    
     return df_pca, df_pca_comp
 
 # Plot the correlations of the features with respect to a target column header in the dataset.
