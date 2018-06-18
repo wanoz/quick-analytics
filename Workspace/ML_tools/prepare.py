@@ -449,7 +449,7 @@ def logistic_reg_features(df, target_header, encoder='one_hot', imputer='median'
     return df_features
 
 # Plot the correlations of the features with respect to a target column header in the dataset.
-def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+def barplot_features(df, target_header, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
     Helper function that outputs a plot of feature correlations against a specified column in the dataset.
 
@@ -501,7 +501,7 @@ def plot_correlations(df, target_header, x_label_desc='x label', plot_size=(10, 
     ax.set_xlabel(x_label_desc)
 
 # Plot the PCA features contributions chart with respect to a specified principal component index.
-def plot_pca_contributions(df_pca_comp, pc_index=1, x_label_desc='PC contribution', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
     Helper function that outputs a plot of PCA features contributions on specified a principal component.
 
@@ -554,7 +554,7 @@ def plot_pca_contributions(df_pca_comp, pc_index=1, x_label_desc='PC contributio
     ax.set_xlabel(x_label_desc)
 
 # Plot 2D scatter of PCA biplot
-def plot_pca_scatter(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_context='talk', sns_palette='plasma'):
+def biplot_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_context='talk', sns_palette='plasma'):
     """
     Produce a PCA scatter biplot.
 
