@@ -89,11 +89,11 @@ def compare_common(df_list):
         if len(common_col_names) == 0:
             common_col_names = df.columns.tolist()
         else:
-            common_col_names = list(
-                set(common_col_names) & set(df.columns.tolist()))
+            common_col_names = list(set(common_col_names) & set(df.columns.tolist()))
 
-    df_common = pd.DataFrame(
-        {'Features(s) common between the datasets': common_col_names})
+    df_common = pd.DataFrame({'Features(s) common between the datasets': common_col_names})
+    print('Number of features common between the given datasets: ' + str(len(common_col_names)))
+
     return df_common
 
 # Compare and find different column features between a main and other given dataframes.
@@ -113,11 +113,11 @@ def compare_difference(df_other, df_train):
     other = df_other.columns.tolist()
     col_names_union = list(set().union(other, train))
     col_names_intersect = list(set(other) & set(train))
-    diff_col_names = list(
-        set(col_names_union) - set(col_names_intersect) - set(df_train.columns.tolist()))
+    diff_col_names = list(set(col_names_union) - set(col_names_intersect) - set(df_train.columns.tolist()))
 
-    df_difference = pd.DataFrame(
-        {'Features(s) not found in the training dataset': diff_col_names})
+    df_difference = pd.DataFrame({'Features(s) not found in the training dataset': diff_col_names})
+    print('Number of features not found the main dataset: ' + str(len(diff_col_names)))
+
     return df_difference
 
 # Checks unique value labels, counts and the relative representations in the dataset.
@@ -763,6 +763,7 @@ def create_dataframe(file_name='unknown', dtype_dict=None):
     Arguments:
     -----------
     file_name : string, name of the data file (excludes extension descriptions like '.csv' or '.xlsx')
+    dtype_dict : dict, dictionary to specify the variable data type(s) to be read via the Pandas read_csv() function
 
     Returns:
     -----------
