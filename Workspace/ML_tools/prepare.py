@@ -756,7 +756,7 @@ def plot_pca_heatmap(df, scaler='standard', components=2, plot_size=(12, 8), ann
     return df_comp
 
 # Create dataframe for initial step of data analysis using Pandas.
-def create_dataframe(file_name='unknown'):
+def create_dataframe(file_name='unknown', dtype_dict=None):
     """
     Import original data for analysis.
 
@@ -777,7 +777,7 @@ def create_dataframe(file_name='unknown'):
     df_original = None
 
     try:
-        df_original = pd.read_csv(file_dir_csv, encoding='cp1252', low_memory=False)
+        df_original = pd.read_csv(file_dir_csv, encoding='cp1252', low_memory=False, dtype=dtype_dict)
         print('Status: ' + file_name + ' imported!')
     except:
         try:
