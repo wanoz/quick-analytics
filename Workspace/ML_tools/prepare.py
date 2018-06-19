@@ -583,6 +583,33 @@ def biplot_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_con
     ax.set_xlabel('Principal component ' + str(pc_axes[0]))
     ax.set_ylabel('Principal component ' + str(pc_axes[1]))
 
+# Perform PCA and output heatmap.
+def heatmap_pca(df_pca_comp, pc_max=3, sns_cmap='plasma', annot=False, plot_size=(12, 8)):
+    """
+    Produce a PCA heatmap after applying scaler functions using Sklearn python library.
+
+    Arguments:
+    -----------
+    df_pca_comp : pd.dataframe, dataframe containing PCA components attribution as the input data
+    pc_max : integer, maximum number of principal components to be displayed in the heatmap
+    sns_cmap : selection of 'plasma' etc, type of color map setting for heatmap
+    annot : boolean, choice of true/false for display or not display value annotations on the heatmap
+    plot_size : tuple, the specified size of the plot chart in the notebook cell
+
+    Returns:
+    -----------
+    df_comp : pd.dataframe, dataframe containing principal component values
+    """
+    # Set header descriptions for displaying PCA results
+    pc_headers = ['PC_' + str(pc_index + 1) for pc_index in range(pca_max)]
+
+    # Plot the PCA heatmap
+    df_pca_comp = df_pca_comp.set_index([pc_headers])
+    plt.figure(figsize=plot_size)
+    g_pca_heatmap = sns.heatmap(data=df_pca_comp, annot=annot, cmap=sns_cmap)
+
+    return df_comp
+
 # Get dataframe that transforms/encodes discrete numbered features (e.g. 0 or 1, or 2, 10, 15) into continuous set of numbers
 # Note: this adds some degree of randomisation of data, and applying encode based on the average of other samples (with exclusion
 # of the active data point)
@@ -696,64 +723,6 @@ def check_math_scalers(df, feature_heading):
     sns.kdeplot(sqrt_scaled_data, ax=ax[1][0], shade=True, color='y')
     sns.kdeplot(tanh_scaled_data, ax=ax[1][1], shade=True, color='y')
     return df_new
-
-# Perform PCA and output heatmap.
-def plot_pca_heatmap(df, scaler='standard', components=2, plot_size=(12, 8), annot=False):
-    """
-    Produce a PCA heatmap after applying scaler functions using Sklearn python library.
-
-    Arguments:
-    -----------
-    df : pd.dataframe, dataframe of the input data
-    scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
-    components : integer, number of PCA components
-    plot_size : tuple, the specified size of the plot chart in the notebook cell
-    annot : boolean, choice of true/false for display or not display value annotations on the heatmap
-
-    Returns:
-    -----------
-    df_comp : pd.dataframe, dataframe containing principal component values
-    """
-    # Apply scaler to data
-    if scaler == 'standard':
-        scaler = StandardScaler()
-        scaler.fit(df)
-    elif scaler == 'minmax':
-        scaler = MinMaxScaler()
-        scaler.fit(df)
-    else:
-        scaler = RobustScaler()
-        scaler.fit(df)
-
-    # Fit data to PCA transformation
-    df_pca = scaler.transform(df)
-
-    # Get the top 2 principal components
-    pca = PCA(n_components=int(components))
-    pca.fit(df_pca)
-
-    # Set PCA components as per input
-    if components == 2:
-        column_headers = ['1st principal component', '2nd principal component']
-    elif components == 3:
-        column_headers = ['1st principal component',
-                          '2nd principal component', '3rd principal component']
-    elif components == 4:
-        column_headers = ['1st principal component', '2nd principal component',
-                          '3rd principal component', '4th principal component']
-    else:
-        print('Warning: number of components argument entered is less than 2 or greater than 4. Thus, components outputs have been downscaled to 4 components.')
-        column_headers = ['1st principal component', '2nd principal component',
-                          '3rd principal component', '4th principal component']
-
-    # Plot the PCA heatmap
-    feature_headings = df.columns.values.tolist()
-    df_comp = pd.DataFrame(pca.components_, columns=feature_headings)
-    df_comp = df_comp.set_index([column_headers])
-    plt.figure(figsize=plot_size)
-    g_pca_heatmap = sns.heatmap(data=df_comp, annot=annot, cmap='plasma')
-
-    return df_comp
 
 # Create dataframe for initial step of data analysis using Pandas.
 def create_dataframe(file_name='unknown', dtype_dict=None):
