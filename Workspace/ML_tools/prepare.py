@@ -228,7 +228,7 @@ def missing_values_table(df):
     return mis_val_table_ren_columns
 
 # Feature analysis with correlations
-def correlations_check(df, target_header, encoder='one_hot'):
+def correlations_check(df, target_header, encoder='one_hot', scaler='minmax'):
     """
     Helper function that outputs a table of feature correlations against a specified column in the dataset
 
@@ -253,7 +253,18 @@ def correlations_check(df, target_header, encoder='one_hot'):
         categorical_one_hot = pd.get_dummies(categorical)
     
     # Join up categorical and non-categorical sub-datasets
-    df_one_hot = pd.concat([categorical_one_hot, non_categorical], axis=1)
+    df_x = pd.concat([categorical_one_hot, non_categorical], axis=1)
+    
+    # Apply scaler to data
+    if scaler == 'standard':
+        scaler = StandardScaler()
+        scaler.fit(df_x)
+    elif scaler == 'minmax':
+        scaler = MinMaxScaler()
+        scaler.fit(df_x)
+    else:
+        scaler = RobustScaler()
+        scaler.fit(df_x)
     
     # Get the correlation values with respect to the target column
     df_correlations = pd.DataFrame(df_one_hot.corr()[target_header].sort_values(ascending=False))
