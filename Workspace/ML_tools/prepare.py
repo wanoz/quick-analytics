@@ -374,7 +374,7 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
     return df_pca, df_pca_comp
 
 # Feature analysis with logistic regression
-def logistic_reg_features(df, target_header, target_value, encoder='one_hot', imputer='median', scaler='standard', reg_C=1, reg_norm='l2'):
+def logistic_reg_features(df, target_header, target_value=None, encoder='one_hot', imputer='median', scaler='standard', reg_C=1, reg_norm='l2'):
     """
     Helper function that outputs feature weights from the trained logistic regression model.
 
@@ -437,12 +437,17 @@ def logistic_reg_features(df, target_header, target_value, encoder='one_hot', im
 
         # Select the relevant column of the specified target value as per input
         target_headers = df_y.columns.tolist()
-        for header in target_headers:
-            if target_value in header:
-                y = df_y[header]
-                break
-            else:
-                pass
+
+        if target_value != None:
+            for header in target_headers:
+                if target_value in header:
+                    y = df_y[header]
+                    break
+                else:
+                    pass
+        else:
+            y = df_y.iloc[:, 0]
+            print('Note: Target column contains multiple labels. The column is one-hot encoded and the first column is selected as the target for feature influence analysis')
 
     print('Preprocessed data...')
     
