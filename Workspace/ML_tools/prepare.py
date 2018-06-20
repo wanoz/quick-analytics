@@ -449,7 +449,7 @@ def logistic_reg_features(df, target_header, target_value=None, encoder='one_hot
                     pass
         else:
             y = df_y.iloc[:, 0]
-            print('Note: Target column contains multiple labels. The column is one-hot encoded and the first column is selected as the target for feature influence analysis')
+            print('Note: Target column contains multiple labels. The column is one-hot encoded and the first column of the encoded result is selected as the target for feature influence analysis.\n')
 
     print('Preprocessed data...')
     
