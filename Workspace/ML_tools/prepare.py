@@ -263,9 +263,8 @@ def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
         
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
-    if len(df_y[target_header].unique()) == 2 and df_y[target_header].unique()[0] == 0 and df_y[target_header][1] == 1:
-        # Get the correlation values with respect to the target column
-        df_correlations = pd.DataFrame(df_x.corr()[target_header].sort_values(ascending=False))
+    if len(df_y[target_header].unique()) == 2 and (0 in df_y[target_header].unique()) and (1 in df_y[target_header].unique()):
+        pass
     else:
         # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
         df_y = pd.get_dummies(df_y)
@@ -277,7 +276,7 @@ def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
             target_header = target_header + '_' + target_label
         else:
             target_header = target_headers[0]
-            print('Note: Target column contains multiple labels. The column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
+            print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
     
     # Get the correlation values with respect to the target column
     df_correlations = pd.DataFrame(df_x.corr()[target_header].sort_values(ascending=False))
@@ -310,7 +309,9 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
     df_pca_comp : pd.dataframe, resulting dataframe of PCA associated features contributions as output
     Display of Scree plots (Eigenvalue and Explained variance)
     """
-        # Separate features and target data
+
+    print('Preprocessing data... ', end='')
+    # Separate features and target data
     df_y = df[[target_header]]
     df_x = df.drop(columns=[target_header])
     
@@ -344,13 +345,13 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
         scaler.fit(df_x)
         
     df_x = scaler.transform(df_x)
-    print('Preprocessed data...')
+    print('[Done]')
 
+    print('Applying PCA data transformation... ', end='')
     # Fit data to PCA transformation of specified principal components
     pca = PCA(n_components=int(pca_components))
     pca.fit(df_x)
     x_pca = pca.transform(df_x)
-    print('Processed PCA...')
 
     # Set header descriptions for displaying PCA results
     pc_headers = ['PC_' + str(pc_index + 1) for pc_index in range(pca_components)]
@@ -361,7 +362,8 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
     
     # Set table containing PCA components contribution
     df_pca_comp = pd.DataFrame(data=pca.components_, columns=feature_headers)
-    
+    print('[Done]')
+
     # Get PCA eigenvalues, explained variance ratio, and cumulative explained variance of top components
     df_explained_var = pd.DataFrame(data=pca.explained_variance_ratio_, index=pc_headers, columns=['Explained variance %'])
     df_explained_var['Explained variance %'] = df_explained_var['Explained variance %']*100
@@ -417,6 +419,8 @@ def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot
     -----------
     df_features : pd.dataframe, resulting dataframe of model feature weights as output
     """
+
+    print('Preprocessing data... ', end='')
     # Separate features and target data
     df_y = df[[target_header]]
     df_x = df.drop(columns=[target_header])
@@ -454,7 +458,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot
     
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
-    if len(df_y[target_header].unique()) == 2 and df_y[target_header].unique()[0] == 0 and df_y[target_header][1] == 1:
+    if len(df_y[target_header].unique()) == 2 and (0 in df_y[target_header].unique()) and (1 in df_y[target_header].unique()):
         y = df_y[target_header]
     else:
         # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
@@ -472,17 +476,18 @@ def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot
                     pass
         else:
             y = df_y.iloc[:, 0]
-            print('Note: Target column contains multiple labels. The column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
+            print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
 
-    print('Preprocessed data...')
+    print('[Done]')
     
+    print('Training model... ', end='')
     # Split train and test data for model fitting
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
     
     # Perform model training and evaluation
     model = LogisticRegression(C=reg_C, penalty=reg_norm)
     model.fit(X_train, y_train)
-    print('Trained model...')
+    print('[Done]')
     
     # Get model accuracy
     accuracy = model.score(X_test, y_test)
@@ -497,14 +502,13 @@ def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot
     return df_features
 
 # Plot the correlations of the features with respect to a target column header in the dataset.
-def barplot_features(df, target_header, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+def barplot_features(df, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
     Helper function that outputs a plot of feature correlations against a specified column in the dataset.
 
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed as input
-    target_header : string, the column with the header description to run feature correlations against
     x_label_desc : string, the x-axis label description
     plot_size : tuple, the specified size of the plot chart in the notebook cell
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
@@ -529,14 +533,21 @@ def barplot_features(df, target_header, x_label_desc='x label', plot_size=(10, 1
         df_plot = df
     
     # Set the x-axis limits and marker locations at 0.05 increments
-    x_mag = df_plot[target_header].abs().max()*1.2
+    x_mag = df_plot.iloc[:, 0].abs().max()*1.2
     x_mag = 0.05 * (x_mag // 0.05) + 0.05
     
     n_ticks = int(2*x_mag/0.05)
-    if n_ticks <= 15:
-        tick_interval = 0.05
-    else:
+    if n_ticks > 200:
+        tick_interval = 1
+    elif n_ticks <= 200 and n_ticks > 100:
+        tick_interval = 0.5
+    elif n_ticks <= 100 and n_ticks > 50:
+        tick_interval = 0.25
+    elif n_ticks <= 50 and n_ticks > 15:
         tick_interval = 0.1
+    else:
+        tick_interval = 0.05
+
     xticks_range = np.linspace(-x_mag + tick_interval, x_mag, int(2*x_mag/tick_interval))
     
     plt.xticks(xticks_range)
@@ -545,7 +556,7 @@ def barplot_features(df, target_header, x_label_desc='x label', plot_size=(10, 1
     plt.xticks(xticks_range)
     plt.xlim(xmin=-x_mag, xmax=x_mag)
     
-    ax = sns.barplot(data=df_plot, x=target_header, y=df_plot.index.tolist(), palette=sns_palette)
+    ax = sns.barplot(data=df_plot, x=df_plot.columns[0], y=df_plot.index.tolist(), palette=sns_palette)
     ax.set_xlabel(x_label_desc)
 
 # Plot the PCA features contributions chart with respect to a specified principal component index.
@@ -588,10 +599,17 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution'
     x_mag = 0.05 * (x_mag // 0.05) + 0.05
     
     n_ticks = int(2*x_mag/0.05)
-    if n_ticks <= 15:
-        tick_interval = 0.05
-    else:
+    if n_ticks > 200:
+        tick_interval = 1
+    elif n_ticks <= 200 and n_ticks > 100:
+        tick_interval = 0.5
+    elif n_ticks <= 100 and n_ticks > 50:
+        tick_interval = 0.25
+    elif n_ticks <= 50 and n_ticks > 15:
         tick_interval = 0.1
+    else:
+        tick_interval = 0.05
+
     xticks_range = np.linspace(-x_mag + tick_interval, x_mag, int(2*x_mag/tick_interval))
     
     plt.xticks(xticks_range)
