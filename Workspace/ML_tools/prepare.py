@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, Imputer
 from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
