@@ -19,6 +19,7 @@ from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
+from sklearn.metrics import f1_score, accuracy_score
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
 
@@ -256,10 +257,10 @@ def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
     
     # Apply encoding to categorical value data
     if encoder == 'one_hot':
-        categorical_one_hot = pd.get_dummies(categorical)
+        categorical = pd.get_dummies(categorical)
     
     # Join up categorical and non-categorical sub-datasets
-    df_x = pd.concat([categorical_one_hot, non_categorical], axis=1)
+    df_x = pd.concat([categorical, non_categorical], axis=1)
         
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
@@ -490,7 +491,8 @@ def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot
     print('[Done]')
     
     # Get model accuracy
-    accuracy = model.score(X_test, y_test)
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
     
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
@@ -498,6 +500,108 @@ def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot
     df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
     
     print('Logistic Regression with ' + reg_norm.capitalize() + ' regularization (accuracy: ' + str(accuracy) + ')')
+
+    return df_features
+
+# Feature analysis with random forest model
+def random_forest_features(df, target_header, target_label=None, encoder='one_hot', imputer='median', scaler='standard', n_trees=10):
+    """
+    Helper function that outputs feature weights from the trained random forest model.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description of the target label
+    target_label : string, optional input if the target column is not yet encoded with binary 0 and 1 labels
+    encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+    imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
+    n_trees : int, number of trees/estimators for the random forest model
+
+    Returns:
+    -----------
+    df_features : pd.dataframe, resulting dataframe of model feature weights as output
+    """
+
+    print('Preprocessing data... ', end='')
+    # Separate features and target data
+    df_y = df[[target_header]]
+    df_x = df.drop(columns=[target_header])
+    
+    # Isolate sub-dataset containing categorical values
+    categorical = df_x.loc[:, df_x.dtypes == object]
+    
+    # Isolate sub-dataset containing non-categorical values
+    non_categorical = df_x.loc[:, df_x.dtypes != object]
+    
+    # Apply encoding to categorical value data
+    if encoder == 'one_hot':
+        categorical = pd.get_dummies(categorical)
+        
+    # Join up categorical and non-categorical sub-datasets
+    df_x = pd.concat([categorical, non_categorical], axis=1)
+    feature_headers = df_x.columns
+    
+    # Apply imputation processing to data
+    imputer = Imputer(strategy=imputer, copy=False)
+    df_x = imputer.fit_transform(df_x)
+    
+    # Apply scaler to data
+    if scaler == 'standard':
+        scaler = StandardScaler()
+        scaler.fit(df_x)
+    elif scaler == 'minmax':
+        scaler = MinMaxScaler()
+        scaler.fit(df_x)
+    else:
+        scaler = RobustScaler()
+        scaler.fit(df_x)
+        
+    X = scaler.transform(df_x)
+    
+    # Get the encoded target labels if necessary
+    # Check if target labels are binary 0 and 1
+    if len(df_y[target_header].unique()) == 2 and (0 in df_y[target_header].unique()) and (1 in df_y[target_header].unique()):
+        y = df_y[target_header]
+    else:
+        # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
+        df_y = pd.get_dummies(df_y)
+
+        # Select the relevant column of the specified target value as per input
+        target_headers = df_y.columns.tolist()
+
+        if target_label != None:
+            for header in target_headers:
+                if target_label in header:
+                    y = df_y[header]
+                    break
+                else:
+                    pass
+        else:
+            y = df_y.iloc[:, 0]
+            print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
+
+    print('[Done]')
+    
+    print('Training model... ', end='')
+    # Split train and test data for model fitting
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    
+    # Perform model training and evaluation
+    model = RandomForestClassifier(n_estimators=n_trees)
+    model.fit(X_train, y_train)
+    print('[Done]')
+    
+    # Get model accuracy
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    
+    # Get the important features from the model in a dataframe format
+    df_features = pd.DataFrame(data=model.feature_importances_, index=feature_headers)
+    df_features.columns=['Feature weight']
+    df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
+    
+    print('Random Forest model (accuracy: ' + str(accuracy) + ')')
 
     return df_features
 
@@ -548,13 +652,14 @@ def barplot_features(df, x_label_desc='x label', plot_size=(10, 10), sns_style='
     else:
         tick_interval = 0.05
 
-    xticks_range = np.linspace(-x_mag + tick_interval, x_mag, int(2*x_mag/tick_interval))
-    
-    plt.xticks(xticks_range)
-    plt.xlim(xmin=-x_mag, xmax=x_mag)
-    
-    plt.xticks(xticks_range)
-    plt.xlim(xmin=-x_mag, xmax=x_mag)
+    if df_plot.iloc[:, 0].min() < 0:
+        xticks_range = np.linspace(-x_mag + tick_interval, x_mag, int(2*x_mag/tick_interval))
+        plt.xticks(xticks_range)
+        plt.xlim(xmin=-x_mag, xmax=x_mag)
+    else:
+        xticks_range = np.linspace(0, x_mag, int(x_mag/tick_interval))
+        plt.xticks(xticks_range)
+        plt.xlim(xmin=0, xmax=x_mag)
     
     ax = sns.barplot(data=df_plot, x=df_plot.columns[0], y=df_plot.index.tolist(), palette=sns_palette)
     ax.set_xlabel(x_label_desc)
@@ -610,10 +715,14 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution'
     else:
         tick_interval = 0.05
 
-    xticks_range = np.linspace(-x_mag + tick_interval, x_mag, int(2*x_mag/tick_interval))
-    
-    plt.xticks(xticks_range)
-    plt.xlim(xmin=-x_mag, xmax=x_mag)
+    if df_plot.iloc[:, 0].min() < 0:
+        xticks_range = np.linspace(-x_mag + tick_interval, x_mag, int(2*x_mag/tick_interval))
+        plt.xticks(xticks_range)
+        plt.xlim(xmin=-x_mag, xmax=x_mag)
+    else:
+        xticks_range = np.linspace(0, x_mag, int(x_mag/tick_interval))
+        plt.xticks(xticks_range)
+        plt.xlim(xmin=0, xmax=x_mag)
     
     # Create the plot
     ax = sns.barplot(data=df_plot, x=target_header, y=df_plot.index.tolist(), palette=sns_palette)
