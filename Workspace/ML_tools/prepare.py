@@ -374,7 +374,7 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
     return df_pca, df_pca_comp
 
 # Feature analysis with logistic regression
-def logistic_reg_features(df, target_header, encoder='one_hot', imputer='median', scaler='standard', reg_C=1, reg_norm='l2'):
+def logistic_reg_features(df, target_header, target_value, encoder='one_hot', imputer='median', scaler='standard', reg_C=1, reg_norm='l2'):
     """
     Helper function that outputs feature weights from the trained logistic regression model.
 
@@ -393,7 +393,7 @@ def logistic_reg_features(df, target_header, encoder='one_hot', imputer='median'
     df_features : pd.dataframe, resulting dataframe of model feature weights as output
     """
     # Separate features and target data
-    y = df[target_header]
+    df_y = df[[target_header]]
     df_x = df.drop(columns=[target_header])
     
     # Isolate sub-dataset containing categorical values
@@ -426,6 +426,24 @@ def logistic_reg_features(df, target_header, encoder='one_hot', imputer='median'
         scaler.fit(df_x)
         
     X = scaler.transform(df_x)
+    
+    # Encode target labels if necessary
+    # Check if target labels are binary 0 and 1
+    if len(df_y[target_header].unique()) == 2 and df_y[target_header].unique()[0] == 0 and df_y[target_header][1] == 1:
+        y = df_y[target_header]
+    else:
+        # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
+        df_y = pd.get_dummies(df_y)
+
+        # Select the relevant column of the specified target value as per input
+        target_headers = df_y.columns.tolist()
+        for header in target_headers:
+            if target_value in header:
+                y = df_y[header]
+                break
+            else:
+                pass
+
     print('Preprocessed data...')
     
     # Split train and test data for model fitting
