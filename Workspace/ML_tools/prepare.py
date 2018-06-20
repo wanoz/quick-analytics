@@ -230,7 +230,7 @@ def missing_values_table(df):
     return mis_val_table_ren_columns
 
 # Feature analysis with correlations
-def correlations_check(df, target_header, encoder='one_hot'):
+def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
     """
     Helper function that outputs a table of feature correlations against a specified column in the dataset
 
@@ -238,12 +238,16 @@ def correlations_check(df, target_header, encoder='one_hot'):
     -----------
     df : pd.dataframe, dataframe to be passed as input
     target_header : string, the column with the header description to run feature correlations against
+    target_label : string, optional input if the target column is not yet encoded with binary 0 and 1 labels
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
 
     Returns:
     -----------
     df_correlations : pd.dataframe, resulting dataframe as output
     """
+    # Get target data
+    df_y = df[[target_header]]
+
     # Isolate sub-dataset containing categorical values
     categorical = df.loc[:, df.dtypes == object]
     
@@ -256,6 +260,24 @@ def correlations_check(df, target_header, encoder='one_hot'):
     
     # Join up categorical and non-categorical sub-datasets
     df_x = pd.concat([categorical_one_hot, non_categorical], axis=1)
+        
+    # Get the encoded target labels if necessary
+    # Check if target labels are binary 0 and 1
+    if len(df_y[target_header].unique()) == 2 and df_y[target_header].unique()[0] == 0 and df_y[target_header][1] == 1:
+        # Get the correlation values with respect to the target column
+        df_correlations = pd.DataFrame(df_x.corr()[target_header].sort_values(ascending=False))
+    else:
+        # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
+        df_y = pd.get_dummies(df_y)
+
+        # Select the relevant column of the specified target value as per input
+        target_headers = df_y.columns.tolist()
+
+        if target_label != None:
+            target_header = target_header + '_' + target_label
+        else:
+            target_header = target_headers[0]
+            print('Note: Target column contains multiple labels. The column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
     
     # Get the correlation values with respect to the target column
     df_correlations = pd.DataFrame(df_x.corr()[target_header].sort_values(ascending=False))
@@ -376,7 +398,7 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
     return df_pca, df_pca_comp
 
 # Feature analysis with logistic regression
-def logistic_reg_features(df, target_header, target_value=None, encoder='one_hot', imputer='median', scaler='standard', reg_C=1, reg_norm='l2'):
+def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot', imputer='median', scaler='standard', reg_C=1, reg_norm='l2'):
     """
     Helper function that outputs feature weights from the trained logistic regression model.
 
@@ -384,6 +406,7 @@ def logistic_reg_features(df, target_header, target_value=None, encoder='one_hot
     -----------
     df : pd.dataframe, dataframe to be passed as input
     target_header : string, the column with the header description of the target label
+    target_label : string, optional input if the target column is not yet encoded with binary 0 and 1 labels
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
     imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
@@ -429,7 +452,7 @@ def logistic_reg_features(df, target_header, target_value=None, encoder='one_hot
         
     X = scaler.transform(df_x)
     
-    # Encode target labels if necessary
+    # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
     if len(df_y[target_header].unique()) == 2 and df_y[target_header].unique()[0] == 0 and df_y[target_header][1] == 1:
         y = df_y[target_header]
@@ -440,16 +463,16 @@ def logistic_reg_features(df, target_header, target_value=None, encoder='one_hot
         # Select the relevant column of the specified target value as per input
         target_headers = df_y.columns.tolist()
 
-        if target_value != None:
+        if target_label != None:
             for header in target_headers:
-                if target_value in header:
+                if target_label in header:
                     y = df_y[header]
                     break
                 else:
                     pass
         else:
             y = df_y.iloc[:, 0]
-            print('Note: Target column contains multiple labels. The column is one-hot encoded and the first column of the encoded result is selected as the target for feature influence analysis.\n')
+            print('Note: Target column contains multiple labels. The column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
 
     print('Preprocessed data...')
     
