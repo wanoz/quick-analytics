@@ -493,7 +493,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, im
     df_features.columns=['Feature weight']
     df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
     
-    print('Logistic Regression with ' + reg_norm.capitalize() + ' regularization model evaluation:')
+    print('\nLogistic Regression with ' + reg_norm.capitalize() + ' regularization model evaluation:\n')
     print(classification_report(y_test, y_pred))
 
     return df_features
@@ -595,7 +595,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, i
     df_features.columns=['Feature weight']
     df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
     
-    print('Random Forest model evaluation:')
+    print('\nRandom Forest model evaluation:\n')
     print(classification_report(y_test, y_pred))
 
     return df_features
