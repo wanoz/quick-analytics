@@ -1,11 +1,5 @@
 # This module is made to aid data analysis by providing commonly used functions
 # for inspecting and analysing a dataset.
-#
-# It may be helpful for:
-# - Inspecting a set of data points for its distribution characterstic
-# - Inspecting a set of data points for unique labels and their counts
-# - Outputing transformed feature data via common feature engineering methods
-# - Outputing transformed target label data as binary for One Vs All classification tasks
 
 # Setup data processing dependencies
 import time
@@ -605,6 +599,37 @@ def random_forest_features(df, target_header, target_label=None, encoder='one_ho
 
     return df_features
 
+# Secondary helper function to get the tickers for plotting
+def get_tickers(df_plot, base_interval=0.05):
+    # Set the x-axis limits and marker locations at base interval increments
+    x_mag = df_plot.iloc[:, 0].abs().max()*1.2
+    x_mag = base_interval * (x_mag // base_interval) + base_interval
+    
+    n_ticks = int(2*x_mag/base_interval)
+    if n_ticks > 200:
+        tick_interval = base_interval*20
+    elif n_ticks <= 200 and n_ticks > 100:
+        tick_interval = base_interval*10
+    elif n_ticks <= 100 and n_ticks > 50:
+        tick_interval = base_interval*5
+    elif n_ticks <= 50 and n_ticks > 15:
+        tick_interval = base_interval*2
+    elif n_ticks <= 15 and n_ticks > 3:
+        tick_interval = base_interval
+    else:
+        tick_interval = base_interval*0.25
+
+    if df_plot.iloc[:, 0].min() < 0:
+        xmax = x_mag
+        xmin = -x_mag
+    else:
+        xmax = x_mag
+        xmin = 0
+
+    xticks_range = np.linspace(xmin, xmax, int(2*x_mag/tick_interval) + 1)
+
+    return xticks_range, xmax, xmin
+
 # Plot the correlations of the features with respect to a target column header in the dataset.
 def barplot_features(df, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
@@ -623,44 +648,24 @@ def barplot_features(df, x_label_desc='x label', plot_size=(10, 10), sns_style='
     -----------
     Display of bar chart
     """
-    # Define size of the plot figure
-    plt.figure(figsize=plot_size)
-    
-    # Define the style of the Seaborn plot
-    sns.set_style(sns_style)
-    sns.set_context(sns_context)
 
     # Reshape input dataframe for plotting
     if df.shape[0] > 30:
         df_plot = pd.concat([df.head(15), df.tail(15)], axis=0)
     else:
         df_plot = df
-    
-    # Set the x-axis limits and marker locations at 0.05 increments
-    x_mag = df_plot.iloc[:, 0].abs().max()*1.2
-    x_mag = 0.05 * (x_mag // 0.05) + 0.05
-    
-    n_ticks = int(2*x_mag/0.05)
-    if n_ticks > 200:
-        tick_interval = 1
-    elif n_ticks <= 200 and n_ticks > 100:
-        tick_interval = 0.5
-    elif n_ticks <= 100 and n_ticks > 50:
-        tick_interval = 0.25
-    elif n_ticks <= 50 and n_ticks > 15:
-        tick_interval = 0.1
-    else:
-        tick_interval = 0.05
 
-    if df_plot.iloc[:, 0].min() < 0:
-        xticks_range = np.linspace(-x_mag + tick_interval, x_mag, int(2*x_mag/tick_interval))
-        plt.xticks(xticks_range)
-        plt.xlim(xmin=-x_mag, xmax=x_mag)
-    else:
-        xticks_range = np.linspace(0, x_mag, int(x_mag/tick_interval))
-        plt.xticks(xticks_range)
-        plt.xlim(xmin=0, xmax=x_mag)
+    # Get the tick markers range, max, and min values for plotting
+    xticks_range, xmax, xmin = get_tickers(df_plot, base_interval=0.05)
     
+    # Define the style of the Seaborn plot
+    sns.set_style(sns_style)
+    sns.set_context(sns_context)
+
+    # Create the plot
+    plt.figure(figsize=plot_size)
+    plt.xticks(xticks_range)
+    plt.xlim(xmin=xmin, xmax=xmax)
     ax = sns.barplot(data=df_plot, x=df_plot.columns[0], y=df_plot.index.tolist(), palette=sns_palette)
     ax.set_xlabel(x_label_desc)
 
@@ -683,13 +688,7 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution'
     -----------
     Display of bar chart
     """
-    # Define the size of the plot figure
-    plt.figure(figsize=plot_size)
-    
-    # Define the style of the Seaborn plot
-    sns.set_style(sns_style)
-    sns.set_context(sns_context)
-    
+
     # Reshape input dataframe for plotting
     target_header = 'PC_' + str(pc_index)
     df = pd.DataFrame(data=df_pca_comp.iloc[pc_index - 1].sort_values(ascending=False))
@@ -699,32 +698,17 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution'
     else:
         df_plot = df
     
-    # Set the x-axis limits and marker locations at 0.05 increments
-    x_mag = df_plot[target_header].abs().max()*1.2
-    x_mag = 0.05 * (x_mag // 0.05) + 0.05
-    
-    n_ticks = int(2*x_mag/0.05)
-    if n_ticks > 200:
-        tick_interval = 1
-    elif n_ticks <= 200 and n_ticks > 100:
-        tick_interval = 0.5
-    elif n_ticks <= 100 and n_ticks > 50:
-        tick_interval = 0.25
-    elif n_ticks <= 50 and n_ticks > 15:
-        tick_interval = 0.1
-    else:
-        tick_interval = 0.05
+    # Get the tick markers range, max, and min values for plotting
+    xticks_range, xmax, xmin = get_tickers(df_plot, base_interval=0.05)
 
-    if df_plot.iloc[:, 0].min() < 0:
-        xticks_range = np.linspace(-x_mag + tick_interval, x_mag, int(2*x_mag/tick_interval))
-        plt.xticks(xticks_range)
-        plt.xlim(xmin=-x_mag, xmax=x_mag)
-    else:
-        xticks_range = np.linspace(0, x_mag, int(x_mag/tick_interval))
-        plt.xticks(xticks_range)
-        plt.xlim(xmin=0, xmax=x_mag)
-    
+    # Define the style of the Seaborn plot
+    sns.set_style(sns_style)
+    sns.set_context(sns_context)
+
     # Create the plot
+    plt.figure(figsize=plot_size)
+    plt.xticks(xticks_range)
+    plt.xlim(xmin=xmin, xmax=xmax)
     ax = sns.barplot(data=df_plot, x=target_header, y=df_plot.index.tolist(), palette=sns_palette)
     ax.set_xlabel(x_label_desc)
 
