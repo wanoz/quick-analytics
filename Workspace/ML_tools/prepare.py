@@ -473,12 +473,11 @@ def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot
             y = df_y.iloc[:, 0]
             print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
 
-    print('[Done]')
-    
-    print('Training model... ', end='')
     # Split train and test data for model fitting
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    print('[Done]')
     
+    print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
     # Perform model training and evaluation
     model = LogisticRegression(C=reg_C, penalty=reg_norm)
     model.fit(X_train, y_train)
@@ -486,14 +485,14 @@ def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot
     
     # Get model accuracy
     y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
+    f1_result = f1_score(y_test, y_pred)
     
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
     df_features.columns=['Feature weight']
     df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
     
-    print('Logistic Regression with ' + reg_norm.capitalize() + ' regularization (accuracy: ' + str(accuracy) + ')')
+    print('Logistic Regression with ' + reg_norm.capitalize() + ' regularization (F1 score: ' + str(f1_result) + ')')
 
     return df_features
 
@@ -575,12 +574,11 @@ def random_forest_features(df, target_header, target_label=None, encoder='one_ho
             y = df_y.iloc[:, 0]
             print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
 
-    print('[Done]')
-    
-    print('Training model... ', end='')
     # Split train and test data for model fitting
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-    
+    print('[Done]')
+ 
+    print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
     # Perform model training and evaluation
     model = RandomForestClassifier(n_estimators=n_trees)
     model.fit(X_train, y_train)
@@ -588,14 +586,14 @@ def random_forest_features(df, target_header, target_label=None, encoder='one_ho
     
     # Get model accuracy
     y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
+    f1_result = f1_score(y_test, y_pred)
     
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.feature_importances_, index=feature_headers)
     df_features.columns=['Feature weight']
     df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
     
-    print('Random Forest model (accuracy: ' + str(accuracy) + ')')
+    print('Random Forest model (F1 score: ' + str(f1_result) + ')')
 
     return df_features
 
