@@ -225,7 +225,7 @@ def missing_values_table(df):
     return mis_val_table_ren_columns
 
 # Feature analysis with correlations
-def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
+def correlations_check(df, target_header, target_label=None, encoder=None):
     """
     Helper function that outputs a table of feature correlations against a specified column in the dataset
 
@@ -285,7 +285,7 @@ def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
     return df_correlations
 
 # Feature analysis with PCA
-def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='standard', pca_components=10):
+def pca_check(df, target_header, encoder='one_hot', imputer=None, scaler=None, pca_components=10):
     """
     Helper function that outputs PCA transformation and the associated features contributions. Also outputs Scree plots on Eigenvalues and Explained variance attributes.
 
@@ -395,7 +395,7 @@ def pca_check(df, target_header, encoder='one_hot', imputer='median', scaler='st
     return df_pca, df_pca_comp
 
 # Feature analysis with logistic regression
-def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot', imputer='median', scaler='standard', reg_C=1, reg_norm='l2'):
+def logistic_reg_features(df, target_header, target_label=None, encoder=None, imputer=None, scaler=None, reg_C=10, reg_norm='l2'):
     """
     Helper function that outputs feature weights from the trained logistic regression model.
 
@@ -504,7 +504,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot
     return df_features
 
 # Feature analysis with random forest model
-def random_forest_features(df, target_header, target_label=None, encoder='one_hot', imputer='median', scaler='standard', n_trees=10, max_depth=None, min_samples_leaf=10):
+def random_forest_features(df, target_header, target_label=None, encoder=None, imputer=None, scaler=None, n_trees=10, max_depth=None, min_samples_leaf=10):
     """
     Helper function that outputs feature weights from the trained random forest model.
 
