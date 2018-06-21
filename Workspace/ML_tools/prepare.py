@@ -631,7 +631,7 @@ def get_tickers(df_plot, base_interval=0.05):
     return xticks_range, xmax, xmin
 
 # Plot the correlations of the features with respect to a target column header in the dataset.
-def barplot_features(df, x_label_desc='x label', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
     Helper function that outputs a plot of feature correlations against a specified column in the dataset.
 
@@ -639,6 +639,7 @@ def barplot_features(df, x_label_desc='x label', plot_size=(10, 10), sns_style='
     -----------
     df : pd.dataframe, dataframe to be passed as input
     x_label_desc : string, the x-axis label description
+    remove_zeros : boolean, choose whether to remove all 0 values from feature influence plot
     plot_size : tuple, the specified size of the plot chart in the notebook cell
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
     sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
@@ -655,6 +656,10 @@ def barplot_features(df, x_label_desc='x label', plot_size=(10, 10), sns_style='
     else:
         df_plot = df
 
+    # Remove 0 values
+    if remove_zeros == True:
+        df_plot = df_plot.loc[(df_plot != 0).any(axis=1)]
+
     # Get the tick markers range, max, and min values for plotting
     xticks_range, xmax, xmin = get_tickers(df_plot, base_interval=0.05)
     
@@ -670,7 +675,7 @@ def barplot_features(df, x_label_desc='x label', plot_size=(10, 10), sns_style='
     ax.set_xlabel(x_label_desc)
 
 # Plot the PCA features contributions chart with respect to a specified principal component index.
-def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution', plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution', remove_zeros=True, plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
     Helper function that outputs a plot of PCA features contributions on specified a principal component.
 
@@ -679,6 +684,7 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution'
     df_pca_comp : pd.dataframe, dataframe containing PCA features contributions to be passed as input
     pc_index : int, the index of the principal component to be extracted and plotted
     x_label_desc : string, the x-axis label description
+    remove_zeros : boolean, choose whether to remove all 0 values from feature influence plot
     plot_size : tuple, the specified size of the plot chart in the notebook cell
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
     sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
@@ -698,6 +704,10 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution'
     else:
         df_plot = df
     
+    # Remove 0 values
+    if remove_zeros == True:
+        df_plot = df_plot.loc[(df_plot != 0).any(axis=1)]
+        
     # Get the tick markers range, max, and min values for plotting
     xticks_range, xmax, xmin = get_tickers(df_plot, base_interval=0.05)
 
