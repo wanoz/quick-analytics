@@ -325,8 +325,9 @@ def pca_check(df, target_header, encoder='one_hot', imputer=None, scaler=None, p
     feature_headers = df_x.columns
     
     # Apply imputation processing to data
-    imputer = Imputer(strategy=imputer)
-    df_x = imputer.fit_transform(df_x)
+    if imputer != None:
+        imputation = Imputer(strategy=imputer)
+        df_x = imputation.fit_transform(df_x)
     
     # Apply scaler to data
     if scaler == 'standard':
@@ -435,8 +436,9 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, im
     feature_headers = df_x.columns
     
     # Apply imputation processing to data
-    imputer = Imputer(strategy=imputer, copy=False)
-    df_x = imputer.fit_transform(df_x)
+    if imputer != None:
+        imputation = Imputer(strategy=imputer)
+        df_x = imputation.fit_transform(df_x)
     
     # Apply scaler to data
     if scaler == 'standard':
@@ -543,8 +545,9 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, i
     feature_headers = df_x.columns
     
     # Apply imputation processing to data
-    imputer = Imputer(strategy=imputer, copy=False)
-    df_x = imputer.fit_transform(df_x)
+    if imputer != None:
+        imputation = Imputer(strategy=imputer)
+        df_x = imputation.fit_transform(df_x)
     
     # Apply scaler to data
     if scaler == 'standard':
