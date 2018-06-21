@@ -13,7 +13,7 @@ from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
 
@@ -487,21 +487,14 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, im
     
     # Get the model performance
     y_pred = model.predict(X_test)
-    if 1 in y_pred:
-        precision = precision_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        f1_result = f1_score(y_test, y_pred)
-    else:
-        precision = 0
-        recall = 0
-        f1_result = 0
-   
+    
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
     df_features.columns=['Feature weight']
     df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
     
-    print('Logistic Regression with ' + reg_norm.capitalize() + ' regularization (precision: ' + str(precision) + ', recall: ' + str(recall) + ', F1 score: ' + str(f1_result) + ')')
+    print('Logistic Regression with ' + reg_norm.capitalize() + ' regularization model evaluation:')
+    print(classification_report(y_test, y_pred))
 
     return df_features
 
@@ -596,21 +589,14 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, i
     
     # Get the model performance
     y_pred = model.predict(X_test)
-    if 1 in y_pred:
-        precision = precision_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        f1_result = f1_score(y_test, y_pred)
-    else:
-        precision = 0
-        recall = 0
-        f1_result = 0
     
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.feature_importances_, index=feature_headers)
     df_features.columns=['Feature weight']
     df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
     
-    print('Random Forest model (precision: ' + str(precision) + ', recall: ' + str(recall) + ', F1 score: ' + str(f1_result) + ')')
+    print('Random Forest model evaluation:')
+    print(classification_report(y_test, y_pred))
 
     return df_features
 
