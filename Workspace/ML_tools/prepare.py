@@ -670,7 +670,7 @@ def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(1
 
     # Remove 0 values
     if remove_zeros == True:
-        df_plot = df_plot.loc[(df_plot > 0.001).any(axis=1) & (df_plot < -0.001).any(axis-1)]
+        df_plot = df_plot.loc[(df_plot > 0.001).any(axis=1) & (df_plot < -0.001).any(axis=-1)]
 
     # Get the tick markers range, max, and min values for plotting
     xticks_range, xmax, xmin = get_tickers(df_plot, base_interval=0.05)
@@ -718,7 +718,7 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution'
     
     # Remove 0 values
     if remove_zeros == True:
-        df_plot = df_plot.loc[(df_plot > 0.001).any(axis=1) & (df_plot < -0.001).any(axis-1)]
+        df_plot = df_plot.loc[(df_plot > 0.001).any(axis=1) & (df_plot < -0.001).any(axis=-1)]
         
     # Get the tick markers range, max, and min values for plotting
     xticks_range, xmax, xmin = get_tickers(df_plot, base_interval=0.05)
