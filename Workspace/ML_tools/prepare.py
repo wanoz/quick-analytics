@@ -504,7 +504,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder='one_hot
     return df_features
 
 # Feature analysis with random forest model
-def random_forest_features(df, target_header, target_label=None, encoder='one_hot', imputer='median', scaler='standard', n_trees=10):
+def random_forest_features(df, target_header, target_label=None, encoder='one_hot', imputer='median', scaler='standard', n_trees=10, max_depth=None, min_samples_leaf=10):
     """
     Helper function that outputs feature weights from the trained random forest model.
 
@@ -587,7 +587,7 @@ def random_forest_features(df, target_header, target_label=None, encoder='one_ho
  
     print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
     # Perform model training and evaluation
-    model = RandomForestClassifier(n_estimators=n_trees)
+    model = RandomForestClassifier(n_estimators=n_trees, max_depth=max_depth, min_samples_leaf=min_samples_leaf)
     model.fit(X_train, y_train)
     print('[Done]')
     
