@@ -285,7 +285,7 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
     return df_correlations
 
 # Feature analysis with PCA
-def pca_check(df, target_header, encoder='one_hot', imputer=None, scaler=None, pca_components=10):
+def pca_check(df, target_header, encoder='one_hot', numeric_imputer=None, scaler=None, pca_components=10):
     """
     Helper function that outputs PCA transformation and the associated features contributions. Also outputs Scree plots on Eigenvalues and Explained variance attributes.
 
@@ -294,7 +294,7 @@ def pca_check(df, target_header, encoder='one_hot', imputer=None, scaler=None, p
     df : pd.dataframe, dataframe to be passed as input
     target_header : string, the column with the header description of the target label
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
-    imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    numeric_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     pca_components : int, the number of principal components to be extracted from PCA
 
@@ -305,48 +305,56 @@ def pca_check(df, target_header, encoder='one_hot', imputer=None, scaler=None, p
     Display of Scree plots (Eigenvalue and Explained variance)
     """
 
-    print('Preprocessing data... ', end='')
+    print('Inspecting data values... ', end='')
     # Separate features and target data
-    df_y = df[[target_header]]
-    df_x = df.drop(columns=[target_header])
-
-    # Apply imputation processing to data
-    if imputer != None:
-        imputation = Imputer(strategy=imputer)
-        df_x = imputation.fit_transform(df_x)
+    df_y = df[[target_header]].copy()
+    df_x = df.drop(columns=[target_header]).copy()
     
     # Isolate sub-dataset containing categorical values
-    categorical = df_x.loc[:, df_x.dtypes == object]
+    categorical = df_x.loc[:, df_x.dtypes == object].copy()
     
     # Isolate sub-dataset containing non-categorical values
-    non_categorical = df_x.loc[:, df_x.dtypes != object]
-    binary_col_headers = binary_check(non_categorical, non_categorical.columns.tolist())
-    non_categorical.drop(columns=[binary_col_headers], inplace=True)
+    non_categorical = df_x.loc[:, df_x.dtypes != object].copy()
+    binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
+    non_categorical.drop(columns=binary_col_headers, inplace=True)
     non_categorical_headers = non_categorical.columns.tolist()
+    print('[Done]')
+
+    # Apply numeric imputation processing to data
+    if numeric_imputer != None:
+        print('Imputing numeric data... ', end='')
+        numeric_imputation = Imputer(strategy=numeric_imputer)
+        non_categorical = numeric_imputation.fit_transform(non_categorical)
+        print('[Done]')
 
     # Apply scaler to data
-    if scaler == 'standard':
-        scaler = StandardScaler()
-        scaler.fit(non_categorical)
-    elif scaler == 'minmax':
-        scaler = MinMaxScaler()
-        scaler.fit(non_categorical)
-    else:
-        scaler = RobustScaler()
-        scaler.fit(non_categorical)
-        
-    non_categorical = pd.DataFrame(data=scaler.transform(non_categorical), columns=non_categorical_headers)
-    
+    if scaler != None:
+        print('Scaling numeric data... ', end='')
+        if scaler == 'standard':
+            scaler = StandardScaler()
+            scaler.fit(non_categorical)
+        elif scaler == 'minmax':
+            scaler = MinMaxScaler()
+            scaler.fit(non_categorical)
+        else:
+            scaler = RobustScaler()
+            scaler.fit(non_categorical)
+        non_categorical_data = scaler.transform(non_categorical)
+        non_categorical = pd.DataFrame(data=non_categorical_data, columns=non_categorical_headers)
+        print('[Done]')
+
     # Apply encoding to categorical value data
-    if encoder == 'one_hot':
-        categorical = pd.get_dummies(categorical)
-        
+    if encoder != None:
+        print('Encoding categorical data... ', end='')
+        if encoder == 'one_hot':
+            categorical = pd.get_dummies(categorical)
+        print('[Done]')
+
     # Join up categorical and non-categorical sub-datasets
     df_x = pd.concat([categorical, non_categorical], axis=1)
     feature_headers = df_x.columns
-    print('[Done]')
 
-    print('Applying PCA data transformation... ', end='')
+    print('Applying PCA transformation... ', end='')
     # Fit data to PCA transformation of specified principal components
     pca = PCA(n_components=int(pca_components))
     pca.fit(df_x)
@@ -399,7 +407,7 @@ def pca_check(df, target_header, encoder='one_hot', imputer=None, scaler=None, p
     return df_pca, df_pca_comp
 
 # Feature analysis with logistic regression
-def logistic_reg_features(df, target_header, target_label=None, encoder=None, imputer=None, scaler=None, reg_C=10, reg_norm='l2'):
+def logistic_reg_features(df, target_header, target_label=None, encoder=None, numeric_imputer=None, scaler=None, reg_C=10, reg_norm='l2'):
     """
     Helper function that outputs feature weights from the trained logistic regression model.
 
@@ -409,7 +417,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, im
     target_header : string, the column with the header description of the target label
     target_label : string, optional input if the target column is not yet encoded with binary 0 and 1 labels
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
-    imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    numeric_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     reg_C : float, regularization parameter for logistic regression (inverse strength of regularization)
     reg_norm : selection of 'l1', 'l2', the type of L1 or L2 penalty for logistic regression
@@ -419,41 +427,50 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, im
     df_features : pd.dataframe, resulting dataframe of model feature weights as output
     """
 
-    print('Preprocessing data... ', end='')
+    print('Inspecting data values... ', end='')
     # Separate features and target data
-    df_y = df[[target_header]]
-    df_x = df.drop(columns=[target_header])
+    df_y = df[[target_header]].copy()
+    df_x = df.drop(columns=[target_header]).copy()
     
-    # Apply imputation processing to data
-    if imputer != None:
-        imputation = Imputer(strategy=imputer)
-        df_x = imputation.fit_transform(df_x)
-
     # Isolate sub-dataset containing categorical values
-    categorical = df_x.loc[:, df_x.dtypes == object]
+    categorical = df_x.loc[:, df_x.dtypes == object].copy()
     
     # Isolate sub-dataset containing non-categorical values
-    non_categorical = df_x.loc[:, df_x.dtypes != object]
-    binary_col_headers = binary_check(non_categorical, non_categorical.columns.tolist())
-    non_categorical.drop(columns=[binary_col_headers], inplace=True)
+    non_categorical = df_x.loc[:, df_x.dtypes != object].copy()
+    binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
+    non_categorical.drop(columns=binary_col_headers, inplace=True)
     non_categorical_headers = non_categorical.columns.tolist()
+    print('[Done]')
+
+    # Apply numeric imputation processing to data
+    if numeric_imputer != None:
+        print('Imputing numeric data... ', end='')
+        numeric_imputation = Imputer(strategy=numeric_imputer)
+        non_categorical = numeric_imputation.fit_transform(non_categorical)
+        print('[Done]')
 
     # Apply scaler to data
-    if scaler == 'standard':
-        scaler = StandardScaler()
-        scaler.fit(non_categorical)
-    elif scaler == 'minmax':
-        scaler = MinMaxScaler()
-        scaler.fit(non_categorical)
-    else:
-        scaler = RobustScaler()
-        scaler.fit(non_categorical)
-        
-    non_categorical = pd.DataFrame(data=scaler.transform(non_categorical), columns=non_categorical_headers)
-    
+    if scaler != None:
+        print('Scaling numeric data... ', end='')
+        if scaler == 'standard':
+            scaler = StandardScaler()
+            scaler.fit(non_categorical)
+        elif scaler == 'minmax':
+            scaler = MinMaxScaler()
+            scaler.fit(non_categorical)
+        else:
+            scaler = RobustScaler()
+            scaler.fit(non_categorical)
+        non_categorical_data = scaler.transform(non_categorical)
+        non_categorical = pd.DataFrame(data=non_categorical_data, columns=non_categorical_headers)
+        print('[Done]')
+
     # Apply encoding to categorical value data
-    if encoder == 'one_hot':
-        categorical = pd.get_dummies(categorical)
+    if encoder != None:
+        print('Encoding categorical data... ', end='')
+        if encoder == 'one_hot':
+            categorical = pd.get_dummies(categorical)
+        print('[Done]')
         
     # Join up categorical and non-categorical sub-datasets
     df_x = pd.concat([categorical, non_categorical], axis=1)
@@ -461,7 +478,8 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, im
     
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
-    binary_col_headers = check_binary_columns(df_y, [target_header])
+    print('Inspect target data type... ', end='')
+    binary_col_headers = get_binary_headers(df_y, [target_header])
     if target_header in binary_col_headers:
         y = df_y[target_header]
     else:
@@ -506,7 +524,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, im
     return df_features
 
 # Feature analysis with random forest model
-def random_forest_features(df, target_header, target_label=None, encoder=None, imputer=None, scaler=None, n_trees=10, max_depth=None, min_samples_leaf=10):
+def random_forest_features(df, target_header, target_label=None, encoder=None, numeric_imputer=None, scaler=None, n_trees=10, max_depth=None, min_samples_leaf=10):
     """
     Helper function that outputs feature weights from the trained random forest model.
 
@@ -516,7 +534,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, i
     target_header : string, the column with the header description of the target label
     target_label : string, optional input if the target column is not yet encoded with binary 0 and 1 labels
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
-    imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    numeric_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     n_trees : int, number of trees/estimators for the random forest model
 
@@ -525,41 +543,50 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, i
     df_features : pd.dataframe, resulting dataframe of model feature weights as output
     """
 
-    print('Preprocessing data... ', end='')
+    print('Inspecting data values... ', end='')
     # Separate features and target data
-    df_y = df[[target_header]]
-    df_x = df.drop(columns=[target_header])
-
-    # Apply imputation processing to data
-    if imputer != None:
-        imputation = Imputer(strategy=imputer)
-        df_x = imputation.fit_transform(df_x)
+    df_y = df[[target_header]].copy()
+    df_x = df.drop(columns=[target_header]).copy()
     
     # Isolate sub-dataset containing categorical values
-    categorical = df_x.loc[:, df_x.dtypes == object]
+    categorical = df_x.loc[:, df_x.dtypes == object].copy()
     
     # Isolate sub-dataset containing non-categorical values
-    non_categorical = df_x.loc[:, df_x.dtypes != object]
-    binary_col_headers = binary_check(non_categorical, non_categorical.columns.tolist())
-    non_categorical.drop(columns=[binary_col_headers], inplace=True)
+    non_categorical = df_x.loc[:, df_x.dtypes != object].copy()
+    binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
+    non_categorical.drop(columns=binary_col_headers, inplace=True)
     non_categorical_headers = non_categorical.columns.tolist()
+    print('[Done]')
+
+    # Apply numeric imputation processing to data
+    if numeric_imputer != None:
+        print('Imputing numeric data... ', end='')
+        numeric_imputation = Imputer(strategy=numeric_imputer)
+        non_categorical = numeric_imputation.fit_transform(non_categorical)
+        print('[Done]')
 
     # Apply scaler to data
-    if scaler == 'standard':
-        scaler = StandardScaler()
-        scaler.fit(non_categorical)
-    elif scaler == 'minmax':
-        scaler = MinMaxScaler()
-        scaler.fit(non_categorical)
-    else:
-        scaler = RobustScaler()
-        scaler.fit(non_categorical)
-        
-    non_categorical = pd.DataFrame(data=scaler.transform(non_categorical), columns=non_categorical_headers)
-    
+    if scaler != None:
+        print('Scaling numeric data... ', end='')
+        if scaler == 'standard':
+            scaler = StandardScaler()
+            scaler.fit(non_categorical)
+        elif scaler == 'minmax':
+            scaler = MinMaxScaler()
+            scaler.fit(non_categorical)
+        else:
+            scaler = RobustScaler()
+            scaler.fit(non_categorical)
+        non_categorical_data = scaler.transform(non_categorical)
+        non_categorical = pd.DataFrame(data=non_categorical_data, columns=non_categorical_headers)
+        print('[Done]')
+
     # Apply encoding to categorical value data
-    if encoder == 'one_hot':
-        categorical = pd.get_dummies(categorical)
+    if encoder != None:
+        print('Encoding categorical data... ', end='')
+        if encoder == 'one_hot':
+            categorical = pd.get_dummies(categorical)
+        print('[Done]')
         
     # Join up categorical and non-categorical sub-datasets
     df_x = pd.concat([categorical, non_categorical], axis=1)
@@ -567,6 +594,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, i
     
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
+    print('Inspecting target data type... ', end='')
     binary_col_headers = check_binary_columns(df_y, [target_header])
     if target_header in binary_col_headers:
         y = df_y[target_header]
@@ -612,11 +640,11 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, i
     return df_features
 
 # Secondary helper function to check whether column(s) contain binary 0 and 1 values
-def check_binary_columns(df, column_headers):
+def get_binary_headers(df, column_headers):
     binary_col_headers = []
     for header in column_headers:
         if len(df[header].unique()) == 2 and (0 in df[header].unique()) and (1 in df[header].unique()):
-            binary_col_header.append(header)
+            binary_col_headers.append(header)
         else:
             pass
     return binary_col_headers
