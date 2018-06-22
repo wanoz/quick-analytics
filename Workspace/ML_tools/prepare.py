@@ -285,7 +285,7 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
     return df_correlations
 
 # Feature analysis with PCA
-def pca_check(df, target_header, encoder='one_hot', numeric_imputer=None, scaler=None, pca_components=10):
+def pca_check(df, target_header, encoder='one_hot', numerical_imputer=None, scaler=None, pca_components=10):
     """
     Helper function that outputs PCA transformation and the associated features contributions. Also outputs Scree plots on Eigenvalues and Explained variance attributes.
 
@@ -294,7 +294,7 @@ def pca_check(df, target_header, encoder='one_hot', numeric_imputer=None, scaler
     df : pd.dataframe, dataframe to be passed as input
     target_header : string, the column with the header description of the target label
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
-    numeric_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     pca_components : int, the number of principal components to be extracted from PCA
 
@@ -322,14 +322,14 @@ def pca_check(df, target_header, encoder='one_hot', numeric_imputer=None, scaler
 
     # Apply numeric imputation processing to data
     if numeric_imputer != None:
-        print('Imputing numeric data... ', end='')
-        numeric_imputation = Imputer(strategy=numeric_imputer)
-        non_categorical = numeric_imputation.fit_transform(non_categorical)
+        print('Imputing numerical data... ', end='')
+        numerical_imputation = Imputer(strategy=numerical_imputer)
+        non_categorical = numerical_imputation.fit_transform(non_categorical)
         print('[Done]')
 
     # Apply scaler to data
     if scaler != None:
-        print('Scaling numeric data... ', end='')
+        print('Scaling numerical data... ', end='')
         if scaler == 'standard':
             scaler = StandardScaler()
             scaler.fit(non_categorical)
@@ -407,7 +407,7 @@ def pca_check(df, target_header, encoder='one_hot', numeric_imputer=None, scaler
     return df_pca, df_pca_comp
 
 # Feature analysis with logistic regression
-def logistic_reg_features(df, target_header, target_label=None, encoder=None, numeric_imputer=None, scaler=None, reg_C=10, reg_norm='l2'):
+def logistic_reg_features(df, target_header, target_label=None, encoder=None, numerical_imputer=None, scaler=None, reg_C=10, reg_norm='l2'):
     """
     Helper function that outputs feature weights from the trained logistic regression model.
 
@@ -417,7 +417,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     target_header : string, the column with the header description of the target label
     target_label : string, optional input if the target column is not yet encoded with binary 0 and 1 labels
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
-    numeric_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     reg_C : float, regularization parameter for logistic regression (inverse strength of regularization)
     reg_norm : selection of 'l1', 'l2', the type of L1 or L2 penalty for logistic regression
@@ -444,14 +444,14 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
 
     # Apply numeric imputation processing to data
     if numeric_imputer != None:
-        print('Imputing numeric data... ', end='')
-        numeric_imputation = Imputer(strategy=numeric_imputer)
-        non_categorical = numeric_imputation.fit_transform(non_categorical)
+        print('Imputing numerical data... ', end='')
+        numerical_imputation = Imputer(strategy=numerical_imputer)
+        non_categorical = numerical_imputation.fit_transform(non_categorical)
         print('[Done]')
 
     # Apply scaler to data
     if scaler != None:
-        print('Scaling numeric data... ', end='')
+        print('Scaling numerical data... ', end='')
         if scaler == 'standard':
             scaler = StandardScaler()
             scaler.fit(non_categorical)
@@ -524,7 +524,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     return df_features
 
 # Feature analysis with random forest model
-def random_forest_features(df, target_header, target_label=None, encoder=None, numeric_imputer=None, scaler=None, n_trees=10, max_depth=None, min_samples_leaf=10):
+def random_forest_features(df, target_header, target_label=None, encoder=None, numerical_imputer=None, scaler=None, n_trees=10, max_depth=None, min_samples_leaf=10):
     """
     Helper function that outputs feature weights from the trained random forest model.
 
@@ -534,7 +534,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     target_header : string, the column with the header description of the target label
     target_label : string, optional input if the target column is not yet encoded with binary 0 and 1 labels
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
-    numeric_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     n_trees : int, number of trees/estimators for the random forest model
 
@@ -560,14 +560,14 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
 
     # Apply numeric imputation processing to data
     if numeric_imputer != None:
-        print('Imputing numeric data... ', end='')
-        numeric_imputation = Imputer(strategy=numeric_imputer)
-        non_categorical = numeric_imputation.fit_transform(non_categorical)
+        print('Imputing numerical data... ', end='')
+        numerical_imputation = Imputer(strategy=numerical_imputer)
+        non_categorical = numerical_imputation.fit_transform(non_categorical)
         print('[Done]')
 
     # Apply scaler to data
     if scaler != None:
-        print('Scaling numeric data... ', end='')
+        print('Scaling numerical data... ', end='')
         if scaler == 'standard':
             scaler = StandardScaler()
             scaler.fit(non_categorical)
