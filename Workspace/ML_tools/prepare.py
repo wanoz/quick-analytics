@@ -475,6 +475,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     # Join up categorical and non-categorical sub-datasets
     df_x = pd.concat([categorical, non_categorical], axis=1)
     feature_headers = df_x.columns
+    X = df_x.values
     
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
@@ -591,7 +592,8 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     # Join up categorical and non-categorical sub-datasets
     df_x = pd.concat([categorical, non_categorical], axis=1)
     feature_headers = df_x.columns
-    
+    X = df_x.values
+
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
     print('Inspecting target data type... ', end='')
