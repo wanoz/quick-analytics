@@ -321,7 +321,7 @@ def pca_check(df, target_header, encoder='one_hot', numerical_imputer=None, scal
     print('[Done]')
 
     # Apply numeric imputation processing to data
-    if numeric_imputer != None:
+    if numerical_imputer != None:
         print('Imputing numerical data... ', end='')
         numerical_imputation = Imputer(strategy=numerical_imputer)
         non_categorical = numerical_imputation.fit_transform(non_categorical)
@@ -443,7 +443,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     print('[Done]')
 
     # Apply numeric imputation processing to data
-    if numeric_imputer != None:
+    if numerical_imputer != None:
         print('Imputing numerical data... ', end='')
         numerical_imputation = Imputer(strategy=numerical_imputer)
         non_categorical = numerical_imputation.fit_transform(non_categorical)
@@ -559,7 +559,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     print('[Done]')
 
     # Apply numeric imputation processing to data
-    if numeric_imputer != None:
+    if numerical_imputer != None:
         print('Imputing numerical data... ', end='')
         numerical_imputation = Imputer(strategy=numerical_imputer)
         non_categorical = numerical_imputation.fit_transform(non_categorical)
