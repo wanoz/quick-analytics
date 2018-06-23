@@ -240,6 +240,8 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
     -----------
     df_correlations : pd.dataframe, resulting dataframe as output
     """
+
+    print('Inspecting data values... ', end='')
     # Get target data
     df_y = df[[target_header]]
 
@@ -248,18 +250,23 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
     
     # Isolate sub-dataset containing non-categorical values
     non_categorical = df.loc[:, df.dtypes != object]
-    
+    print('[Done]')
+
     # Apply encoding to categorical value data
     if encoder == 'one_hot':
+        print('Encoding categorical data... ', end='')
         categorical = pd.get_dummies(categorical)
-    
+        print('[Done]')
+
     # Join up categorical and non-categorical sub-datasets
     df_x = pd.concat([categorical, non_categorical], axis=1)
         
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
-    if len(df_y[target_header].unique()) == 2 and (0 in df_y[target_header].unique()) and (1 in df_y[target_header].unique()):
-        pass
+    print('Inspect target data type... ', end='')
+    binary_col_headers = get_binary_headers(df_y, [target_header])
+    if target_header in binary_col_headers:
+        y = df_y[target_header]
     else:
         # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
         df_y = pd.get_dummies(df_y)
@@ -268,14 +275,22 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
         target_headers = df_y.columns.tolist()
 
         if target_label != None:
-            target_header = target_header + '_' + target_label
+            for header in target_headers:
+                if target_label in header:
+                    y = df_y[header]
+                    break
+                else:
+                    pass
         else:
-            target_header = target_headers[0]
+            y = df_y.iloc[:, 0]
             print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
-    
+    print('[Done]')
+
+    print('Extracting data correlations... ', end='')
     # Get the correlation values with respect to the target column
     df_correlations = pd.DataFrame(df_x.corr()[target_header].sort_values(ascending=False))
-    
+    print('[Done]')
+
     # Drop the row with the index of the target header (correlation value to this row is 1 - with itself)
     df_correlations.drop(df_correlations.index[df_correlations.index.get_loc(target_header)], inplace=True)
 
@@ -320,7 +335,7 @@ def pca_check(df, target_header, encoder='one_hot', numerical_imputer=None, scal
     non_categorical_headers = non_categorical.columns.tolist()
     print('[Done]')
 
-    # Apply numeric imputation processing to data
+    # Apply numerical imputation processing to data
     if numerical_imputer != None:
         print('Imputing numerical data... ', end='')
         numerical_imputation = Imputer(strategy=numerical_imputer)
@@ -442,7 +457,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     non_categorical_headers = non_categorical.columns.tolist()
     print('[Done]')
 
-    # Apply numeric imputation processing to data
+    # Apply numerical imputation processing to data
     if numerical_imputer != None:
         print('Imputing numerical data... ', end='')
         numerical_imputation = Imputer(strategy=numerical_imputer)
@@ -500,10 +515,10 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
         else:
             y = df_y.iloc[:, 0]
             print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
+    print('[Done]')
 
     # Split train and test data for model fitting
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-    print('[Done]')
     
     print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
     # Perform model training and evaluation
@@ -559,7 +574,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     non_categorical_headers = non_categorical.columns.tolist()
     print('[Done]')
 
-    # Apply numeric imputation processing to data
+    # Apply numerical imputation processing to data
     if numerical_imputer != None:
         print('Imputing numerical data... ', end='')
         numerical_imputation = Imputer(strategy=numerical_imputer)
@@ -617,10 +632,10 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
         else:
             y = df_y.iloc[:, 0]
             print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
+    print('[Done]')
 
     # Split train and test data for model fitting
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-    print('[Done]')
  
     print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
     # Perform model training and evaluation
