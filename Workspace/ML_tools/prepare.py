@@ -11,9 +11,10 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, Imputer
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
+from sklearn.svm import OneClassSVM
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, precision_recall_curve
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
 
@@ -420,6 +421,135 @@ def pca_check(df, target_header, encoder='one_hot', numerical_imputer=None, scal
     leg.legendHandles[1].set_color('Grey')
     
     return df_pca, df_pca_comp
+
+# Feature analysis with logistic regression
+def svm_anomaly_features(df, target_header, target_label=None, encoder=None, numerical_imputer=None, scaler=None, nu=0.2):
+    """
+    Helper function that outputs feature weights from the trained one-class SVM model (with linear kernel).
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description of the target label
+    target_label : string, optional input if the target column is not yet encoded with binary 0 and 1 labels
+    encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+    numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
+    nu : float, regularization parameter for one-class SVM where it is upper bounded at the fraction of outliers and a lower bounded at the fraction of support vectors
+
+    Returns:
+    -----------
+    df_features : pd.dataframe, resulting dataframe of model feature weights as output
+    """
+
+    print('Inspecting data values... ', end='')
+    # Separate features and target data
+    df_y = df[[target_header]].copy()
+    df_x = df.drop(columns=[target_header]).copy()
+    
+    # Isolate sub-dataset containing categorical values
+    categorical = df_x.loc[:, df_x.dtypes == object].copy()
+    
+    # Isolate sub-dataset containing non-categorical values
+    non_categorical = df_x.loc[:, df_x.dtypes != object].copy()
+    binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
+    non_categorical.drop(columns=binary_col_headers, inplace=True)
+    non_categorical_headers = non_categorical.columns.tolist()
+    print('[Done]')
+
+    # Apply numerical imputation processing to data
+    if numerical_imputer != None:
+        print('Imputing numerical data... ', end='')
+        numerical_imputation = Imputer(strategy=numerical_imputer)
+        non_categorical = numerical_imputation.fit_transform(non_categorical)
+        print('[Done]')
+
+    # Apply scaler to data
+    if scaler != None:
+        print('Scaling numerical data... ', end='')
+        if scaler == 'standard':
+            scaler = StandardScaler()
+            scaler.fit(non_categorical)
+        elif scaler == 'minmax':
+            scaler = MinMaxScaler()
+            scaler.fit(non_categorical)
+        else:
+            scaler = RobustScaler()
+            scaler.fit(non_categorical)
+        non_categorical_data = scaler.transform(non_categorical)
+        non_categorical = pd.DataFrame(data=non_categorical_data, columns=non_categorical_headers)
+        print('[Done]')
+
+    # Apply encoding to categorical value data
+    if encoder != None:
+        print('Encoding categorical data... ', end='')
+        if encoder == 'one_hot':
+            categorical = pd.get_dummies(categorical)
+        print('[Done]')
+        
+    # Join up categorical and non-categorical sub-datasets
+    df_x = pd.concat([categorical, non_categorical], axis=1)
+    feature_headers = df_x.columns
+    X = df_x.values
+    
+    # Get the encoded target labels if necessary
+    # Check if target labels are binary 0 and 1
+    print('Inspect target data type... ', end='')
+    binary_col_headers = get_binary_headers(df_y, [target_header])
+    if target_header in binary_col_headers:
+        y = df_y[target_header]
+    else:
+        # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
+        df_y = pd.get_dummies(df_y)
+
+        # Select the relevant column of the specified target value as per input
+        target_headers = df_y.columns.tolist()
+
+        if target_label != None:
+            for header in target_headers:
+                if target_label in header:
+                    y = df_y[header]
+                    break
+                else:
+                    pass
+        else:
+            y = df_y.iloc[:, 0]
+            print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
+    print('[Done]')
+
+    # Split train and test data for model fitting
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    
+    print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
+    # Perform model training and evaluation
+    model = OneClassSVM(nu=nu, kernel='linear')
+    model.fit(X_train, y_train)
+    print('[Done]')
+    
+    # Get the model performance
+    y_pred = model.predict(X_test)
+    fpr, tpr, _ = roc_curve(y_test, y_pred)
+    df_positive_rate = pd.DataFrame({'False positive rate' : fpr, 'True positive rate' : tpr})
+
+    # Get the important features from the model in a dataframe format
+    df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
+    df_features.columns=['Feature weight']
+    df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
+    
+    print('\nOne-class SVM model with linear kernel evaluation:\n')
+    print(classification_report(y_test, y_pred))
+
+     # ROC plot
+    plt.figure(figsize=(10, 10))
+    custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
+    sns.set_style('white')
+    sns.set_context('talk', rc=custom_rc)
+    sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, ax=ax1, color='Blue')
+    ax1.set_title('ROC plot')
+    ax1.set_xlabel('False positive rate')
+    ax1.set_ylabel('True positive rate')
+
+    return df_features
 
 # Feature analysis with logistic regression
 def logistic_reg_features(df, target_header, target_label=None, encoder=None, numerical_imputer=None, scaler=None, reg_C=10, reg_norm='l2'):
