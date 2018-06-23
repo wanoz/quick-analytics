@@ -539,7 +539,7 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
     print('\nOne-class SVM model with linear kernel evaluation:\n')
     print(classification_report(y_test, y_pred))
 
-     # ROC plot
+    # ROC plot
     plt.figure(figsize=(10, 10))
     custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
     sns.set_style('white')
@@ -658,6 +658,8 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     
     # Get the model performance
     y_pred = model.predict(X_test)
+    fpr, tpr, _ = roc_curve(y_test, y_pred)
+    df_positive_rate = pd.DataFrame({'False positive rate' : fpr, 'True positive rate' : tpr})
     
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
@@ -666,6 +668,16 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     
     print('\nLogistic Regression with ' + reg_norm.capitalize() + ' regularization model evaluation:\n')
     print(classification_report(y_test, y_pred))
+
+    # ROC plot
+    plt.figure(figsize=(10, 10))
+    custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
+    sns.set_style('white')
+    sns.set_context('talk', rc=custom_rc)
+    sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, ax=ax1, color='Blue')
+    ax1.set_title('ROC plot')
+    ax1.set_xlabel('False positive rate')
+    ax1.set_ylabel('True positive rate')
 
     return df_features
 
@@ -775,6 +787,8 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     
     # Get the model performance
     y_pred = model.predict(X_test)
+    fpr, tpr, _ = roc_curve(y_test, y_pred)
+    df_positive_rate = pd.DataFrame({'False positive rate' : fpr, 'True positive rate' : tpr})
     
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.feature_importances_, index=feature_headers)
@@ -783,6 +797,16 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     
     print('\nRandom Forest model evaluation:\n')
     print(classification_report(y_test, y_pred))
+
+    # ROC plot
+    plt.figure(figsize=(10, 10))
+    custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
+    sns.set_style('white')
+    sns.set_context('talk', rc=custom_rc)
+    sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, ax=ax1, color='Blue')
+    ax1.set_title('ROC plot')
+    ax1.set_xlabel('False positive rate')
+    ax1.set_ylabel('True positive rate')
 
     return df_features
 
