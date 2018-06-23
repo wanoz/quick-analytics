@@ -387,6 +387,41 @@ def train_svm_sklearn(X_train, y_train, C=1, gamma=1):
 
     return svm_model, task_info
 
+# One-class SVM model
+def train_svm_anomaly_sklearn(X_train, y_train, nu=1=0.2, kernel='rbf'):
+    """
+    Train an one-class SVM model (for anomaly detection) using the Sklearn python library.
+
+    Arguments:
+    -----------
+    X_train : input training samples
+    y_train : target training samples
+    nu : float, SVM training parameter, where it is upper bounded at the fraction of outliers and a lower bounded at the fraction of support vectors
+    kernel : selection of 'rbf', 'linear', 'poly', 'sigmoid', type of kernel used for one-class SVM model
+    """
+
+    task_name='One-class SVM model training'
+
+    start_time=time.time()
+
+    svm_anomaly_model=sklearn.svm.OneClassSVM(nu=nu, kernel=kernel)
+    svm_anomaly_model.fit(X_train, y_train)
+
+    end_time=time.time()
+    time_taken=end_time - start_time
+
+    print('Status: One-class SVM successfully trained!')
+
+    # Store the task information
+    task_info={
+        'task_name': task_name,
+        'nu' : nu,
+        'kernel': kernel,
+        'time_taken': time_taken
+    }
+
+    return svm_anomaly_model, task_info
+
 # Logistic Regression model
 def train_lgr_sklearn(X_train, y_train):
     """
@@ -454,6 +489,43 @@ def train_rforest_sklearn(X_train, y_train, max_depth=None, max_features=None, m
     }
 
     return rforest_model, task_info
+
+# Random Forest model
+def train_isoforest_sklearn(X_train, y_train, max_depth=None, max_features=None, n_estimators=100, outliers=0.1):
+    """
+    Train a Isolation Forest model (for anomaly detection) using the Sklearn python library.
+
+    Arguments:
+    -----------
+    X_train : input training samples
+    y_train : target training samples
+    max_depth : integer, max depth of the trees (None implies trees will keep forking until limit)
+    max_features : integer or float, number of features to consider when looking for the best split
+    n_estimators : integer, number of tree in the isolation forest model
+    outlier : float, the proportion of outliers in the data
+    """
+
+    task_name='Isolation Forest model training'
+
+    start_time=time.time()
+
+    isoforest_model=sklearn.ensemble.IsolationForest(max_depth=max_depth, max_features=max_feature, n_estimators=n_estimators, contamination=outliers)
+
+    isoforest_model.fit(X_train, y_train)
+
+    end_time=time.time()
+    time_taken=end_time - start_time
+
+    # Store the task information
+    task_info={
+        'task_name': task_name,
+        'max_depth': max_depth,
+        'max_features': max_features,
+        'outlier_proportion': outliers,
+        'time_taken': time_taken
+    }
+
+    return isoforest_model, task_info
 
 # Adaboost (boosted) model
 def train_adaboost_sklearn(X_train, y_train, n_estimators=50, learning_rate=1):
