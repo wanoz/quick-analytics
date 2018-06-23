@@ -540,14 +540,14 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
     print(classification_report(y_test, y_pred))
 
     # ROC plot
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(8, 6))
     custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
     sns.set_style('white')
     sns.set_context('talk', rc=custom_rc)
-    sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, ax=ax1, color='Blue')
-    ax1.set_title('ROC plot')
-    ax1.set_xlabel('False positive rate')
-    ax1.set_ylabel('True positive rate')
+    ax = sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, color='Blue')
+    ax.set_title('ROC plot')
+    ax.set_xlabel('False positive rate')
+    ax.set_ylabel('True positive rate')
 
     return df_features
 
@@ -670,14 +670,14 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     print(classification_report(y_test, y_pred))
 
     # ROC plot
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(8, 6))
     custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
     sns.set_style('white')
     sns.set_context('talk', rc=custom_rc)
-    sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, ax=ax1, color='Blue')
-    ax1.set_title('ROC plot')
-    ax1.set_xlabel('False positive rate')
-    ax1.set_ylabel('True positive rate')
+    ax = sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, color='Blue')
+    ax.set_title('ROC plot')
+    ax.set_xlabel('False positive rate')
+    ax.set_ylabel('True positive rate')
 
     return df_features
 
@@ -799,14 +799,14 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     print(classification_report(y_test, y_pred))
 
     # ROC plot
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(8, 6))
     custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
     sns.set_style('white')
     sns.set_context('talk', rc=custom_rc)
-    sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, ax=ax1, color='Blue')
-    ax1.set_title('ROC plot')
-    ax1.set_xlabel('False positive rate')
-    ax1.set_ylabel('True positive rate')
+    ax = sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, color='Blue')
+    ax.set_title('ROC plot')
+    ax.set_xlabel('False positive rate')
+    ax.set_ylabel('True positive rate')
 
     return df_features
 
