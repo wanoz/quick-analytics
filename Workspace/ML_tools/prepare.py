@@ -754,7 +754,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
     print('Inspecting target data type... ', end='')
-    binary_col_headers = check_binary_columns(df_y, [target_header])
+    binary_col_headers = get_binary_headers(df_y, [target_header])
     if target_header in binary_col_headers:
         y = df_y[target_header]
     else:
