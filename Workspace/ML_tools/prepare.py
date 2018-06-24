@@ -226,31 +226,49 @@ def missing_values_table(df):
     return mis_val_table_ren_columns
 
 # Secondary helper function for creating custom (binary) target labels.
-def target_label(row, target_header, lookup_value, mode='equal to'):
+def target_label(row, target_header, lookup_value, criteria):
     value = row[target_header]
     output = 0
-    if 'greater than' in mode and (isinstance(value, float) or isinstance(value, int)):
-        if value > lookup_value:
-            output = 1
+    if isinstance(criteria, (list, tuple)):
+        for c in criteria:
+            if 'greater than' in c and isinstance(value, (float, int)):
+                if value > lookup_value:
+                    output = 1
 
-    if 'less than' in mode and (isinstance(value, float) or isinstance(value, int)):
-        if value < lookup_value:
-            output = 1
+            if 'less than' in c and isinstance(value, (float, int)):
+                if value < lookup_value:
+                    output = 1
 
-    if 'equal to' in mode:
-        if value == lookup_value:
-            output = 1
+            if 'equal to' in c:
+                if value == lookup_value:
+                    output = 1
 
-    if 'contains' in mode and isintance(value, str):
-        if lookup_value in value:
-            output = 1
+            if 'contains' in c and isintance(value, str):
+                if lookup_value in value:
+                    output = 1
+    else:
+        if 'greater than' in criteria and isinstance(value, (float, int)):
+            if value > lookup_value:
+                output = 1
+
+        if 'less than' in criteria and isinstance(value, (float, int)):
+            if value < lookup_value:
+                output = 1
+
+        if 'equal to' in criteria:
+            if value == lookup_value:
+                output = 1
+
+        if 'contains' in criteria and isintance(value, str):
+            if lookup_value in value:
+                output = 1
     
     row[target_header + '_' + str(lookup_value)] = output
     
     return row
 
 # Helper function to creating new target labels
-def create_target(df, target_header, lookup_value, mode):
+def create_target(df, target_header, lookup_value, criteria='equal to'):
     """
     Helper function that outputs a table containing the newly created target label(s).
 
@@ -259,13 +277,13 @@ def create_target(df, target_header, lookup_value, mode):
     df : pd.dataframe, dataframe to be passed as input
     target_header : string, the column with the header description to run feature correlations against
     lookup_value : the target value to be sought after in the existing target column
-    mode : string, selection of 'equal to', 'greater than', 'less than', 'contains', the type of operator setting
+    criteria : string or list/tuple of string elements, selection of 'equal to', 'greater than', 'less than', 'contains', the type of operator setting
 
     Returns:
     -----------
     df_output : pd.dataframe, resulting dataframe as output
     """
-    df_output = df.apply(lambda row : target_label(row, target_header=target_header, lookup_value=lookup_value, mode=mode), axis=1)
+    df_output = df.apply(lambda row : target_label(row, target_header=target_header, lookup_value=lookup_value, criteria=criteria), axis=1)
     
     return df_output
 
