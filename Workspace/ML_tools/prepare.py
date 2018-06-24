@@ -226,7 +226,7 @@ def missing_values_table(df):
     return mis_val_table_ren_columns
 
 # Secondary helper function for creating custom (binary) target labels.
-def target_label(row, target_header, mode='equal to', lookup_value):
+def target_label(row, target_header, lookup_value, mode='equal to'):
     value = row[target_header]
     output = 0
     if 'greater than' in mode and (isinstance(value, float) or isinstance(value, int)):
@@ -258,7 +258,7 @@ def target_label(row, target_header, mode='equal to', lookup_value):
     return row
 
 # Helper function to creating new target labels
-def create_target(df, target_header, mode='equal to', lookup_value):
+def create_target(df, target_header, lookup_value, mode):
     """
     Helper function that outputs a table containing the newly created target label(s).
 
