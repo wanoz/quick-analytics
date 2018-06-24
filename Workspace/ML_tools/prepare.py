@@ -225,6 +225,58 @@ def missing_values_table(df):
     # Return the dataframe with missing information
     return mis_val_table_ren_columns
 
+# Secondary helper function for creating custom (binary) target labels.
+def target_label(row, target_header, mode='equal to', lookup_value):
+    value = row[target_header]
+    output = 0
+    if 'greater than' in mode and (isinstance(value, float) or isinstance(value, int)):
+        if value > lookup_value:
+            output = 1
+        else:
+            output = 0
+
+    if 'less than' in mode and (isinstance(value, float) or isinstance(value, int)):
+        if value < lookup_value:
+            output = 1
+        else:
+            output = 0
+
+    if 'equal to' in mode:
+        if value == lookup_value:
+            output = 1
+        else:
+            output = 0
+
+    if 'contains' in mode and isintance(value, str):
+        if lookup_value in value:
+            output = 1
+        else:
+            output = 0
+    
+    row[target_header + '_' + str(lookup_value)] = output
+    
+    return row
+
+# Helper function to creating new target labels
+def create_target(df, target_header, mode='equal to', lookup_value):
+    """
+    Helper function that outputs a table containing the newly created target label(s).
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description to run feature correlations against
+    mode : string, selection of 'equal to', 'greater than', 'less than', 'contains', the type of operator setting
+    lookup_value : the target value to be sought after in the existing target column.
+
+    Returns:
+    -----------
+    df_new_target : pd.dataframe, resulting dataframe as output
+    """
+    df.apply(lambda row : target_label(row, target_header, mode=mode, lookup_value), axis=1)
+    
+    return df
+
 # Feature analysis with correlations
 def correlations_check(df, target_header, target_label=None, encoder=None):
     """
