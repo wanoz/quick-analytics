@@ -232,26 +232,18 @@ def target_label(row, target_header, lookup_value, mode='equal to'):
     if 'greater than' in mode and (isinstance(value, float) or isinstance(value, int)):
         if value > lookup_value:
             output = 1
-        else:
-            output = 0
 
     if 'less than' in mode and (isinstance(value, float) or isinstance(value, int)):
         if value < lookup_value:
             output = 1
-        else:
-            output = 0
 
     if 'equal to' in mode:
         if value == lookup_value:
             output = 1
-        else:
-            output = 0
 
     if 'contains' in mode and isintance(value, str):
         if lookup_value in value:
             output = 1
-        else:
-            output = 0
     
     row[target_header + '_' + str(lookup_value)] = output
     
