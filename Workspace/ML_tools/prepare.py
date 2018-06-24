@@ -266,16 +266,16 @@ def create_target(df, target_header, lookup_value, mode):
     -----------
     df : pd.dataframe, dataframe to be passed as input
     target_header : string, the column with the header description to run feature correlations against
+    lookup_value : the target value to be sought after in the existing target column
     mode : string, selection of 'equal to', 'greater than', 'less than', 'contains', the type of operator setting
-    lookup_value : the target value to be sought after in the existing target column.
 
     Returns:
     -----------
-    df_new_target : pd.dataframe, resulting dataframe as output
+    df_output : pd.dataframe, resulting dataframe as output
     """
-    df.apply(lambda row : target_label(row, target_header, mode=mode, lookup_value), axis=1)
+    df_output = df.apply(lambda row : target_label(row, target_header=target_header, lookup_value=lookup_value, mode=mode), axis=1)
     
-    return df
+    return df_output
 
 # Feature analysis with correlations
 def correlations_check(df, target_header, target_label=None, encoder=None):
