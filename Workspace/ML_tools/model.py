@@ -388,7 +388,7 @@ def train_svm_sklearn(X_train, y_train, C=1, gamma=1):
     return svm_model, task_info
 
 # One-class SVM model
-def train_svm_anomaly_sklearn(X_train, y_train, nu=1=0.2, kernel='rbf'):
+def train_svm_anomaly_sklearn(X_train, y_train, nu=0.2, kernel='rbf'):
     """
     Train an one-class SVM model (for anomaly detection) using the Sklearn python library.
 
