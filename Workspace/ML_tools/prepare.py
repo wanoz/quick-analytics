@@ -187,7 +187,7 @@ def relative_representation(df, header_list, min_threshold=100):
     return df_relative_rep
 
 # Check the relative proportion of data that contain missing value in the dataset.
-def missing_values_table(df):
+def missing_values(df):
     """
     Helper function that outputs a summary table of the proportion of data that contain missing value in the dataset
 
