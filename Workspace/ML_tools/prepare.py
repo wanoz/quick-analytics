@@ -15,7 +15,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import OneClassSVM
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, auc, precision_recall_curve
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, roc_auc_score, precision_recall_curve
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -594,8 +594,7 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
     y_pred = model.predict(X_test)
     y_score = model.decision_function(X_test)
     fpr, tpr, _ = roc_curve(y_test, y_score)
-    roc_auc = auc(fpr, tpr)
-    df_positive_rate = pd.DataFrame({'False positive rate' : fpr, 'True positive rate' : tpr})
+    roc_auc = roc_auc_score(fpr, tpr)
 
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
@@ -607,16 +606,15 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
 
     # ROC plot
     plt.figure(figsize=(8, 6))
-    custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
-    sns.set_style('white')
-    sns.set_context('talk', rc=custom_rc)
-    ax = sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, color='Blue')
-    ax.set_title('Receive operating characteristic plot')
-    ax.set_xlabel('False positive rate')
-    ax.set_ylabel('True positive rate')
-    ax.legend(labels=('ROC area: %0.2f' %roc_auc))
-    leg = ax.get_legend()
-    leg.legendHandles[0].set_color('Blue')
+    plt.plot(fpr, tpr, color='darkblue', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic')
+    plt.legend(loc="lower right")
+    plt.show()
 
     return df_features
 
@@ -729,8 +727,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     y_pred = model.predict(X_test)
     y_score = model.decision_function(X_test)
     fpr, tpr, _ = roc_curve(y_test, y_score)
-    roc_auc = auc(fpr, tpr)
-    df_positive_rate = pd.DataFrame({'False positive rate' : fpr, 'True positive rate' : tpr})
+    roc_auc = roc_auc_score(y_test, y_score)
     
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
@@ -740,19 +737,17 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     print('\nLogistic Regression with ' + reg_norm.capitalize() + ' regularization model evaluation:\n')
     print(classification_report(y_test, y_pred))
 
-    # ROC plot
     plt.figure(figsize=(8, 6))
-    custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
-    sns.set_style('white')
-    sns.set_context('talk', rc=custom_rc)
-    ax = sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, color='Blue')
-    ax.set_title('Receive operating characteristic plot')
-    ax.set_xlabel('False positive rate')
-    ax.set_ylabel('True positive rate')
-    ax.legend(labels=('ROC area: %0.2f' %roc_auc))
-    leg = ax.get_legend()
-    leg.legendHandles[0].set_color('Blue')
-
+    plt.plot(fpr, tpr, color='darkblue', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic')
+    plt.legend(loc="lower right")
+    plt.show()
+    
     return df_features
 
 # Feature analysis with random forest model
@@ -863,8 +858,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     y_pred = model.predict(X_test)
     y_score = model.decision_function(X_test)
     fpr, tpr, _ = roc_curve(y_test, y_score)
-    roc_auc = auc(fpr, tpr)
-    df_positive_rate = pd.DataFrame({'False positive rate' : fpr, 'True positive rate' : tpr})
+    roc_auc = roc_auc_score(fpr, tpr)
     
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.feature_importances_, index=feature_headers)
@@ -876,16 +870,15 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
 
     # ROC plot
     plt.figure(figsize=(8, 6))
-    custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
-    sns.set_style('white')
-    sns.set_context('talk', rc=custom_rc)
-    ax = sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, color='Blue')
-    ax.set_title('Receive operating characteristic plot')
-    ax.set_xlabel('False positive rate')
-    ax.set_ylabel('True positive rate')
-    ax.legend(labels=('ROC area: %0.2f' %roc_auc))
-    leg = ax.get_legend()
-    leg.legendHandles[0].set_color('Blue')
+    plt.plot(fpr, tpr, color='darkblue', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic')
+    plt.legend(loc="lower right")
+    plt.show()
 
     return df_features
 
