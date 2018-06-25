@@ -225,52 +225,53 @@ def missing_values(df):
           " columns that have missing values.")
 
     # Return the dataframe with missing information
-    return mis_val_table_ren_columns
+    if mis_val_table_ren_columns.shape[0] != 0:
+        return mis_val_table_ren_columns
 
 # Secondary helper function for creating custom (binary) target labels.
-def target_label(row, target_header, lookup_value, criteria):
+def target_label(row, target_header, lookup_value, criteria, pos_label, neg_label):
     value = row[target_header]
-    output = 0
+    output = neg_label
     if isinstance(criteria, (list, tuple)):
         for c in criteria:
             if 'greater than' in c and isinstance(value, (float, int)):
                 if value > lookup_value:
-                    output = 1
+                    output = pos_label 
 
             if 'less than' in c and isinstance(value, (float, int)):
                 if value < lookup_value:
-                    output = 1
+                    output = pos_label
 
             if 'equal to' in c:
                 if value == lookup_value:
-                    output = 1
+                    output = pos_label
 
             if 'contains' in c and isintance(value, str):
                 if lookup_value in value:
-                    output = 1
+                    output = pos_label
     else:
         if 'greater than' in criteria and isinstance(value, (float, int)):
             if value > lookup_value:
-                output = 1
+                output = pos_label
 
         if 'less than' in criteria and isinstance(value, (float, int)):
             if value < lookup_value:
-                output = 1
+                output = pos_label
 
         if 'equal to' in criteria:
             if value == lookup_value:
-                output = 1
+                output = pos_label
 
         if 'contains' in criteria and isintance(value, str):
             if lookup_value in value:
-                output = 1
+                output = pos_label
     
     row[target_header + '_' + str(lookup_value)] = output
     
     return row
 
 # Helper function to creating new target labels
-def create_target(df, target_header, lookup_value, criteria='equal to'):
+def create_target(df, target_header, lookup_value, criteria='equal to', pos_label=1, neg_label=0):
     """
     Helper function that outputs a table containing the newly created target label(s).
 
@@ -280,12 +281,15 @@ def create_target(df, target_header, lookup_value, criteria='equal to'):
     target_header : string, the column with the header description to run feature correlations against
     lookup_value : the target value to be sought after in the existing target column
     criteria : string or list/tuple of string elements, selection of 'equal to', 'greater than', 'less than', 'contains', the type of operator setting
+    pos_label : int, output for positive label
+    neg_label : int, output for negative label
 
     Returns:
     -----------
     df_output : pd.dataframe, resulting dataframe as output
     """
-    df_output = df.apply(lambda row : target_label(row, target_header=target_header, lookup_value=lookup_value, criteria=criteria), axis=1)
+    df_output = df.apply(lambda row : target_label(row, target_header=target_header, lookup_value=lookup_value, 
+            criteria=criteria, pos_label=pos_label, neg_label=neg_label), axis=1)
     
     return df_output
 
@@ -929,11 +933,12 @@ def get_tickers(df_plot, base_interval=0.05):
         xmin = 0
 
     xticks_range = np.linspace(xmin, xmax, int(2*x_mag/tick_interval) + 1)
+    xticks_range = np.round(xticks_range, 2)
 
     return xticks_range, xmax, xmin
 
 # Plot the correlations of the features with respect to a target column header in the dataset.
-def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(12, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
     Helper function that outputs a plot of feature correlations against a specified column in the dataset.
 
@@ -977,7 +982,7 @@ def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(1
     ax.set_xlabel(x_label_desc)
 
 # Plot the PCA features contributions chart with respect to a specified principal component index.
-def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution', remove_zeros=True, plot_size=(10, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution', remove_zeros=True, plot_size=(12, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
     Helper function that outputs a plot of PCA features contributions on specified a principal component.
 
@@ -1055,7 +1060,7 @@ def biplot_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_con
     ax.set_ylabel('Principal component ' + str(pc_axes[1]))
 
 # Perform PCA and output heatmap.
-def heatmap_pca(df_pca_comp, pc_max=3, sns_cmap='plasma', annot=False, plot_size=(12, 8)):
+def heatmap_pca(df_pca_comp, pc_max=3, sns_cmap='plasma', annot=False, plot_size=(12, 10)):
     """
     Produce a PCA heatmap after applying scaler functions using Sklearn python library.
 
