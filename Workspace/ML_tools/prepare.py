@@ -1102,15 +1102,15 @@ def get_continuous_mean(df, feature_heading, random_scaling=0.01):
     return df_continuous_mean
 
 # Apply sklearn scalers and output plots
-def check_stats_scalers(df, feature_heading):
+def check_stats_scalers(df, headers):
     # Set scaled data headers
-    original_heading = feature_heading + '_original'
-    std_scaled_heading = feature_heading + '_standard_scaled'
-    minmax_scaled_heading = feature_heading + '_minmax_scaled'
-    robust_scaled_heading = feature_heading + '_robust_scaled'
+    original_header = header + '_original'
+    std_scaled_header = header + '_standard_scaled'
+    minmax_scaled_header = header + '_minmax_scaled'
+    robust_scaled_header = header + '_robust_scaled'
 
     # Reshape the 1D input data into "transposed" column-wise array for use with sklearn scaler functions
-    feature_series = df[feature_heading]
+    feature_series = df[feature_header]
     feature_array = feature_series.values.reshape(-1, 1)
 
     # Fit data to scaler functions and get the scaled data after transformation
@@ -1122,19 +1122,19 @@ def check_stats_scalers(df, feature_heading):
     robust_scaled_array = robust_scaler.fit_transform(feature_array)
 
     # Append the scaled data to a custom dataframe
-    df_new = pd.DataFrame({original_heading: feature_series})
-    df_new[std_scaled_heading] = std_scaled_array
-    df_new[minmax_scaled_heading] = minmax_scaled_array
-    df_new[robust_scaled_heading] = robust_scaled_array
+    df_new = pd.DataFrame({original_header: feature_series})
+    df_new[std_scaled_header] = std_scaled_array
+    df_new[minmax_scaled_header] = minmax_scaled_array
+    df_new[robust_scaled_header] = robust_scaled_array
 
     # Visualise original and scaled data distributions
-    original_data = pd.Series(feature_series, name=original_heading)
+    original_data = pd.Series(feature_series, name=original_header)
     std_scaled_data = pd.Series(
-        df_new[std_scaled_heading], name=std_scaled_heading)
+        df_new[std_scaled_header], name=std_scaled_header)
     minmax_scaled_data = pd.Series(
-        df_new[minmax_scaled_heading], name=minmax_scaled_heading)
+        df_new[minmax_scaled_header], name=minmax_scaled_header)
     robust_scaled_data = pd.Series(
-        df_new[robust_scaled_heading], name=robust_scaled_heading)
+        df_new[robust_scaled_header], name=robust_scaled_header)
 
     fig, ax = plt.subplots(2, 2, figsize=(15, 11))
     sns.kdeplot(original_data, ax=ax[0][0], shade=True, color='b')
@@ -1144,27 +1144,27 @@ def check_stats_scalers(df, feature_heading):
     return df_new
 
 # Apply math operation scaling and output plots
-def check_math_scalers(df, feature_heading):
+def check_math_scalers(df, header):
     """
     Apply different scaler functions to a feature column using Sklearn python library.
 
     Arguments:
     -----------
     df : pd.dataframe, dataframe of the input data
-    feature_heading : string, header description of the feature column subjected to the scaler functions
+    header : string, header description of the feature column subjected to the scaler functions
 
     Returns:
     -----------
     df_new : pd.dataframe, dataframe containing math function scaled values
     """
     # Set scaled data headers
-    original_heading = feature_heading + '_original'
-    log_scaled_heading = feature_heading + '_log_scaled'
-    sqrt_scaled_heading = feature_heading + '_sqrt_scaled'
-    tanh_scaled_heading = feature_heading + '_tanh_scaled'
+    original_header = feature_header + '_original'
+    log_scaled_header = feature_header + '_log_scaled'
+    sqrt_scaled_header = feature_header + '_sqrt_scaled'
+    tanh_scaled_header = feature_header + '_tanh_scaled'
 
     # Reshape the 1D input data into "transposed" column-wise array for use with sklearn scaler functions
-    feature_series = df[feature_heading]
+    feature_series = df[feature_header]
 
     # Fit data to scaler functions and get the scaled data after transformation
     if np.min(feature_series.values) < 0:
@@ -1179,19 +1179,19 @@ def check_math_scalers(df, feature_heading):
     tanh_scaled_array = np.tanh(feature_series)
 
     # Append the scaled data to a custom dataframe
-    df_new = pd.DataFrame({original_heading: feature_series})
-    df_new[log_scaled_heading] = log_scaled_array
-    df_new[sqrt_scaled_heading] = sqrt_scaled_array
-    df_new[tanh_scaled_heading] = tanh_scaled_array
+    df_new = pd.DataFrame({original_header: feature_series})
+    df_new[log_scaled_header] = log_scaled_array
+    df_new[sqrt_scaled_header] = sqrt_scaled_array
+    df_new[tanh_scaled_header] = tanh_scaled_array
 
     # Visualise original and scaled data distributions
-    original_data = pd.Series(feature_series, name=original_heading)
+    original_data = pd.Series(feature_series, name=original_header)
     log_scaled_data = pd.Series(
-        df_new[log_scaled_heading], name=log_scaled_heading)
+        df_new[log_scaled_header], name=log_scaled_header)
     sqrt_scaled_data = pd.Series(
-        df_new[sqrt_scaled_heading], name=sqrt_scaled_heading)
+        df_new[sqrt_scaled_header], name=sqrt_scaled_header)
     tanh_scaled_data = pd.Series(
-        df_new[tanh_scaled_heading], name=tanh_scaled_heading)
+        df_new[tanh_scaled_header], name=tanh_scaled_header)
 
     fig, ax = plt.subplots(2, 2, figsize=(15, 11))
     sns.kdeplot(original_data, ax=ax[0][0], shade=True, color='b')
