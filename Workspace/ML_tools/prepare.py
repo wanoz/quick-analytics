@@ -607,8 +607,6 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
 
     # ROC plot
     plt.figure(figsize=(8, 6))
-    plt.plot(label='ROC area: %0.2f' % roc_auc[2])
-    plt.legend(loc='lower right')
     custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
     sns.set_style('white')
     sns.set_context('talk', rc=custom_rc)
@@ -616,6 +614,9 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
     ax.set_title('Receive operating characteristic plot')
     ax.set_xlabel('False positive rate')
     ax.set_ylabel('True positive rate')
+    ax.legend(labels=('ROC area: %0.2f' %roc_auc))
+    leg = ax.get_legend()
+    leg.legendHandles[0].set_color('Blue')
 
     return df_features
 
@@ -741,8 +742,6 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
 
     # ROC plot
     plt.figure(figsize=(8, 6))
-    plt.plot(label='ROC area: %0.2f' % roc_auc[2])
-    plt.legend(loc='lower right')
     custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
     sns.set_style('white')
     sns.set_context('talk', rc=custom_rc)
@@ -750,6 +749,9 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     ax.set_title('Receive operating characteristic plot')
     ax.set_xlabel('False positive rate')
     ax.set_ylabel('True positive rate')
+    ax.legend(labels=('ROC area: %0.2f' %roc_auc))
+    leg = ax.get_legend()
+    leg.legendHandles[0].set_color('Blue')
 
     return df_features
 
@@ -874,8 +876,6 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
 
     # ROC plot
     plt.figure(figsize=(8, 6))
-    plt.plot(label='ROC area: %0.2f' % roc_auc[2])
-    plt.legend(loc='lower right')
     custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
     sns.set_style('white')
     sns.set_context('talk', rc=custom_rc)
@@ -883,6 +883,9 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     ax.set_title('Receive operating characteristic plot')
     ax.set_xlabel('False positive rate')
     ax.set_ylabel('True positive rate')
+    ax.legend(labels=('ROC area: %0.2f' %roc_auc))
+    leg = ax.get_legend()
+    leg.legendHandles[0].set_color('Blue')
 
     return df_features
 
