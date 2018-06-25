@@ -586,8 +586,8 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
     
     # Get the model performance
     y_pred = model.predict(X_test)
-    y_score = model.decision_function(X_test)
-    fpr, tpr, _ = roc_curve(y_test, y_score)
+    y_score = model.predict_proba(X_test)[:, 1]
+    fpr, tpr, thresholds = roc_curve(y_test, y_score)
     try:
         roc_auc = auc(fpr, tpr)
         roc_auc = round(roc_auc, 2)
@@ -724,8 +724,8 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     
     # Get the model performance
     y_pred = model.predict(X_test)
-    y_score = model.decision_function(X_test)
-    fpr, tpr, _ = roc_curve(y_test, y_score)
+    y_score = model.predict_proba(X_test)[:, 1]
+    fpr, tpr, thresholds = roc_curve(y_test, y_score)
     try:
         roc_auc = auc(fpr, tpr)
         roc_auc = round(roc_auc, 2)
@@ -861,7 +861,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     # Get the model performance
     y_pred = model.predict(X_test)
     y_score = model.predict_proba(X_test)[:, 1]
-    fpr, tpr, _ = roc_curve(y_test, y_score)
+    fpr, tpr, thresholds = roc_curve(y_test, y_score)
     try:
         roc_auc = auc(fpr, tpr)
         roc_auc = round(roc_auc, 2)
