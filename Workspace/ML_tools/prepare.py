@@ -15,7 +15,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import OneClassSVM
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, roc_auc_score, precision_recall_curve
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, precision_recall_curve, roc_auc_score, auc
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -589,7 +589,7 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
     y_score = model.decision_function(X_test)
     fpr, tpr, _ = roc_curve(y_test, y_score)
     try:
-        roc_auc = roc_auc_score(fpr, tpr)
+        roc_auc = auc(fpr, tpr)
         roc_auc = round(roc_auc, 2)
     except:
         roc_auc = 'undefined'
@@ -727,7 +727,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     y_score = model.decision_function(X_test)
     fpr, tpr, _ = roc_curve(y_test, y_score)
     try:
-        roc_auc = roc_auc_score(fpr, tpr)
+        roc_auc = auc(fpr, tpr)
         roc_auc = round(roc_auc, 2)
     except:
         roc_auc = 'undefined'
@@ -863,7 +863,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     y_score = model.predict_proba(X_test)[:, 1]
     fpr, tpr, _ = roc_curve(y_test, y_score)
     try:
-        roc_auc = roc_auc_score(fpr, tpr)
+        roc_auc = auc(fpr, tpr)
         roc_auc = round(roc_auc, 2)
     except:
         roc_auc = 'undefined'
