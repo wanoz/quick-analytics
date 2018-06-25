@@ -290,7 +290,7 @@ def create_target(df, target_header, lookup_value, criteria='equal to'):
     return df_output
 
 # Feature analysis with correlations
-def correlations_check(df, target_header, target_label=None, encoder=None):
+def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
     """
     Helper function that outputs a table of feature correlations against a specified column in the dataset
 
@@ -329,9 +329,8 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
     print('Inspect target data type... ', end='')
-    binary_col_headers = get_binary_headers(df_y, [target_header])
-    if target_header in binary_col_headers:
-        y = df_y[target_header]
+    if len(df_y[target_header].unique()) == 2 and (0 in df_y[target_header].unique()) and (1 in df_y[target_header].unique()):
+        pass
     else:
         # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
         df_y = pd.get_dummies(df_y)
@@ -340,14 +339,9 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
         target_headers = df_y.columns.tolist()
 
         if target_label != None:
-            for header in target_headers:
-                if target_label in header:
-                    y = df_y[header]
-                    break
-                else:
-                    pass
+            target_header = target_header + '_' + target_label
         else:
-            y = df_y.iloc[:, 0]
+            target_header = target_headers[0]
             print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
     print('[Done]')
 
@@ -361,7 +355,7 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
 
     # Drop rows containing NaN
     df_correlations.dropna(inplace=True)
-    
+
     return df_correlations
 
 # Feature analysis with PCA
