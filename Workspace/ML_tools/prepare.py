@@ -4,6 +4,7 @@
 # Setup data processing dependencies
 import time
 import os
+import warnings
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -14,9 +15,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import OneClassSVM
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, precision_recall_curve
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, auc, precision_recall_curve
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # ===============================
 # === Inspection and analysis ===
@@ -590,7 +592,9 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
     
     # Get the model performance
     y_pred = model.predict(X_test)
-    fpr, tpr, _ = roc_curve(y_test, y_pred)
+    y_score = model.decision_function(X_test)
+    fpr, tpr, _ = roc_curve(y_test, y_score)
+    roc_auc = auc(fpr, tpr)
     df_positive_rate = pd.DataFrame({'False positive rate' : fpr, 'True positive rate' : tpr})
 
     # Get the important features from the model in a dataframe format
@@ -603,11 +607,13 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
 
     # ROC plot
     plt.figure(figsize=(8, 6))
+    plt.plot(label='ROC area: %0.2f' % roc_auc[2])
+    plt.legend(loc='lower right')
     custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
     sns.set_style('white')
     sns.set_context('talk', rc=custom_rc)
     ax = sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, color='Blue')
-    ax.set_title('ROC plot')
+    ax.set_title('Receive operating characteristic plot')
     ax.set_xlabel('False positive rate')
     ax.set_ylabel('True positive rate')
 
@@ -720,7 +726,9 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     
     # Get the model performance
     y_pred = model.predict(X_test)
-    fpr, tpr, _ = roc_curve(y_test, y_pred)
+    y_score = model.decision_function(X_test)
+    fpr, tpr, _ = roc_curve(y_test, y_score)
+    roc_auc = auc(fpr, tpr)
     df_positive_rate = pd.DataFrame({'False positive rate' : fpr, 'True positive rate' : tpr})
     
     # Get the important features from the model in a dataframe format
@@ -733,11 +741,13 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
 
     # ROC plot
     plt.figure(figsize=(8, 6))
+    plt.plot(label='ROC area: %0.2f' % roc_auc[2])
+    plt.legend(loc='lower right')
     custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
     sns.set_style('white')
     sns.set_context('talk', rc=custom_rc)
     ax = sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, color='Blue')
-    ax.set_title('ROC plot')
+    ax.set_title('Receive operating characteristic plot')
     ax.set_xlabel('False positive rate')
     ax.set_ylabel('True positive rate')
 
@@ -849,7 +859,9 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     
     # Get the model performance
     y_pred = model.predict(X_test)
-    fpr, tpr, _ = roc_curve(y_test, y_pred)
+    y_score = model.decision_function(X_test)
+    fpr, tpr, _ = roc_curve(y_test, y_score)
+    roc_auc = auc(fpr, tpr)
     df_positive_rate = pd.DataFrame({'False positive rate' : fpr, 'True positive rate' : tpr})
     
     # Get the important features from the model in a dataframe format
@@ -862,11 +874,13 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
 
     # ROC plot
     plt.figure(figsize=(8, 6))
+    plt.plot(label='ROC area: %0.2f' % roc_auc[2])
+    plt.legend(loc='lower right')
     custom_rc = {'lines.linewidth': 0.8, 'lines.markersize': 0.8} 
     sns.set_style('white')
     sns.set_context('talk', rc=custom_rc)
     ax = sns.pointplot(x='False positive rate', y='True positive rate', data=df_positive_rate, color='Blue')
-    ax.set_title('ROC plot')
+    ax.set_title('Receive operating characteristic plot')
     ax.set_xlabel('False positive rate')
     ax.set_ylabel('True positive rate')
 
