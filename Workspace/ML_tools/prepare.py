@@ -588,7 +588,12 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
     y_pred = model.predict(X_test)
     y_score = model.decision_function(X_test)
     fpr, tpr, _ = roc_curve(y_test, y_score)
-    roc_auc = roc_auc_score(fpr, tpr)
+    try:
+        roc_auc = roc_auc_score(fpr, tpr)
+        roc_auc = round(roc_auc, 2)
+    except:
+        roc_auc = 'undefined'
+    roc_auc_label = 'ROC curve (area: ' + str(roc_auc) + ')'
 
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
@@ -600,7 +605,7 @@ def svm_anomaly_features(df, target_header, target_label=None, encoder=None, num
 
     # ROC plot
     plt.figure(figsize=(8, 6))
-    plt.plot(fpr, tpr, color='darkblue', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot(fpr, tpr, color='darkblue', lw=2, label=roc_auc_label)
     plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
@@ -721,7 +726,12 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     y_pred = model.predict(X_test)
     y_score = model.decision_function(X_test)
     fpr, tpr, _ = roc_curve(y_test, y_score)
-    roc_auc = roc_auc_score(y_test, y_score)
+    try:
+        roc_auc = roc_auc_score(fpr, tpr)
+        roc_auc = round(roc_auc, 2)
+    except:
+        roc_auc = 'undefined'
+    roc_auc_label = 'ROC curve (area: ' + str(roc_auc) + ')'
     
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
@@ -732,7 +742,7 @@ def logistic_reg_features(df, target_header, target_label=None, encoder=None, nu
     print(classification_report(y_test, y_pred))
 
     plt.figure(figsize=(8, 6))
-    plt.plot(fpr, tpr, color='darkblue', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot(fpr, tpr, color='darkblue', lw=2, label=roc_auc_label)
     plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
@@ -850,9 +860,14 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
     
     # Get the model performance
     y_pred = model.predict(X_test)
-    y_score = model.decision_function(X_test)
+    y_score = model.predict_proba(X_test)[:, 1]
     fpr, tpr, _ = roc_curve(y_test, y_score)
-    roc_auc = roc_auc_score(fpr, tpr)
+    try:
+        roc_auc = roc_auc_score(fpr, tpr)
+        roc_auc = round(roc_auc, 2)
+    except:
+        roc_auc = 'undefined'
+    roc_auc_label = 'ROC curve (area: ' + str(roc_auc) + ')'
     
     # Get the important features from the model in a dataframe format
     df_features = pd.DataFrame(data=model.feature_importances_, index=feature_headers)
@@ -864,7 +879,7 @@ def random_forest_features(df, target_header, target_label=None, encoder=None, n
 
     # ROC plot
     plt.figure(figsize=(8, 6))
-    plt.plot(fpr, tpr, color='darkblue', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot(fpr, tpr, color='darkblue', lw=2, label=roc_auc_label)
     plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
