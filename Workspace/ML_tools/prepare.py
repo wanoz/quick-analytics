@@ -313,6 +313,7 @@ def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
     print('Inspecting data values... ', end='')
     # Get target data
     df_y = df[[target_header]]
+    main_label = target_header
 
     # Isolate sub-dataset containing categorical values
     categorical = df.loc[:, df.dtypes == object]
@@ -354,8 +355,11 @@ def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
     df_correlations = pd.DataFrame(df_x.corr()[target_header].sort_values(ascending=False))
     print('[Done]')
 
-    # Drop the row with the index of the target header (correlation value to this row is 1 - with itself)
-    df_correlations.drop(df_correlations.index[df_correlations.index.get_loc(target_header)], inplace=True)
+    # Drop the row with the index containing the original target header (i.e. drop the target label columns as correlation is relevant only for indepdent variables)
+    index_labels = df_correlations.index.tolist()
+    for label in index_labels:
+        if main_label in label:
+            df_correlations.drop(df_correlations.index[df_correlations.index.get_loc(label)], inplace=True)
 
     # Drop rows containing NaN
     df_correlations.dropna(inplace=True)
