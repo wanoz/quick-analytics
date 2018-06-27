@@ -1063,6 +1063,55 @@ def biplot_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_con
     ax.set_xlabel('Principal component ' + str(pc_axes[0]))
     ax.set_ylabel('Principal component ' + str(pc_axes[1]))
 
+# Plot 2D distribution
+def distplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='plasma'):
+    """
+    Produce a feature distributions plot against all target labels.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, PCA components dataframe as input data
+    feature_header : string, column header of the feature label
+    target_header : string, column header of the target label
+    compare_labels : tuple, target labels required for comparison in the plot
+    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
+    sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
+    sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+
+    Returns:
+    -----------
+    Display of feature distributions plot
+    """
+    
+    # Define the style of the Seaborn plot
+    sns.set_style(sns_style)
+    sns.set_context(sns_context)
+
+    # Create the plot
+    plt.figure(figsize=plot_size)
+    legend_labels = []
+    plot_labels = None
+    target_labels = df[target_header].unique()
+    
+    if compare_labels[0] != None and compare_labels[1] != None:
+        plot_labels = compare_labels
+        for label in plot_labels:
+            ax = sns.distplot(a=df.loc[df[target_header] == label][feature_header], kde=True, kde_kws={'label' : label})
+            legend_labels.append(label)
+        handles, _ = ax.get_legend_handles_labels()
+        ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
+        ax.set_xlabel(feature_header)
+        ax.set_ylabel('Frequency')
+    else:
+        plot_labels = target_labels
+        for label in plot_labels:
+            ax = sns.kdeplot(data=df.loc[df[target_header] == label][feature_header])
+            legend_labels.append(label)
+        handles, _ = ax.get_legend_handles_labels()
+        ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
+        ax.set_xlabel(feature_header)
+        ax.set_ylabel('Frequency')
+    
 # Perform PCA and output heatmap.
 def heatmap_pca(df_pca_comp, pc_max=3, sns_cmap='plasma', annot=False, plot_size=(12, 10)):
     """
@@ -1088,7 +1137,7 @@ def heatmap_pca(df_pca_comp, pc_max=3, sns_cmap='plasma', annot=False, plot_size
     plt.figure(figsize=plot_size)
     g_pca_heatmap = sns.heatmap(data=df_pca_comp, annot=annot, cmap=sns_cmap)
 
-    return df_comp
+    return df_pca_comp
 
 # Get dataframe that transforms/encodes discrete numbered features (e.g. 0 or 1, or 2, 10, 15) into continuous set of numbers
 # Note: this adds some degree of randomisation of data, and applying encode based on the average of other samples (with exclusion
@@ -1114,7 +1163,7 @@ def check_stats_scalers(df, headers):
     robust_scaled_header = header + '_robust_scaled'
 
     # Reshape the 1D input data into "transposed" column-wise array for use with sklearn scaler functions
-    feature_series = df[feature_header]
+    feature_series = df[header]
     feature_array = feature_series.values.reshape(-1, 1)
 
     # Fit data to scaler functions and get the scaled data after transformation
@@ -1162,13 +1211,13 @@ def check_math_scalers(df, header):
     df_new : pd.dataframe, dataframe containing math function scaled values
     """
     # Set scaled data headers
-    original_header = feature_header + '_original'
-    log_scaled_header = feature_header + '_log_scaled'
-    sqrt_scaled_header = feature_header + '_sqrt_scaled'
-    tanh_scaled_header = feature_header + '_tanh_scaled'
+    original_header = header + '_original'
+    log_scaled_header = header + '_log_scaled'
+    sqrt_scaled_header = header + '_sqrt_scaled'
+    tanh_scaled_header = header + '_tanh_scaled'
 
     # Reshape the 1D input data into "transposed" column-wise array for use with sklearn scaler functions
-    feature_series = df[feature_header]
+    feature_series = df[header]
 
     # Fit data to scaler functions and get the scaled data after transformation
     if np.min(feature_series.values) < 0:
