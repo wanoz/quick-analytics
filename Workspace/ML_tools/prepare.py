@@ -986,7 +986,7 @@ def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(1
     ax.set_xlabel(x_label_desc)
 
 # Plot the PCA features contributions chart with respect to a specified principal component index.
-def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution', remove_zeros=True, plot_size=(12, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='Variance contribution %', remove_zeros=True, plot_size=(12, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
     """
     Helper function that outputs a plot of PCA features contributions on specified a principal component.
 
@@ -1010,8 +1010,10 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution'
     target_header = 'PC_' + str(pc_index)
     df = pd.DataFrame(data=df_pca_comp.iloc[pc_index - 1].sort_values(ascending=False))
     df.columns = [target_header]
+    df[target_header] = df[target_header]**2
+    df.sort_values(by=target_header, ascending=False)
     if df.shape[0] > 30:
-        df_plot = pd.concat([df.head(15), df.tail(15)], axis=0)
+        df_plot = df.head(30)
     else:
         df_plot = df
     
@@ -1031,7 +1033,7 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution'
     plt.xticks(xticks_range)
     plt.xlim(xmin=xmin, xmax=xmax)
     ax = sns.barplot(data=df_plot, x=target_header, y=df_plot.index.tolist(), palette=sns_palette)
-    ax.set_xlabel(x_label_desc)
+    ax.set_xlabel(x_label_desc + ' in principal component ' + str(pc_index))
 
 # Plot 2D scatter of PCA biplot
 def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_context='talk', sns_palette='plasma'):
@@ -1113,13 +1115,14 @@ def distplot_features(df, feature_header, target_header=None, compare_labels=(No
         ax.set_ylabel('Frequency')
     
 # Perform PCA and output heatmap.
-def heatmap_pca(df_pca_comp, pc_max=3, sns_cmap='plasma', annot=False, plot_size=(12, 10)):
+def heatmap_pca(df_pca_comp, n_features=3, pc_max=3, sns_cmap='plasma', annot=False, plot_size=(12, 10)):
     """
     Produce a PCA heatmap after applying scaler functions using Sklearn python library.
 
     Arguments:
     -----------
     df_pca_comp : pd.dataframe, dataframe containing PCA components attribution as the input data
+    n_features : integer, number of top features in variance contribution to include in the plot
     pc_max : integer, maximum number of principal components to be displayed in the heatmap
     sns_cmap : selection of 'plasma' etc, type of color map setting for heatmap
     annot : boolean, choice of true/false for display or not display value annotations on the heatmap
@@ -1132,8 +1135,20 @@ def heatmap_pca(df_pca_comp, pc_max=3, sns_cmap='plasma', annot=False, plot_size
     # Set header descriptions for displaying PCA results
     pc_headers = ['PC_' + str(pc_index + 1) for pc_index in range(pca_max)]
 
+    # Reshape input dataframe for analysis
+    features = []
+    for pc_index in range(pc_max):
+        target_header = 'PC_' + str(pc_index)
+        comp_array = df_pca_comp.iloc[pc_index - 1].values**2
+        feature_indices = np.argpartition(-comp_array, n_features)
+        new_features = []
+        for feature_index in feature_indices:
+            new_features.append(df_pca_comp.columns[feature_index])
+        features = list(set(features).union(new_features))
+
     # Plot the PCA heatmap
     df_pca_comp = df_pca_comp.set_index([pc_headers])
+    df_pca_comp = df_pca_comp[features]
     plt.figure(figsize=plot_size)
     g_pca_heatmap = sns.heatmap(data=df_pca_comp, annot=annot, cmap=sns_cmap)
 
