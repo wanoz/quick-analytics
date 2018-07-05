@@ -1034,9 +1034,9 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='PC contribution'
     ax.set_xlabel(x_label_desc)
 
 # Plot 2D scatter of PCA biplot
-def biplot_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_context='talk', sns_palette='plasma'):
+def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_context='talk', sns_palette='plasma'):
     """
-    Produce a PCA scatter biplot.
+    Produce a PCA scatter plot.
 
     Arguments:
     -----------
@@ -1049,7 +1049,7 @@ def biplot_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_con
 
     Returns:
     -----------
-    Display of PCA biplot
+    Display of PCA scatter plot
     """
     
     # Define the style of the Seaborn plot
@@ -1059,7 +1059,7 @@ def biplot_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_con
     # Create the plot
     sns.lmplot(data=df_pca, x='PC_' + str(pc_axes[0]), y='PC_' + str(pc_axes[1]), hue=target_header, fit_reg=False, palette=sns_palette, size=8, aspect=1.5)
     ax = plt.gca()
-    ax.set_title('PCA biplot')
+    ax.set_title('PCA scatter plot')
     ax.set_xlabel('Principal component ' + str(pc_axes[0]))
     ax.set_ylabel('Principal component ' + str(pc_axes[1]))
 
