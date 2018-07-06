@@ -1148,16 +1148,17 @@ def heatmap_pca(df_pca_comp, n_features=3, pc_max=3, sns_cmap='plasma', annot=Fa
     # Plot the PCA heatmap
     df_pca_comp = df_pca_comp.set_index([pc_headers])
     df_pca_comp = df_pca_comp[features].transpose()
+    df_pca_comp = df_pca_comp.applymap(np.square)*100
     if df_pca_comp.shape[1] >= 7:
         plot_width = 10
-    elif df_pca_comp.shape[1] < 7 and df_pca_comp[1] >= 4:
+    elif df_pca_comp.shape[1] < 7 and df_pca_comp.shape[1] >= 4:
         plot_width = 8
     else:
         plot_width = 6
     plot_height = df_pca_comp.shape[0]*2
     plot_size = (plot_height, plot_width)
     plt.figure(figsize=plot_size)
-    g = sns.heatmap(data=df_pca_comp.transpose(), annot=annot, cmap=sns_cmap)
+    g = sns.heatmap(data=df_pca_comp, annot=annot, cmap=sns_cmap, cbar_kws={'label': 'Variance contribution %'})
 
 # Get dataframe that transforms/encodes discrete numbered features (e.g. 0 or 1, or 2, 10, 15) into continuous set of numbers
 # Note: this adds some degree of randomisation of data, and applying encode based on the average of other samples (with exclusion
