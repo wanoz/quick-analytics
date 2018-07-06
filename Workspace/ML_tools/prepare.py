@@ -1148,9 +1148,9 @@ def heatmap_pca(df_pca_comp, n_features=3, pc_max=3, sns_cmap='plasma', annot=Fa
     # Plot the PCA heatmap
     df_pca_comp = df_pca_comp.set_index([pc_headers])
     df_pca_comp = df_pca_comp[features].transpose()
-    if df_pca_comp[1] >= 7:
+    if df_pca_comp.shape[1] >= 7:
         plot_width = 10
-    elif df_pca_comp[1] < 7 and df_pca_comp[1] >= 4:
+    elif df_pca_comp.shape[1] < 7 and df_pca_comp[1] >= 4:
         plot_width = 8
     else:
         plot_width = 6
