@@ -1133,7 +1133,7 @@ def heatmap_pca(df_pca_comp, n_features=3, pc_max=3, sns_cmap='plasma', annot=Fa
     df_comp : pd.dataframe, dataframe containing principal component values
     """
     # Set header descriptions for displaying PCA results
-    pc_headers = ['PC_' + str(pc_index + 1) for pc_index in range(pca_max)]
+    pc_headers = ['PC_' + str(pc_index + 1) for pc_index in range(pc_max)]
 
     # Reshape input dataframe for analysis
     features = []
@@ -1150,9 +1150,7 @@ def heatmap_pca(df_pca_comp, n_features=3, pc_max=3, sns_cmap='plasma', annot=Fa
     df_pca_comp = df_pca_comp.set_index([pc_headers])
     df_pca_comp = df_pca_comp[features]
     plt.figure(figsize=plot_size)
-    g_pca_heatmap = sns.heatmap(data=df_pca_comp, annot=annot, cmap=sns_cmap)
-
-    return df_pca_comp
+    g = sns.heatmap(data=df_pca_comp, annot=annot, cmap=sns_cmap)
 
 # Get dataframe that transforms/encodes discrete numbered features (e.g. 0 or 1, or 2, 10, 15) into continuous set of numbers
 # Note: this adds some degree of randomisation of data, and applying encode based on the average of other samples (with exclusion
