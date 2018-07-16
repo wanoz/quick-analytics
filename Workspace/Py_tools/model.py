@@ -3,6 +3,7 @@ import time
 import pickle
 import sklearn
 import tensorflow as tf
+from tensorflow.keras import models, layers
 import tensorflow.contrib.eager as tfe
 from sklearn.model_selection import GridSearchCV
 
@@ -32,12 +33,12 @@ def set_nn(input_features, hidden_layers=2, hidden_units=8, hidden_activation='r
     output_activation = output_activation.lower()
 
     # Build the neural network model
-    nn_model = tf.keras.Sequential()
-    nn_model.add(tf.keras.layers.Dense(hidden_units, activation=hidden_activation, input_shape=(input_features,)))
+    nn_model = models.Sequential()
+    nn_model.add(layers.Dense(hidden_units, activation=hidden_activation, input_shape=(input_features,)))
     if hidden_layers >= 2:
         for layer in range(hidden_layers - 1):
-            nn_model.add(tf.keras.layers.Dense(hidden_units, activation=hidden_activation))
-    nn_model.add(tf.keras.layers.Dense(output_units, activation=output_activation))
+            nn_model.add(layers.Dense(hidden_units, activation=hidden_activation))
+    nn_model.add(layers.Dense(output_units, activation=output_activation))
 
     end_time = time.time()
     time_taken = end_time - start_time
@@ -105,23 +106,23 @@ def set_conv_nn(input_shape=(128, 128), conv_layers=2, kernel_size=(5, 5), conv_
     dense_activation = dense_activation.lower()
 
     # Build the neural network model
-    conv_nn_model = tf.keras.Sequential()
-    conv_nn_model.add(tf.keras.layers.Conv2D(32, kernel_size=kernel_size, strides=(1, 1), activation=conv_activation, input_shape=input_shape))
-    conv_nn_model.add(tf.keras.layers.MaxPooling2D(pool_size=max_pool_size))
+    conv_nn_model = models.Sequential()
+    conv_nn_model.add(layers.Conv2D(32, kernel_size=kernel_size, strides=(1, 1), activation=conv_activation, input_shape=input_shape))
+    conv_nn_model.add(layers.MaxPooling2D(pool_size=max_pool_size))
     if conv_layers >= 2:
         for layer in range(conv_layers - 1):
-            conv_nn_model.add(tf.keras.layers.Conv2D(32*np.exp2(layer), kernel_size=kernel_size, activation=conv_activation))
-            conv_nn_model.add(tf.keras.layers.MaxPooling2D(pool_size=max_pool_size))
+            conv_nn_model.add(layers.Conv2D(32*np.exp2(layer), kernel_size=kernel_size, activation=conv_activation))
+            conv_nn_model.add(layers.MaxPooling2D(pool_size=max_pool_size))
             if layer >= 3:
                 break
     if drop_out_val > 0:
-        conv_nn_model(tf.keras.layers.Dropout(drop_out_val))
-    conv_nn_model.add(tf.keras.layers.Flatten())
-    conv_nn_model.add(tf.keras.layers.Dense(dense_units, activation=dense_activation))
+        conv_nn_model(layers.Dropout(drop_out_val))
+    conv_nn_model.add(layers.Flatten())
+    conv_nn_model.add(layers.Dense(dense_units, activation=dense_activation))
     if dense_layers >= 2:
         for layer in range(dense_layers - 1):
-            conv_nn_model.add(tf.keras.layers.Dense(dense_units, activation=dense_activation))
-    conv_nn_model.add(tf.keras.layers.Dense(num_classes, activation='softmax'))
+            conv_nn_model.add(layers.Dense(dense_units, activation=dense_activation))
+    conv_nn_model.add(layers.Dense(num_classes, activation='softmax'))
 
     end_time=time.time()
     time_taken=end_time - start_time
