@@ -1308,6 +1308,25 @@ def create_dataframe(data_folder='Data', file_name='unknown', dtype_dict=None):
 
     return df_original
 
+# Check the dataframe memory usage
+def memory_usage(df):
+    '''
+    Display the memory usage of a dataframe in GB.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, input data
+
+    Returns:
+    -----------
+    msg : string, display of message description for memory usage
+    '''
+    mem_used = df.memory_usage(index=True).sum()/(10**9)
+    mem_used = round(mem_used, 3)
+    msg = 'Dataframe memory usage: ' + str(mem_used) + 'GB'
+    print(msg)
+
+
 # Get the file path of the input dataset - for use in the notebook template).
 def get_filepath(file_name='unknown'):
     """
