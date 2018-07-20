@@ -3,7 +3,7 @@ import time
 import pickle
 import sklearn
 import tensorflow as tf
-from tensorflow.keras import models, layers
+from tensorflow.python.keras import models, layers
 import tensorflow.contrib.eager as tfe
 from sklearn.model_selection import GridSearchCV
 

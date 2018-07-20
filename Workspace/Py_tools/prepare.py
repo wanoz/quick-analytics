@@ -1275,7 +1275,7 @@ def check_math_scalers(df, header):
     return df_new
 
 # Create dataframe for initial step of data analysis using Pandas.
-def create_dataframe(file_name='unknown', dtype_dict=None):
+def create_dataframe(data_folder='Data', file_name='unknown', dtype_dict=None):
     """
     Import original data for analysis.
 
@@ -1290,7 +1290,7 @@ def create_dataframe(file_name='unknown', dtype_dict=None):
     """
 
     base_dir = os.path.dirname(os.path.realpath('__file__'))
-    data_dir = os.path.join(base_dir, 'Data')
+    data_dir = os.path.join(base_dir, data_folder)
     file_dir_csv = os.path.join(data_dir, file_name + '.csv')
 
     file_dir_xlsx = os.path.join(data_dir, file_name + '.xlsx')
