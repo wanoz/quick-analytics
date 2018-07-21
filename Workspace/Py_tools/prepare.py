@@ -1430,10 +1430,15 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     norm_stddevs = []
     norm_mean = df[target_header].mean()
     norm_stddev = df[target_header].std()
+    summary_rows = df_summary.shape[0]
     print('[Done]')
     
-    print('Updating outlier table with statistical metrics... ', end='')
+    i = 1
     for label in df_summary.iloc[:, 0]:
+        percent_progress = round(100*(i/summary_rows))
+        if percent_progress % 5 == 0:
+            print('Updating outlier table with statistical metrics... progress: ' + str(percent_progress) + '% ...', end='\r')
+
         freq_frac = 100*df[df[feature_header]==label][feature_header].shape[0]/df.shape[0]
         outlier_mean = df[df[feature_header]==label][target_header].mean()
         outlier_stddev = df[df[feature_header]==label][target_header].std()
@@ -1442,6 +1447,7 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
         outlier_stddevs.append(outlier_stddev)
         norm_means.append(norm_mean)
         norm_stddevs.append(norm_stddev)
+        i += 1
     
     df_summary['Freq %'] = norm_freq_frac
     df_summary['Freq ratio'] = df_summary['Freq % (outlier)']/df_summary['Freq %']
@@ -1449,15 +1455,15 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     df_summary['Std dev (outlier)'] = outlier_stddevs
     df_summary['Mean'] = norm_means
     df_summary['Std dev'] = norm_stddevs
-    print('[Done]')
+    print('Updating outlier table with statistical metrics... [Done]')
 
     print('Sort columns in outlier table... ', end='')
     if metric=='mean':
-        df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
+        df_summary = df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
     elif metric=='freq':
-        df_summary.sort_values(by='Freq ratio', ascending=False).head(nsamples)
+        df_summary = df_summary.sort_values(by='Freq ratio', ascending=False).head(nsamples)
     else:
-        df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
+        df_summary = df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
     print('[Done]')
 
     return df_summary
