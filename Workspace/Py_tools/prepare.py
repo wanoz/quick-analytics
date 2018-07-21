@@ -1327,13 +1327,14 @@ def memory_usage(dfs):
         nrows = df.shape[0]
         ncols= df.shape[1]
         mem_used = df.memory_usage(index=True).sum()/(10**9)
-        mem_used = round(mem_used, 3)
+        mem_used = round(mem_used, 6)
         df_mem.append(mem_used)
         df_name.append('DF ' + str(len(df_name) + 1))
         df_rows.append(nrows)
         df_columns.append(ncols)
         
     df_summary = pd.DataFrame({'Dataframe' : df_name, 'Memory usage (GB)' : df_mem, 'No. rows' : df_rows, 'No. columns' : df_columns})
+    df_summary = df_summary[['Dataframe', 'Memory usage (GB)', 'No. rows', 'No. columns']]
     df_summary.set_index('Dataframe', inplace=True)
 
     return df_summary
