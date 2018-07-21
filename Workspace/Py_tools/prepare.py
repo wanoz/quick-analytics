@@ -1309,22 +1309,34 @@ def create_dataframe(data_folder='Data', file_name='unknown', dtype_dict=None):
     return df_original
 
 # Check the dataframe memory usage
-def memory_usage(df):
+def memory_usage(dfs):
     '''
-    Display the memory usage of a dataframe in GB.
+    Display the memory usage of dataframes in GB.
 
-    Arguments:
-    -----------
-    df : pd.dataframe, input data
+    dfs : list of pd.dataframes as input
 
     Returns:
     -----------
-    msg : string, display of message description for memory usage
+    df_summary : pd.dataframe display of message description for memory usage
     '''
-    mem_used = df.memory_usage(index=True).sum()/(10**9)
-    mem_used = round(mem_used, 3)
-    msg = 'Dataframe memory usage: ' + str(mem_used) + 'GB'
-    print(msg)
+    df_name = []
+    df_mem = []
+    df_rows = []
+    df_columns = []
+    for df in dfs:
+        nrows = df.shape[0]
+        ncols= df.shape[1]
+        mem_used = df.memory_usage(index=True).sum()/(10**9)
+        mem_used = round(mem_used, 3)
+        df_mem.append(mem_used)
+        df_name.append('DF ' + str(len(df_name) + 1))
+        df_rows.append(nrows)
+        df_columns.append(ncols)
+        
+    df_summary = pd.DataFrame({'Dataframe' : df_name, 'Memory usage (GB)' : df_mem, 'No. rows' : df_rows, 'No. columns' : df_columns})
+    df_summary.set_index('Dataframe', inplace=True)
+
+    return df_summary
 
 
 # Get the file path of the input dataset - for use in the notebook template).
