@@ -1437,7 +1437,7 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     for label in df_summary.iloc[:, 0]:
         percent_progress = round(100*(i/summary_rows))
         if percent_progress % 5 == 0:
-            print('Updating outlier table with statistical metrics... progress: ' + str(percent_progress) + '% ...', end='\r')
+            print('\rUpdating outlier table with statistical metrics... progress: ' + str(percent_progress) + '% ...', end='')
 
         freq_frac = 100*df[df[feature_header]==label][feature_header].shape[0]/df.shape[0]
         outlier_mean = df[df[feature_header]==label][target_header].mean()
@@ -1455,7 +1455,7 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     df_summary['Std dev (outlier)'] = outlier_stddevs
     df_summary['Mean'] = norm_means
     df_summary['Std dev'] = norm_stddevs
-    print('Updating outlier table with statistical metrics... [Done]')
+    print('[Done]')
 
     print('Sort columns in outlier table... ', end='')
     if metric=='mean':
