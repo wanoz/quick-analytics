@@ -1419,7 +1419,8 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     -----------
     df_summary : pd.dataframe, resulting dataframe as output
     """
-    df_summary = unique_values(df_outlier, feature_header)
+    print('Initializing outlier summary table... ', end='')
+    df_summary = unique_values(df_outlier, feature_header).head(100)
     df_summary.rename(columns={df.columns[0] : feature_header}, inplace=True)
     df_summary.rename(columns={'Relative representation %' : 'Freq % (outlier)'}, inplace=True)
     norm_freq_frac = []
@@ -1429,6 +1430,9 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     norm_stddevs = []
     norm_mean = df[target_header].mean()
     norm_stddev = df[target_header].std()
+    print('[Done]')
+    
+    print('Updating outlier table with statistical metrics... ', end='')
     for label in df_summary.iloc[:, 0]:
         freq_frac = 100*df[df[feature_header]==label][feature_header].shape[0]/df.shape[0]
         outlier_mean = df[df[feature_header]==label][target_header].mean()
@@ -1445,14 +1449,17 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     df_summary['Std dev (outlier)'] = outlier_stddevs
     df_summary['Mean'] = norm_means
     df_summary['Std dev'] = norm_stddevs
-    
+    print('[Done]')
+
+    print('Sort columns in outlier table... ', end='')
     if metric=='mean':
         df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
     elif metric=='freq':
         df_summary.sort_values(by='Freq ratio', ascending=False).head(nsamples)
     else:
         df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
-    
+    print('[Done]')
+
     return df_summary
 
 # Get the file path of the input dataset - for use in the notebook template).
