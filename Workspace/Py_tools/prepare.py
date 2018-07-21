@@ -1402,7 +1402,7 @@ def outlier_filter(df, target_header, scale=1.5):
     return df_outlier_lower, df_outlier_upper
 
 # Summary of the data characteristics for the filtered outlier data
-def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean', nsamples=10):
+def outlier_summary(df_outlier, df, feature_header, target_header, side, metric='mean', nsamples=10):
     """
     Helper function that outputs a summary table of outlier analysis.
     
@@ -1412,7 +1412,8 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     df : pd.dataframe, original dataset
     feature_header : string, the header description of column containing features of which to perform outlier analysis
     target_header : string, the header description of columnn containing numeric values for outlier analysis
-    metric : selection of 'mean', 'freq', the metric to sort in descending order with in the outlier analysis summary table.
+    side : selection of 'lower', 'upper', the side of extremity of the outlier analysis
+    metric : selection of 'mean', 'freq', the metric to sort in descending order with in the outlier analysis summary table
     nsamples : int, number of top features to show in the outlier analysis summary table
 
     Returns:
@@ -1421,7 +1422,7 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     """
     print('Initializing outlier summary table... ', end='')
     df_summary = unique_values(df_outlier, feature_header).head(100)
-    df_summary.rename(columns={df.columns[0] : feature_header}, inplace=True)
+    df_summary.rename(columns={df_summary.columns[0] : feature_header}, inplace=True)
     df_summary.rename(columns={'Relative representation %' : 'Freq % (outlier)'}, inplace=True)
     norm_freq_frac = []
     outlier_means = []
@@ -1437,7 +1438,7 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     for label in df_summary.iloc[:, 0]:
         percent_progress = round(100*(i/summary_rows))
         if percent_progress % 5 == 0:
-            print('\rUpdating outlier table with statistical metrics... progress: ' + str(percent_progress) + '% ...', end='')
+            print('\rUpdating outlier table with statistical metrics... progress: ' + str(percent_progress) + '% ... ', end='')
 
         freq_frac = 100*df[df[feature_header]==label][feature_header].shape[0]/df.shape[0]
         outlier_mean = df[df[feature_header]==label][target_header].mean()
@@ -1457,14 +1458,18 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     df_summary['Std dev'] = norm_stddevs
     print('[Done]')
 
-    print('Sort columns in outlier table... ', end='')
     if metric=='mean':
-        df_summary = df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
+        if side=='lower':
+            df_summary = df_summary.sort_values(by='Mean (outlier)', ascending=True).head(nsamples)
+        elif side=='upper':
+            df_summary = df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
     elif metric=='freq':
         df_summary = df_summary.sort_values(by='Freq ratio', ascending=False).head(nsamples)
     else:
-        df_summary = df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
-    print('[Done]')
+        if side=='lower':
+            df_summary = df_summary.sort_values(by='Mean (outlier)', ascending=True).head(nsamples)
+        elif side=='upper':
+            df_summary = df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
 
     return df_summary
 
