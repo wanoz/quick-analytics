@@ -4,6 +4,7 @@
 # Setup data processing dependencies
 import time
 import os
+import gc
 import warnings
 import numpy as np
 import pandas as pd
@@ -1339,6 +1340,120 @@ def memory_usage(dfs):
 
     return df_summary
 
+# Join multiple dataframes along rows or columns.
+def join_dataframes(dfs, axis=0):
+    '''
+    Joins subset dataframes into one output dataframe (subset dataframe is removed from memory).
+
+    dfs : list of pd.dataframes as input
+    axis : 0 or 1, 0 - joining on rows, 1 - joining on columns
+
+    Returns:
+    -----------
+    df_output : pd.dataframe as output
+    dfs_cleared : list of pd.dataframes that are cleared
+    '''
+    df_output = pd.DataFrame()
+    dfs_cleared = []
+    i = 0
+    for df in dfs:
+        if i == 0:
+            df_output = df
+            # Clear original dataframe from memory
+            dfs_cleared.append(df.iloc[0:0])
+            print('Status: dataframe #' + str(i + 1) + ' processed!')
+        else:
+            df_output = pd.concat([df_output, df], axis=axis)
+            # Clear original dataframe from memory
+            dfs_cleared.append(df.iloc[0:0])
+            print('Status: dataframe #' + str(i + 1) + ' processed!')
+
+        i += 1
+    
+    gc.collect()
+
+    return df_output, dfs_cleared
+
+# Filter the data to the range appropriate for outlier analysis
+def outlier_filter(df, target_header, scale=1.5):
+    """
+    Helper function that outputs a filtered range of data for outlier consideration.
+    
+    Arguments:
+    -----------
+    df : pd.dataframe, original dataset
+    target_header : string, the header description of columnn containing numeric values for outlier analysis
+    scale : float, the factor multipled to the interquartile range for determining outlier range threshold
+
+    Returns:
+    -----------
+    df_outlier_lower : pd.dataframe, resulting filtered lower outlier dataframe as output
+    df_outlier_upper : pd.dataframe, resulting filtered upper outlier dataframe as output
+    """
+    q1 = df[target_header].quantile(0.25)
+    q3 = df[target_header].quantile(0.75)
+    iqr = q3 - q1
+    threshold_lower = q1 - iqr*scale
+    threshold_upper = q3 + iqr*scale
+
+    df_outlier_lower = df[df[target_header] < threshold_lower]
+    df_outlier_upper = df[df[target_header] > threshold_lower]
+    
+    return df_outlier_lower, df_outlier_upper
+
+# Summary of the data characteristics for the filtered outlier data
+def outlier_summary(df_filtered, df, feature_header, target_header, metric='mean', nsamples=10):
+    """
+    Helper function that outputs a summary table of outlier analysis.
+    
+    Arguments:
+    -----------
+    df_filtered : pd.dataframe, filtered data containing potential outlier samples
+    df : pd.dataframe, original dataset
+    feature_header : string, the header description of column containing features of which to perform outlier analysis
+    target_header : string, the header description of columnn containing numeric values for outlier analysis
+    metric : selection of 'mean', 'freq', the metric to sort in descending order with in the outlier analysis summary table.
+    nsamples : int, number of top features to show in the outlier analysis summary table
+
+    Returns:
+    -----------
+    df_summary : pd.dataframe, resulting dataframe as output
+    """
+    df_summary = unique_values(df_filtered, feature_header)
+    df_summary.rename(columns={df.columns[0] : feature_header}, inplace=True)
+    df_summary.rename(columns={'Relative representation %' : 'Freq % (outlier)'}, inplace=True)
+    norm_freq_frac = []
+    outlier_means = []
+    norm_means = []
+    outlier_stddevs = []
+    norm_stddevs = []
+    norm_mean = df[target_header].mean()
+    norm_stddev = df[target_header].std()
+    for label in df_output.iloc[:, 0]:
+        freq_frac = 100*df[df[feature_header]==label][feature_header].shape[0]/df.shape[0]
+        outlier_mean = df[df[feature_header]==label][target_header].mean()
+        outlier_stddev = df[df[feature_header]==label][target_header].std()
+        norm_freq_frac.append(freq_frac)
+        outlier_means.append(outlier_mean)
+        outlier_stddevs.append(outlier_stddev)
+        norm_means.append(norm_mean)
+        norm_stddevs.append(norm_stddev)
+    
+    df_summary['Freq %'] = norm_freq_frac
+    df_summary['Freq ratio'] = df_output['Freq % (outlier)']/df_output['Freq %']
+    df_summary['Mean (outlier)'] = outlier_means
+    df_summary['Std dev (outlier)'] = outlier_stddevs
+    df_summary['Mean'] = norm_means
+    df_summary['Std dev'] = norm_stddevs
+    
+    if metric=='mean':
+        df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
+    elif metric=='freq':
+        df_summary.sort_values(by='Freq ratio', ascending=False).head(nsamples)
+    else:
+        df_summary.sort_values(by='Mean (outlier)', ascending=False).head(nsamples)
+    
+    return df_summary
 
 # Get the file path of the input dataset - for use in the notebook template).
 def get_filepath(file_name='unknown'):
