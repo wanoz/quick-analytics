@@ -1429,7 +1429,7 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
     norm_stddevs = []
     norm_mean = df[target_header].mean()
     norm_stddev = df[target_header].std()
-    for label in df_output.iloc[:, 0]:
+    for label in df_summary.iloc[:, 0]:
         freq_frac = 100*df[df[feature_header]==label][feature_header].shape[0]/df.shape[0]
         outlier_mean = df[df[feature_header]==label][target_header].mean()
         outlier_stddev = df[df[feature_header]==label][target_header].std()
@@ -1440,7 +1440,7 @@ def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean'
         norm_stddevs.append(norm_stddev)
     
     df_summary['Freq %'] = norm_freq_frac
-    df_summary['Freq ratio'] = df_output['Freq % (outlier)']/df_output['Freq %']
+    df_summary['Freq ratio'] = df_summary['Freq % (outlier)']/df_summary['Freq %']
     df_summary['Mean (outlier)'] = outlier_means
     df_summary['Std dev (outlier)'] = outlier_stddevs
     df_summary['Mean'] = norm_means
