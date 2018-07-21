@@ -1402,13 +1402,13 @@ def outlier_filter(df, target_header, scale=1.5):
     return df_outlier_lower, df_outlier_upper
 
 # Summary of the data characteristics for the filtered outlier data
-def outlier_summary(df_filtered, df, feature_header, target_header, metric='mean', nsamples=10):
+def outlier_summary(df_outlier, df, feature_header, target_header, metric='mean', nsamples=10):
     """
     Helper function that outputs a summary table of outlier analysis.
     
     Arguments:
     -----------
-    df_filtered : pd.dataframe, filtered data containing potential outlier samples
+    df_outlier : pd.dataframe, subset of data containing potential outlier samples
     df : pd.dataframe, original dataset
     feature_header : string, the header description of column containing features of which to perform outlier analysis
     target_header : string, the header description of columnn containing numeric values for outlier analysis
@@ -1419,7 +1419,7 @@ def outlier_summary(df_filtered, df, feature_header, target_header, metric='mean
     -----------
     df_summary : pd.dataframe, resulting dataframe as output
     """
-    df_summary = unique_values(df_filtered, feature_header)
+    df_summary = unique_values(df_outlier, feature_header)
     df_summary.rename(columns={df.columns[0] : feature_header}, inplace=True)
     df_summary.rename(columns={'Relative representation %' : 'Freq % (outlier)'}, inplace=True)
     norm_freq_frac = []
