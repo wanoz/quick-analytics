@@ -1310,11 +1310,11 @@ def create_dataframe(data_folder='Data', file_name='unknown', dtype_dict=None):
     return df_original
 
 # Check the dataframe memory usage
-def memory_usage(dfs):
+def memory_usage(df_list):
     '''
     Display the memory usage of dataframes in GB.
 
-    dfs : list of pd.dataframes as input
+    df_list : list of pd.dataframes as input
 
     Returns:
     -----------
@@ -1324,7 +1324,7 @@ def memory_usage(dfs):
     df_mem = []
     df_rows = []
     df_columns = []
-    for df in dfs:
+    for df in df_list:
         nrows = df.shape[0]
         ncols= df.shape[1]
         mem_used = df.memory_usage(index=True).sum()/(10**9)
