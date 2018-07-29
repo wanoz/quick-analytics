@@ -1212,9 +1212,11 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
         plot_width = df_pca_comp.shape[1]*2
     
     if df_pca_comp.shape[0] <= 10:
-        plot_height = df_pca_comp.shape[0]*0.7
+        plot_height = df_pca_comp.shape[0]*1
+    elif df_pca_comp.shape[0] > 10 and df_pca_comp.shape[0] <= 20:
+        plot_height = df_pca_comp.shape[0]*0.8
     else:
-        plot_height = df_pca_comp.shape[0]*0.5
+        plot_height = df_pca_comp.shape[0]*0.6
     
     # Setup the plot
     plot_size = (plot_width, plot_height)
