@@ -346,7 +346,7 @@ def create_target(df, target_header, lookup_value, criteria='equal to', pos_labe
     return df_output
 
 # Feature analysis with correlations
-def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
+def correlations_check(df, target_header, target_label=None, encoder=None):
     """
     Helper function that outputs a table of feature correlations against a specified column in the dataset
 
@@ -419,7 +419,7 @@ def correlations_check(df, target_header, target_label=None, encoder='one_hot'):
     return df_correlations
 
 # Feature analysis with PCA
-def pca_check(df, target_header, encoder='one_hot', numerical_imputer=None, scaler=None, pca_components=10):
+def pca_check(df, target_header, encoder=None, numerical_imputer=None, scaler=None, pca_components=10):
     """
     Helper function that outputs PCA transformation and the associated features contributions. Also outputs Scree plots on Eigenvalues and Explained variance attributes.
 
