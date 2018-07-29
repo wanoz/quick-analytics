@@ -1166,7 +1166,7 @@ def distplot_features(df, feature_header, target_header=None, compare_labels=(No
         ax.set_xlabel(feature_header)
         ax.set_ylabel('Frequency')
     
-# Perform PCA and output heatmap.
+# Output heatmap based on PCA components.
 def heatmap_pca(df_pca_comp, n_features=3, pc_max=3, sns_cmap='plasma', annot=False, plot_size=(12, 10)):
     """
     Produce a PCA heatmap after applying scaler functions using Sklearn python library.
