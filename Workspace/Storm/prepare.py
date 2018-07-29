@@ -25,7 +25,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 # === Inspection and analysis ===
 
 # Get dataframe containing information about the unique labels within the dataset column/array.
-def datasets_overview(df_list, df_names):
+def data_overview(df_list, df_names):
     """
     Helper function that outputs a table containing high level/general statistics of the provided dataframes.
 
@@ -61,7 +61,7 @@ def datasets_overview(df_list, df_names):
     # Setup overview info
     df_overview = pd.DataFrame(
         data={
-            '': dataset_names,
+            '': df_names,
             'Number of entries': num_rows,
             'Number of features': num_cols,
             'Some feature names': total_col_names
