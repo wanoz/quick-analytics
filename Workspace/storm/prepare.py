@@ -1178,7 +1178,6 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
     n_comps : integer, maximum number of principal components to be displayed in the heatmap
     sns_cmap : selection of 'plasma' etc, type of color map setting for heatmap
     annot : boolean, choice of true/false for display or not display value annotations on the heatmap
-    plot_size : tuple, the specified size of the plot chart in the notebook cell
 
     Returns:
     -----------
