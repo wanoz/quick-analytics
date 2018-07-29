@@ -1167,43 +1167,46 @@ def distplot_features(df, feature_header, target_header=None, compare_labels=(No
         ax.set_ylabel('Frequency')
     
 # Output heatmap based on PCA components.
-def heatmap_pca(df_pca_comp, n_features=3, pc_max=3, sns_cmap='plasma', annot=False, plot_size=(12, 10)):
+def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=False):
     """
-    Produce a PCA heatmap after applying scaler functions using Sklearn python library.
+    Produce a PCA heatmap based on variance contributions of features across principal components using the Seaborn library.
 
     Arguments:
     -----------
     df_pca_comp : pd.dataframe, dataframe containing PCA components attribution as the input data
     n_features : integer, number of top features in variance contribution to include in the plot
-    pc_max : integer, maximum number of principal components to be displayed in the heatmap
+    n_comps : integer, maximum number of principal components to be displayed in the heatmap
     sns_cmap : selection of 'plasma' etc, type of color map setting for heatmap
     annot : boolean, choice of true/false for display or not display value annotations on the heatmap
     plot_size : tuple, the specified size of the plot chart in the notebook cell
 
     Returns:
     -----------
-    df_comp : pd.dataframe, dataframe containing principal component values
+    Display of heatmap
     """
     # Set header descriptions for displaying PCA results
-    pc_headers = ['PC ' + str(pc_index + 1) for pc_index in range(pc_max)]
+    pc_headers = ['PC ' + str(pc_index + 1) for pc_index in range(n_comps)]
 
-    # Reshape input dataframe for analysis
+    # Preprocess pca components data
     features = []
-    for pc_index in range(pc_max):
+    for pc_index in range(n_comps):
         comp_array = df_pca_comp.iloc[pc_index - 1].values**2
-        # Obtain the top n features
-        feature_indices = np.argpartition(comp_array, n_features)[-n_features : ]
+        # Get the top n features of each principal component
+        feature_indices = np.argsort(-comp_array)[:n_features]
         new_features = []
         for feature_index in feature_indices:
             new_features.append(df_pca_comp.columns[feature_index])
+            
+        # Aggregate all top features across the selected principal components
         features = list(set(features).union(new_features))
     
-  
-    # Plot the PCA heatmap
+    # Filter to get the relevant pca components based on the top features
     df_pca_comp = df_pca_comp.head(len(pc_headers)).set_index([pc_headers])
     df_pca_comp = df_pca_comp[features].transpose()
     df_pca_comp = df_pca_comp.applymap(np.square)*100
     
+    # Plot the PCA heatmap
+    # Adjust the plot size w.r.t. features and principal components displayed
     if df_pca_comp.shape[1] <= 5:
         plot_width = df_pca_comp.shape[1]*3
     else:
@@ -1213,7 +1216,8 @@ def heatmap_pca(df_pca_comp, n_features=3, pc_max=3, sns_cmap='plasma', annot=Fa
         plot_height = df_pca_comp.shape[0]*0.7
     else:
         plot_height = df_pca_comp.shape[0]*0.5
- 
+    
+    # Setup the plot
     plot_size = (plot_width, plot_height)
     plt.figure(figsize=plot_size)
     g = sns.heatmap(data=df_pca_comp, annot=annot, cmap=sns_cmap, cbar_kws={'label': 'Variance contribution %'})
