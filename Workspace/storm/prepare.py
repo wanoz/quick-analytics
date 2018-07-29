@@ -1166,7 +1166,7 @@ def distplot_features(df, feature_header, target_header=None, compare_labels=(No
         ax.set_xlabel(feature_header)
         ax.set_ylabel('Frequency')
     
-# Output heatmap based on PCA components.
+# Display PCA heatmap based on feature variance contribution across selected principal components
 def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=False):
     """
     Produce a PCA heatmap based on variance contributions of features across principal components using the Seaborn library.
