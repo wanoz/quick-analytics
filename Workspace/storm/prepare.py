@@ -1191,24 +1191,20 @@ def heatmap_pca(df_pca_comp, n_features=3, pc_max=3, sns_cmap='plasma', annot=Fa
     features = []
     for pc_index in range(pc_max):
         comp_array = df_pca_comp.iloc[pc_index - 1].values**2
-        feature_indices = np.argpartition(-comp_array, n_features)
+        feature_indices = np.argpartition(comp_array, n_features)[-n_features : ]
         new_features = []
         for feature_index in feature_indices:
             new_features.append(df_pca_comp.columns[feature_index])
         features = list(set(features).union(new_features))
-
+    
     # Plot the PCA heatmap
-    df_pca_comp = df_pca_comp.set_index([pc_headers])
+    df_pca_comp = df_pca_comp.head(len(pc_headers)).set_index([pc_headers])
     df_pca_comp = df_pca_comp[features].transpose()
     df_pca_comp = df_pca_comp.applymap(np.square)*100
-    if df_pca_comp.shape[1] >= 7:
-        plot_width = 10
-    elif df_pca_comp.shape[1] < 7 and df_pca_comp.shape[1] >= 4:
-        plot_width = 8
-    else:
-        plot_width = 6
-    plot_height = df_pca_comp.shape[0]*2
-    plot_size = (plot_height, plot_width)
+    
+    plot_width = df_pca_comp.shape[1]*3
+    plot_height = df_pca_comp.shape[0]*0.7
+    plot_size = (plot_width, plot_height)
     plt.figure(figsize=plot_size)
     g = sns.heatmap(data=df_pca_comp, annot=annot, cmap=sns_cmap, cbar_kws={'label': 'Variance contribution %'})
 
