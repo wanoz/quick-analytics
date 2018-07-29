@@ -24,53 +24,104 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 # ===============================
 # === Inspection and analysis ===
 
-# Get dataframe containing information about the unique labels within the dataset column/array.
-def data_overview(df_list, df_names):
+# Create dataframe for initial step of data analysis using Pandas.
+def create_dataframe(data_folder='Data', file_name='unknown', dtype_dict=None):
     """
-    Helper function that outputs a table containing high level/general statistics of the provided dataframes.
+    Import original data for analysis.
 
     Arguments:
     -----------
-    df_list : pd.dataframe, list of dataframes as input
-    df_names : list, list containing the names assigned to the dataframes in their respective order
+    file_name : string, name of the data file (excludes extension descriptions like '.csv' or '.xlsx')
+    dtype_dict : dict, dictionary to specify the variable data type(s) to be read via the Pandas read_csv() function
 
     Returns:
     -----------
-    df_overview : pd.dataframe, resulting dataframe as output
+    df_original : pd.dataframe, dataframe of the original dataset
     """
-    num_rows = []
-    num_cols = []
-    total_col_names = []
 
-    # Iterate through dataframes
+    base_dir = os.path.dirname(os.path.realpath('__file__'))
+    data_dir = os.path.join(base_dir, data_folder)
+    file_dir_csv = os.path.join(data_dir, file_name + '.csv')
+
+    file_dir_xlsx = os.path.join(data_dir, file_name + '.xlsx')
+    df_original = None
+
+    try:
+        df_original = pd.read_csv(file_dir_csv, encoding='cp1252', low_memory=False, dtype=dtype_dict)
+        print('Status: ' + file_name + ' imported!')
+    except:
+        try:
+            df_original = pd.read_excel(file_dir_xlsx, sheet_name='Sheet1')
+            print('Status: ' + file_name + ' imported!')
+        except:
+            print('Status: ' + file_name + ' is unable to be read! Please ensure file content is not corrupted or if the file is of .xlsx format, the sheetname is titled as "Sheet1".')
+
+    return df_original
+
+# Get high level information about the imported datasets
+def data_overview(df_list):
+    '''
+    Display high level information about the datasets (including memory, number of rows/columns).
+
+    df_list : list of pd.dataframes as input
+
+    Returns:
+    -----------
+    df_summary : pd.dataframe, display of data overview information
+    '''
+    df_name = []
+    df_mem = []
+    df_rows = []
+    df_columns = []
     for df in df_list:
-        col_names = ''
-        first_col = True
-        # Iterate through column names
-        for col_name in df.columns.tolist():
-            if first_col == True:
-                first_col = False
-                col_names = col_name
-            else:
-                col_names = col_names + ', ' + col_name
+        nrows = df.shape[0]
+        ncols= df.shape[1]
+        mem_used = df.memory_usage(index=True).sum()/(10**9)
+        mem_used = round(mem_used, 6)
+        df_mem.append(mem_used)
+        df_name.append('DF ' + str(len(df_name) + 1))
+        df_rows.append(nrows)
+        df_columns.append(ncols)
+        
+    df_summary = pd.DataFrame({'Dataframe' : df_name, 'Memory usage (GB)' : df_mem, 'No. rows' : df_rows, 'No. columns' : df_columns})
+    df_summary = df_summary[['Dataframe', 'Memory usage (GB)', 'No. rows', 'No. columns']]
+    df_summary.set_index('Dataframe', inplace=True)
 
-        num_rows.append(df.shape[0])
-        num_cols.append(df.shape[1])
-        total_col_names.append(col_names)
+    return df_summary
 
-    # Setup overview info
-    df_overview = pd.DataFrame(
-        data={
-            '': df_names,
-            'Number of entries': num_rows,
-            'Number of features': num_cols,
-            'Some feature names': total_col_names
-        }
-    )
+# Join multiple dataframes along rows or columns.
+def join_dataframes(df_list, axis=0):
+    '''
+    Joins subset dataframes into one output dataframe (subset dataframe is removed from memory).
 
-    df_overview.set_index('', inplace=True)
+    df_list : list of pd.dataframes as input
+    axis : 0 or 1, 0 - joining on rows, 1 - joining on columns
 
-    return df_overview
+    Returns:
+    -----------
+    df_output : pd.dataframe as output
+    dfs_cleared : list of pd.dataframes that are cleared
+    '''
+    df_output = pd.DataFrame()
+    df_cleared = []
+    i = 0
+    for df in df_list:
+        if i == 0:
+            df_output = df
+            # Clear original dataframe from memory
+            dfs_cleared.append(df.iloc[0:0])
+            print('Status: dataframe #' + str(i + 1) + ' processed!')
+        else:
+            df_output = pd.concat([df_output, df], axis=axis)
+            # Clear original dataframe from memory
+            df_cleared.append(df.iloc[0:0])
+            print('Status: dataframe #' + str(i + 1) + ' processed!')
+
+        i += 1
+    
+    gc.collect()
+
+    return df_output, df_cleared
 
 # Compare and find common column features between given dataframes.
 def compare_common(df_list):
@@ -1274,105 +1325,6 @@ def check_math_scalers(df, header):
     sns.kdeplot(sqrt_scaled_data, ax=ax[1][0], shade=True, color='y')
     sns.kdeplot(tanh_scaled_data, ax=ax[1][1], shade=True, color='y')
     return df_new
-
-# Create dataframe for initial step of data analysis using Pandas.
-def create_dataframe(data_folder='Data', file_name='unknown', dtype_dict=None):
-    """
-    Import original data for analysis.
-
-    Arguments:
-    -----------
-    file_name : string, name of the data file (excludes extension descriptions like '.csv' or '.xlsx')
-    dtype_dict : dict, dictionary to specify the variable data type(s) to be read via the Pandas read_csv() function
-
-    Returns:
-    -----------
-    df_original : pd.dataframe, dataframe of the original dataset
-    """
-
-    base_dir = os.path.dirname(os.path.realpath('__file__'))
-    data_dir = os.path.join(base_dir, data_folder)
-    file_dir_csv = os.path.join(data_dir, file_name + '.csv')
-
-    file_dir_xlsx = os.path.join(data_dir, file_name + '.xlsx')
-    df_original = None
-
-    try:
-        df_original = pd.read_csv(file_dir_csv, encoding='cp1252', low_memory=False, dtype=dtype_dict)
-        print('Status: ' + file_name + ' imported!')
-    except:
-        try:
-            df_original = pd.read_excel(file_dir_xlsx, sheet_name='Sheet1')
-            print('Status: ' + file_name + ' imported!')
-        except:
-            print('Status: ' + file_name + ' is unable to be read! Please ensure file content is not corrupted or if the file is of .xlsx format, the sheetname is titled as "Sheet1".')
-
-    return df_original
-
-# Check the dataframe memory usage
-def memory_usage(df_list):
-    '''
-    Display the memory usage of dataframes in GB.
-
-    df_list : list of pd.dataframes as input
-
-    Returns:
-    -----------
-    df_summary : pd.dataframe display of message description for memory usage
-    '''
-    df_name = []
-    df_mem = []
-    df_rows = []
-    df_columns = []
-    for df in df_list:
-        nrows = df.shape[0]
-        ncols= df.shape[1]
-        mem_used = df.memory_usage(index=True).sum()/(10**9)
-        mem_used = round(mem_used, 6)
-        df_mem.append(mem_used)
-        df_name.append('DF ' + str(len(df_name) + 1))
-        df_rows.append(nrows)
-        df_columns.append(ncols)
-        
-    df_summary = pd.DataFrame({'Dataframe' : df_name, 'Memory usage (GB)' : df_mem, 'No. rows' : df_rows, 'No. columns' : df_columns})
-    df_summary = df_summary[['Dataframe', 'Memory usage (GB)', 'No. rows', 'No. columns']]
-    df_summary.set_index('Dataframe', inplace=True)
-
-    return df_summary
-
-# Join multiple dataframes along rows or columns.
-def join_dataframes(dfs, axis=0):
-    '''
-    Joins subset dataframes into one output dataframe (subset dataframe is removed from memory).
-
-    dfs : list of pd.dataframes as input
-    axis : 0 or 1, 0 - joining on rows, 1 - joining on columns
-
-    Returns:
-    -----------
-    df_output : pd.dataframe as output
-    dfs_cleared : list of pd.dataframes that are cleared
-    '''
-    df_output = pd.DataFrame()
-    dfs_cleared = []
-    i = 0
-    for df in dfs:
-        if i == 0:
-            df_output = df
-            # Clear original dataframe from memory
-            dfs_cleared.append(df.iloc[0:0])
-            print('Status: dataframe #' + str(i + 1) + ' processed!')
-        else:
-            df_output = pd.concat([df_output, df], axis=axis)
-            # Clear original dataframe from memory
-            dfs_cleared.append(df.iloc[0:0])
-            print('Status: dataframe #' + str(i + 1) + ' processed!')
-
-        i += 1
-    
-    gc.collect()
-
-    return df_output, dfs_cleared
 
 # Filter the data to the range appropriate for outlier analysis
 def outlier_filter(df, target_header, scale=1.5):
