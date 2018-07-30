@@ -1145,26 +1145,30 @@ def distplot_features(df, feature_header, target_header=None, compare_labels=(No
     plt.figure(figsize=plot_size)
     legend_labels = []
     plot_labels = None
-    target_labels = df[target_header].unique()
     
-    if compare_labels[0] != None and compare_labels[1] != None:
-        plot_labels = compare_labels
-        for label in plot_labels:
-            ax = sns.distplot(a=df.loc[df[target_header] == label][feature_header], kde=True, kde_kws={'label' : label})
-            legend_labels.append(label)
-        handles, _ = ax.get_legend_handles_labels()
-        ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
-        ax.set_xlabel(feature_header)
-        ax.set_ylabel('Frequency')
+    if target_header is None:
+        ax = sns.kdeplot(data=df[feature_header])
     else:
-        plot_labels = target_labels
-        for label in plot_labels:
-            ax = sns.kdeplot(data=df.loc[df[target_header] == label][feature_header])
-            legend_labels.append(label)
-        handles, _ = ax.get_legend_handles_labels()
-        ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
-        ax.set_xlabel(feature_header)
-        ax.set_ylabel('Frequency')
+        target_labels = df[target_header].unique()
+
+        if compare_labels[0] != None and compare_labels[1] != None:
+            plot_labels = compare_labels
+            for label in plot_labels:
+                ax = sns.distplot(a=df.loc[df[target_header] == label][feature_header], kde=True, kde_kws={'label' : label})
+                legend_labels.append(label)
+            handles, _ = ax.get_legend_handles_labels()
+            ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
+            ax.set_xlabel(feature_header)
+            ax.set_ylabel('Frequency')
+        else:
+            plot_labels = target_labels
+            for label in plot_labels:
+                ax = sns.kdeplot(data=df.loc[df[target_header] == label][feature_header])
+                legend_labels.append(label)
+            handles, _ = ax.get_legend_handles_labels()
+            ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
+            ax.set_xlabel(feature_header)
+            ax.set_ylabel('Frequency')
     
 # Display PCA heatmap based on feature variance contribution across selected principal components
 def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=False):
