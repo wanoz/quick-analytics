@@ -1118,7 +1118,7 @@ def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_co
     ax.set_ylabel('Principal component ' + str(pc_axes[1]))
 
 # Plot 2D distribution
-def distplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='plasma'):
+def distplot_features(df, feature_header_list, target_header=None, compare_labels=(None, None), plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='plasma'):
     """
     Produce a feature distributions plot against all target labels.
 
@@ -1147,15 +1147,17 @@ def distplot_features(df, feature_header, target_header=None, compare_labels=(No
     plot_labels = None
     
     if target_header is None:
-        ax = sns.kdeplot(data=df[feature_header])
+        for feature_header in feature_header_list
+            ax = sns.kdeplot(data=df[feature_header])
     else:
         target_labels = df[target_header].unique()
 
         if compare_labels[0] != None and compare_labels[1] != None:
             plot_labels = compare_labels
             for label in plot_labels:
-                ax = sns.distplot(a=df.loc[df[target_header] == label][feature_header], kde=True, kde_kws={'label' : label})
-                legend_labels.append(label)
+                for feature_header in feature_header_list:
+                    ax = sns.distplot(a=df.loc[df[target_header] == label][feature_header], kde=True, kde_kws={'label' : label})
+                    legend_labels.append(label)
             handles, _ = ax.get_legend_handles_labels()
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
             ax.set_xlabel(feature_header)
@@ -1163,8 +1165,9 @@ def distplot_features(df, feature_header, target_header=None, compare_labels=(No
         else:
             plot_labels = target_labels
             for label in plot_labels:
-                ax = sns.kdeplot(data=df.loc[df[target_header] == label][feature_header])
-                legend_labels.append(label)
+                for feature_header in feature_header_list:
+                    ax = sns.kdeplot(data=df.loc[df[target_header] == label][feature_header])
+                    legend_labels.append(label)
             handles, _ = ax.get_legend_handles_labels()
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
             ax.set_xlabel(feature_header)
