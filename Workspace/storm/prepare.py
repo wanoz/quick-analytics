@@ -1134,7 +1134,7 @@ def distplot_features(df, feature_header_list, target_header=None, compare_label
 
     Returns:
     -----------
-    Display of feature distributions plot
+    Display of distributions plot for the selected feature(s) in the dataset
     """
     
     # Define the style of the Seaborn plot
