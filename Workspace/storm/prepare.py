@@ -1146,12 +1146,16 @@ def distplot_features(df, feature_header_list, target_header=None, compare_label
     legend_labels = []
     plot_labels = None
     
+    # If the task is for producing a vanilla distribution plot of a selected range of feature values
     if target_header is None:
-        for feature_header in feature_header_list
+        for feature_header in feature_header_list:
             ax = sns.kdeplot(data=df[feature_header])
+
+    # If the task is for producing a distribution plot of feature values against selected/all target value categories
     else:
         target_labels = df[target_header].unique()
 
+        # If task requires comparing the distribution plots of feature values w.r.t. two different target value categories
         if compare_labels[0] != None and compare_labels[1] != None:
             plot_labels = compare_labels
             for label in plot_labels:
@@ -1162,6 +1166,8 @@ def distplot_features(df, feature_header_list, target_header=None, compare_label
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
             ax.set_xlabel(feature_header)
             ax.set_ylabel('Frequency')
+
+        # If task is for distribution plots of feature values w.r.t. all target value categories.
         else:
             plot_labels = target_labels
             for label in plot_labels:
