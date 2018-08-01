@@ -1249,7 +1249,8 @@ def distplot_features(df, feature_header_list, target_header=None, compare_label
     # If the task is for producing a vanilla distribution plot of a selected range of feature values
     if target_header is None:
         for feature_header in feature_header_list:
-            ax = sns.kdeplot(data=df[feature_header])
+            data_series = df[feature_header].dropna()
+            ax = sns.kdeplot(data=data_series)
 
     # If the task is for producing a distribution plot of feature values against selected/all target value categories
     else:
@@ -1260,7 +1261,8 @@ def distplot_features(df, feature_header_list, target_header=None, compare_label
             plot_labels = compare_labels
             for label in plot_labels:
                 for feature_header in feature_header_list:
-                    ax = sns.distplot(a=df.loc[df[target_header] == label][feature_header], kde=True, kde_kws={'label' : label})
+                    data_series = df.loc[df[target_header] == label][feature_header].dropna()
+                    ax = sns.distplot(a=data_series, kde=True, kde_kws={'label' : label})
                     legend_labels.append(label)
             handles, _ = ax.get_legend_handles_labels()
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
@@ -1272,7 +1274,8 @@ def distplot_features(df, feature_header_list, target_header=None, compare_label
             plot_labels = target_labels
             for label in plot_labels:
                 for feature_header in feature_header_list:
-                    ax = sns.kdeplot(data=df.loc[df[target_header] == label][feature_header])
+                    data_series = df.loc[df[target_header] == label][feature_header].dropna()
+                    ax = sns.kdeplot(data=data_series)
                     legend_labels.append(label)
             handles, _ = ax.get_legend_handles_labels()
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
@@ -1325,11 +1328,11 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
         plot_width = df_pca_comp.shape[1]*2
     
     if df_pca_comp.shape[0] <= 8:
-        plot_height = df_pca_comp.shape[0]*1
+        plot_height = df_pca_comp.shape[0]*0.9
     elif df_pca_comp.shape[0] > 8 and df_pca_comp.shape[0] <= 15:
-        plot_height = df_pca_comp.shape[0]*0.7
+        plot_height = df_pca_comp.shape[0]*0.6
     else:
-        plot_height = df_pca_comp.shape[0]*0.5
+        plot_height = df_pca_comp.shape[0]*0.4
     
     # Setup the plot
     plot_size = (plot_width, plot_height)
