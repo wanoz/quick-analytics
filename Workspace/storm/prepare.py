@@ -425,7 +425,7 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
         
         # Get the original datetime format of the data
         original_dtype = df.dtypes[feature_header].name
-        print('Status: Original datetime content data type is ' + str(original_dtype) + '.')
+        print('Status: Original datetime content data type is "' + str(original_dtype) + '".')
 
         # Process datetime data to the desired format (additionally, process delta time contents)
         if str(original_dtype) == 'datetime64[ns]':
