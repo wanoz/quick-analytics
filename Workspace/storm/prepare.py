@@ -347,7 +347,7 @@ def create_target(df, target_header, lookup_value, criteria='equal to', pos_labe
     return df_output
 
 # Secondary helper function for cleaning datetime data of 'datetime64ns' data type
-def format_datetime64ns(row, feature_header, cleaned_header, target_format, dt_quantity, time_origin):
+def format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_origin):
     try:
         time_sample_obj = row[feature_header]
 
