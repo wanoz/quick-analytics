@@ -419,10 +419,9 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
             print('Status: Datetime format "target_format" is unspecified, format is defaulted to YYYY-MM-DD.')
         
         if time_origin is None:
-            time_origin = date(2000, 1, 1)
-            print('Status: Time of origin "time_origin" used for calculating the time difference quantity is unspecified, time of origin is defaulted to "date(2000, 1, 1)".')
-            print('Example: time origin of "2010-Mar-15", is specified with "date(2010, 3, 15)"\n')
-        
+            time_origin = date(1999, 12, 31)
+            print('Status: Time of origin "time_origin" used for calculating the time difference quantity is unspecified, time of origin is defaulted to "date(1999, 12, 31)".')
+     
         # Get the original datetime format of the data
         original_dtype = df.dtypes[feature_header].name
         print('Status: Original datetime content data type is "' + str(original_dtype) + '".')
@@ -431,9 +430,11 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
         print('Processing datetime contents... ', end='')
         if str(original_dtype) == 'datetime64[ns]':
             df_output = df.apply(lambda row : format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_origin), axis=1)
+            df_output[feature_header + ' (' + dt_quantity + ' since)'] = df_output[feature_header + ' (' + dt_quantity + ' since)'].astype(float)
             print('[Done]')
         elif str(original_dtype) == 'object':
             df_output = df.apply(lambda row : format_datetimeobject(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_origin), axis=1)
+            df_output[feature_header + ' (' + dt_quantity + ' since)'] = df_output[feature_header + ' (' + dt_quantity + ' since)'].astype(float)
             print('[Done]')
         else:
             print('[Done]')
