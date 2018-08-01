@@ -347,7 +347,7 @@ def create_target(df, target_header, lookup_value, criteria='equal to', pos_labe
     return df_output
 
 # Secondary helper function for cleaning datetime data of 'datetime64ns' data type
-def format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_ref):
+def format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dtime_unit, dtime_ref):
     try:
         time_sample_obj = row[feature_header]
 
@@ -356,17 +356,17 @@ def format_datetime64ns(row, feature_header, cleaned_header, original_format, ta
 
         # Calculate and save the delta time data in an additional column
         time_sample = time_sample_obj.date()
-        if dt_quantity == 'days':
-            row[feature_header + ' (' + dt_quantity + ' since)'] = (time_sample - time_ref).days
-        elif dt_quantity == 'weeks':
-            row[feature_header + ' (' + dt_quantity + ' since)'] = (time_sample - time_ref).weeks
+        if dtime_unit == 'days':
+            row[feature_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).days
+        elif dtime_unit == 'weeks':
+            row[feature_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).weeks
     except:
         pass
     
     return row
 
 # Secondary helper function for cleaning datetime data of 'object' data type
-def format_datetimeobject(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_ref):
+def format_datetimeobject(row, feature_header, cleaned_header, original_format, target_format, dtime_unit, dtime_ref):
     try:
         time_sample_obj = datetime.strptime(row[feature_header], original_format)
 
@@ -375,17 +375,17 @@ def format_datetimeobject(row, feature_header, cleaned_header, original_format, 
 
         # Calculate and save the delta time data in an additional column
         time_sample = time_sample_obj.date()
-        if dt_quantity == 'days':
-            row[feature_header + ' (' + dt_quantity + ' since)'] = (time_sample - time_ref).days
-        elif dt_quantity == 'weeks':
-            row[feature_header + ' (' + dt_quantity + ' since)'] = (time_sample - time_ref).weeks
+        if dtime_unit == 'days':
+            row[feature_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).days
+        elif dtime_unit == 'weeks':
+            row[feature_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).weeks
     except:
         pass
     
     return row
 
 # Helper function to clean datetime data in the desired format
-def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, target_format=None, dt_quantity='days', time_ref=None):
+def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, target_format=None, dtime_unit='days', dtime_ref=None):
     '''
     Helper function that produces the cleaned datetime data and the number of days/weeks time delta information in the dataset
 
@@ -396,8 +396,8 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
     cleaned_header : string, the column with header description that is to contain the cleaned datetime data
     original_format : string, the datetie format of the original datetime data
     target_format : string, the datetime format specification of the output of the cleaned datetime data
-    dt_quantity : selection of 'days', 'weeks' etc, the time difference variable quantity w.r.t. a set reference time
-    time_ref : date object, a set reference time for calculating time difference
+    dtime_unit : selection of 'days', 'weeks' etc, the time difference variable quantity w.r.t. a set reference time
+    dtime_ref : date object, a set reference time for calculating time difference
 
     Returns:
     -----------
@@ -418,9 +418,9 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
             target_format = '%Y-%m-%d'
             print('Status: Datetime format "target_format" is unspecified, format is defaulted to YYYY-MM-DD.')
         
-        if time_ref is None:
-            time_ref = date(1999, 12, 31)
-            print('Status: Reference time "time_ref" used for calculating the time difference quantity is unspecified, reference time is defaulted to "date(1999, 12, 31)".')
+        if dtime_ref is None:
+            dtime_ref = date(1999, 12, 31)
+            print('Status: Reference time "dtime_ref" used for calculating the time difference quantity is unspecified. Setting reference time to "date(1999, 12, 31)".')
      
         # Get the original datetime format of the data
         original_dtype = df.dtypes[feature_header].name
@@ -429,12 +429,12 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
         # Process datetime data to the desired format (additionally, process delta time contents)
         print('Processing datetime contents... ', end='')
         if str(original_dtype) == 'datetime64[ns]':
-            df_output = df.apply(lambda row : format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_ref), axis=1)
-            df_output[feature_header + ' (' + dt_quantity + ' since)'] = df_output[feature_header + ' (' + dt_quantity + ' since)'].astype(float)
+            df_output = df.apply(lambda row : format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dtime_unit, dtime_ref), axis=1)
+            df_output[feature_header + ' (' + dtime_unit + ' since)'] = df_output[feature_header + ' (' + dttime_unit + ' since)'].astype(float)
             print('[Done]')
         elif str(original_dtype) == 'object':
-            df_output = df.apply(lambda row : format_datetimeobject(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_ref), axis=1)
-            df_output[feature_header + ' (' + dt_quantity + ' since)'] = df_output[feature_header + ' (' + dt_quantity + ' since)'].astype(float)
+            df_output = df.apply(lambda row : format_datetimeobject(row, feature_header, cleaned_header, original_format, target_format, dtime_unit, dtime_ref), axis=1)
+            df_output[feature_header + ' (' + dtime_unit + ' since)'] = df_output[feature_header + ' (' + dtime_unit + ' since)'].astype(float)
             print('[Done]')
         else:
             print('[Done]')
