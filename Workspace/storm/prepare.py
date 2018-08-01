@@ -345,6 +345,96 @@ def create_target(df, target_header, lookup_value, criteria='equal to', pos_labe
     
     return df_output
 
+# Secondary helper function for cleaning datetime data of 'datetime64ns' data type
+def format_datetime64ns(row, feature_header, cleaned_header, target_format, dt_quantity, time_origin):
+    try:
+        time_sample_obj = row[feature_header]
+
+        # Save the formatted datetime data in the specified "cleaned header" column
+        row[cleaned_header] = time_sample_obj.strftime(target_format)
+
+        # Calculate and save the delta time data in an additional column
+        time_sample = datetime.strptime(row[feature_header], target_format).date()
+        if dt_quantity == 'days':
+            row[feature_header + '_' + dt_quantity + '_since'] = (time_sample - time_origin).days
+        elif dt_quantity == 'weeks':
+            row[feature_header + '_' + dt_quantity + '_since'] = (time_sample - time_origin).weeks
+    except:
+        pass
+    
+    return row
+
+# Secondary helper function for cleaning datetime data of 'object' data type
+def format_datetimeobject(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_origin):
+    try:
+        time_sample_obj = datetime.strptime(row[feature_header], original_format)
+
+        # Save the formatted datetime data in the specified "cleaned header" column
+        row[cleaned_header] = time_sample_obj.strftime(target_format)
+
+        # Calculate and save the delta time data in an additional column
+        time_sample = datetime.strptime(row[feature_header], target_format).date()
+        if dt_quantity == 'days':
+            row[feature_header + '_' + dt_quantity + '_since'] = (time_sample - time_origin).days
+        elif dt_quantity == 'weeks':
+            row[feature_header + '_' + dt_quantity + '_since'] = (time_sample - time_origin).weeks
+    except:
+        pass
+    
+    return row
+
+# Helper function to clean datetime data in the desired format
+def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, target_format=None, dt_quantity='days', time_origin=None):
+    '''
+    Helper function that produces the cleaned datetime data and the number of days/weeks time delta information in the dataset
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    feature_header : string, the column with the header description that contains the original datetime data required for cleaned
+    cleaned_header : string, the column with header description that is to contain the cleaned datetime data
+    original_format : string, the datetie format of the original datetime data
+    target_format : string, the datetime format specification of the output of the cleaned datetime data
+    dt_quantity : selection of 'days', 'weeks' etc, the delta time variable quantity since a set time of origin
+    time_origin : date object, a set time of origin for calculating delta time
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+
+    '''
+    if original_format is None:
+        print('Status: Original datetime format "original_format" is not specified. Function is terminated.')
+        print('Please state the "original_format" as per examples:')
+        print('Example 1: "2018-Mar-01", format: "%Y-%b-%d"')
+        print('Example 2: "2018-03-01", format: "%Y-%m-%d"')
+        print('Example 3: "01-Mar-2018", format: "%d-%b-%Y"')
+        print('Example 4: "01-03-2018", format: "%d-%m-%Y"')
+    else:
+        if target_format is None:
+            target_format = '%Y-%m-%d'
+            print('Status: Datetime format "target_format" is unspecified, format is defaulted to YYYY-MM-DD.')
+        
+        if time_origin is None:
+            time_origin = date(2000, 1, 1)
+            print('Status: Time of origin "time_origin" used for calculating the time difference quantity is unspecified, time of origin is defaulted to "date(2000, 1, 1)".')
+            print('Example: time origin of "2010-Mar-15", is specified with "date(2010, 3, 15)"\n')
+        
+        # Get the original datetime format of the data
+        original_dtype = df.dtypes[feature_header].name
+        print('Status: Original datetime content data type is ' + str(original_dtype) + '.')
+
+        # Process datetime to the desired format from 'datetime64ns'
+        if original_format == 'datetime64[ns]':
+            df_output = df.apply(lambda row : format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_origin), axis=1)
+            print('Date/time data is cleaned and processed!')
+        elif original_format == 'object':
+            df_output = df.apply(lambda row : format_datetimeobject(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_origin), axis=1)
+        else:
+            print('Status: Original datetime content data type is not covered by this function. Function is terminated.')
+
+        return df_output
+
 # Feature analysis with correlations
 def correlations_check(df, target_header, target_label=None, encoder=None):
     """
