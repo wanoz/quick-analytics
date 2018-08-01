@@ -419,15 +419,15 @@ def cleaned_datetime(df, feature_header, cleaned_header=None, original_format=No
             print('Status: Input of "cleaned_header" is unspecified. The original datetime column will be overwritten with the newly cleaned data.')
         if target_format is None:
             target_format = '%Y-%m-%d'
-            print('Status: Datetime format "target_format" is unspecified, newly cleaned data format is defaulted to YYYY-MM-DD.')
+            print('Status: Input of "target_format" is unspecified. The format of the newly cleaned data will be set to YYYY-MM-DD.')
         
         if dtime_ref is None:
             dtime_ref = date(1999, 12, 31)
-            print('Status: Reference time "dtime_ref" used for calculating the time difference quantity is unspecified. Setting reference time to "date(1999, 12, 31)".')
+            print('Status: Input of "dtime_ref" (reference for delta time measurement) is unspecified. Setting reference time to "date(1999, 12, 31)".')
      
         # Get the original datetime format of the data
         original_dtype = df.dtypes[feature_header].name
-        print('Status: Original datetime content data type is "' + str(original_dtype) + '".')
+        print('Status: The data type of the original datetime content is "' + str(original_dtype) + '".')
 
         # Process datetime data to the desired format (additionally, process delta time contents)
         print('Processing datetime contents... ', end='')
