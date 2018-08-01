@@ -357,9 +357,9 @@ def format_datetime64ns(row, feature_header, cleaned_header, original_format, ta
         # Calculate and save the delta time data in an additional column
         time_sample = time_sample_obj.date()
         if dtime_unit == 'days':
-            row[feature_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).days
+            row[cleaned_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).days
         elif dtime_unit == 'weeks':
-            row[feature_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).weeks
+            row[cleaned_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).weeks
     except:
         pass
     
@@ -376,16 +376,16 @@ def format_datetimeobject(row, feature_header, cleaned_header, original_format, 
         # Calculate and save the delta time data in an additional column
         time_sample = time_sample_obj.date()
         if dtime_unit == 'days':
-            row[feature_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).days
+            row[cleaned_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).days
         elif dtime_unit == 'weeks':
-            row[feature_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).weeks
+            row[cleaned_header + ' (' + dtime_unit + ' since)'] = (time_sample - dtime_ref).weeks
     except:
         pass
     
     return row
 
 # Helper function to clean datetime data in the desired format
-def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, target_format=None, dtime_unit='days', dtime_ref=None):
+def cleaned_datetime(df, feature_header, cleaned_header=None, original_format=None, target_format=None, dtime_unit='days', dtime_ref=None):
     '''
     Helper function that produces the cleaned datetime data and the number of days/weeks time delta information in the dataset
 
@@ -414,9 +414,12 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
         print('Example 3: "01-Mar-2018", format: "%d-%b-%Y"')
         print('Example 4: "01-03-2018", format: "%d-%m-%Y"')
     else:
+        if cleaned_header is None:
+            cleaned_header = feature_header
+            print('Status: No new column header specified for cleaned datetime data. Original datetime column will be overwritten with newly cleaned data.')
         if target_format is None:
             target_format = '%Y-%m-%d'
-            print('Status: Datetime format "target_format" is unspecified, format is defaulted to YYYY-MM-DD.')
+            print('Status: Datetime format "target_format" is unspecified, newly cleaned data format is defaulted to YYYY-MM-DD.')
         
         if dtime_ref is None:
             dtime_ref = date(1999, 12, 31)
@@ -430,11 +433,11 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
         print('Processing datetime contents... ', end='')
         if str(original_dtype) == 'datetime64[ns]':
             df_output = df.apply(lambda row : format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dtime_unit, dtime_ref), axis=1)
-            df_output[feature_header + ' (' + dtime_unit + ' since)'] = df_output[feature_header + ' (' + dtime_unit + ' since)'].astype(float)
+            df_output[cleaned_header + ' (' + dtime_unit + ' since)'] = df_output[cleaned_header + ' (' + dtime_unit + ' since)'].astype(float)
             print('[Done]')
         elif str(original_dtype) == 'object':
             df_output = df.apply(lambda row : format_datetimeobject(row, feature_header, cleaned_header, original_format, target_format, dtime_unit, dtime_ref), axis=1)
-            df_output[feature_header + ' (' + dtime_unit + ' since)'] = df_output[feature_header + ' (' + dtime_unit + ' since)'].astype(float)
+            df_output[cleaned_header + ' (' + dtime_unit + ' since)'] = df_output[cleaned_header + ' (' + dtime_unit + ' since)'].astype(float)
             print('[Done]')
         else:
             print('[Done]')
