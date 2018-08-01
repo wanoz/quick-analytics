@@ -430,7 +430,7 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
         print('Processing datetime contents... ', end='')
         if str(original_dtype) == 'datetime64[ns]':
             df_output = df.apply(lambda row : format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dtime_unit, dtime_ref), axis=1)
-            df_output[feature_header + ' (' + dtime_unit + ' since)'] = df_output[feature_header + ' (' + dttime_unit + ' since)'].astype(float)
+            df_output[feature_header + ' (' + dtime_unit + ' since)'] = df_output[feature_header + ' (' + dtime_unit + ' since)'].astype(float)
             print('[Done]')
         elif str(original_dtype) == 'object':
             df_output = df.apply(lambda row : format_datetimeobject(row, feature_header, cleaned_header, original_format, target_format, dtime_unit, dtime_ref), axis=1)
