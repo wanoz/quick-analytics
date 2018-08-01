@@ -1225,7 +1225,7 @@ def distplot_features(df, feature_header_list, target_header=None, compare_label
     Arguments:
     -----------
     df : pd.dataframe, PCA components dataframe as input data
-    feature_header : string, column header of the feature label
+    feature_header_list : list, list of column headers containing the feature labels to be plotted
     target_header : string, column header of the target label
     compare_labels : tuple, target labels required for comparison in the plot
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
