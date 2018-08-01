@@ -355,11 +355,11 @@ def format_datetime64ns(row, feature_header, cleaned_header, original_format, ta
         row[cleaned_header] = time_sample_obj.strftime(target_format)
 
         # Calculate and save the delta time data in an additional column
-        time_sample = datetime.strptime(row[feature_header], target_format).date()
+        time_sample = time_sample_obj.date()
         if dt_quantity == 'days':
-            row[feature_header + '_' + dt_quantity + '_since'] = (time_sample - time_origin).days
+            row[feature_header + ' (' + dt_quantity + ' since)'] = (time_sample - time_origin).days
         elif dt_quantity == 'weeks':
-            row[feature_header + '_' + dt_quantity + '_since'] = (time_sample - time_origin).weeks
+            row[feature_header + ' (' + dt_quantity + ' since)'] = (time_sample - time_origin).weeks
     except:
         pass
     
@@ -374,11 +374,11 @@ def format_datetimeobject(row, feature_header, cleaned_header, original_format, 
         row[cleaned_header] = time_sample_obj.strftime(target_format)
 
         # Calculate and save the delta time data in an additional column
-        time_sample = datetime.strptime(row[feature_header], target_format).date()
+        time_sample = time_sample_obj.date()
         if dt_quantity == 'days':
-            row[feature_header + '_' + dt_quantity + '_since'] = (time_sample - time_origin).days
+            row[feature_header + ' (' + dt_quantity + ' since)'] = (time_sample - time_origin).days
         elif dt_quantity == 'weeks':
-            row[feature_header + '_' + dt_quantity + '_since'] = (time_sample - time_origin).weeks
+            row[feature_header + ' (' + dt_quantity + ' since)'] = (time_sample - time_origin).weeks
     except:
         pass
     
