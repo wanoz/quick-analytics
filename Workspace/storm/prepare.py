@@ -416,7 +416,7 @@ def cleaned_datetime(df, feature_header, cleaned_header=None, original_format=No
     else:
         if cleaned_header is None:
             cleaned_header = feature_header
-            print('Status: Argument of "cleaned_header" is unspecified. The original datetime column will be overwritten with the newly cleaned data.')
+            print('Status: Input of "cleaned_header" is unspecified. The original datetime column will be overwritten with the newly cleaned data.')
         if target_format is None:
             target_format = '%Y-%m-%d'
             print('Status: Datetime format "target_format" is unspecified, newly cleaned data format is defaulted to YYYY-MM-DD.')
