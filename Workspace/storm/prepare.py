@@ -428,12 +428,15 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
         print('Status: Original datetime content data type is "' + str(original_dtype) + '".')
 
         # Process datetime data to the desired format (additionally, process delta time contents)
+        print('Processing datetime contents... ', end='')
         if str(original_dtype) == 'datetime64[ns]':
             df_output = df.apply(lambda row : format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_origin), axis=1)
-            print('Date/time data is cleaned and processed!')
+            print('[Done]')
         elif str(original_dtype) == 'object':
             df_output = df.apply(lambda row : format_datetimeobject(row, feature_header, cleaned_header, original_format, target_format, dt_quantity, time_origin), axis=1)
+            print('[Done]')
         else:
+            print('[Done]')
             print('Status: Original datetime content data type is not covered by this function. Function is terminated.')
 
     return df_output
