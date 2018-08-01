@@ -404,6 +404,8 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
     df_output : pd.dataframe, resulting dataframe as output
 
     '''
+    df_output = df
+
     if original_format is None:
         print('Status: Original datetime format "original_format" is not specified. Function is terminated.')
         print('Please state the "original_format" as per examples:')
@@ -434,7 +436,7 @@ def cleaned_datetime(df, feature_header, cleaned_header, original_format=None, t
         else:
             print('Status: Original datetime content data type is not covered by this function. Function is terminated.')
 
-        return df_output
+    return df_output
 
 # Feature analysis with correlations
 def correlations_check(df, target_header, target_label=None, encoder=None):
