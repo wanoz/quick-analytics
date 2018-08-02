@@ -478,7 +478,7 @@ def label_duplicates(df, feature_header, count_index_header=None):
     count_index_list = []
     df_output = df
     # Iterate through the data of the selected column and lookup selected values against a dictionary containing values and their count index
-    for _, value in df[feature_header].iteritems()
+    for _, value in df[feature_header].iteritems():
         count_index, value_lookup = value_count(value, value_lookup)
         count_index_list.append(count_index)
 
