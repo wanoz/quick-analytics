@@ -445,6 +445,52 @@ def cleaned_datetime(df, feature_header, cleaned_header=None, original_format=No
 
     return df_output
 
+# Secondary helper function for labelling duplicate count index information
+def value_count(value, value_lookup):
+    # Lookup value against a table to check duplicated value count, increment if already exists, or initialise count index at 1.
+    if value in value_lookup:
+        value_lookup[value] += 1
+    else:
+        value_lookup[value] = 1
+    
+    # Get the count index of the value
+    count_index = value_lookup[value]
+
+    return count_index, value_lookup
+
+# Helper function for labelling duplicate count index information
+def label_duplicates(df, feature_header, count_index_header=None):
+    '''
+    Helper function that produces an updated dataset containing the count index of duplicated values in the selected column.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    feature_header : string, the column with the header description that will be inspected for the count index information of duplicated values
+    count_index_header : string, the column with header description that is to contain the count index information of the selected column
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+
+    '''
+    value_lookup = {}
+    count_index_list = []
+    df_output = df
+    # Iterate through the data of the selected column and lookup selected values against a dictionary containing values and their count index
+    for _, value in df[feature_header].iteritems()
+        count_index, value_lookup = value_count(value, value_lookup)
+        count_index_list.append(count_index)
+
+    # Set the column header description of the count index column
+    if count_index_header is None:
+        count_index_header = feature_header + ' (count index)'
+    
+    # Add the count index column into the dataset
+    df_output[count_index_header] = pd.Series(count_index_list)
+
+    return df_output
+
 # Feature analysis with correlations
 def correlations_check(df, target_header, target_label=None, encoder=None):
     """
