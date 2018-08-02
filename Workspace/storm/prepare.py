@@ -404,9 +404,11 @@ def cleaned_datetime(df, feature_header, cleaned_header=None, original_format=No
     df_output : pd.dataframe, resulting dataframe as output
 
     '''
+    print('Inspecting date/time data in column "' + feature_header + '"... ', end='')
     df_output = df
 
     if original_format is None:
+        print('[Done]')
         print('Status: Original datetime format "original_format" is not specified. Function is terminated.')
         print('Please state the "original_format" as per examples:')
         print('Example 1: "2018-Mar-01", format: "%Y-%b-%d"')
@@ -414,9 +416,11 @@ def cleaned_datetime(df, feature_header, cleaned_header=None, original_format=No
         print('Example 3: "01-Mar-2018", format: "%d-%b-%Y"')
         print('Example 4: "01-03-2018", format: "%d-%m-%Y"')
     else:
+        print('[Done]')
         if cleaned_header is None:
             cleaned_header = feature_header
             print('Status: Input of "cleaned_header" is unspecified. The original datetime column will be overwritten with the newly cleaned data.')
+
         if target_format is None:
             target_format = '%Y-%m-%d'
             print('Status: Input of "target_format" is unspecified. The format of the newly cleaned data will be set to YYYY-MM-DD.')
@@ -430,7 +434,7 @@ def cleaned_datetime(df, feature_header, cleaned_header=None, original_format=No
         print('Status: The data type of the original datetime content is "' + str(original_dtype) + '".')
 
         # Process datetime data to the desired format (additionally, process delta time contents)
-        print('Processing datetime contents... ', end='')
+        print('Cleaning date/time data and update dataset... ', end='')
         if str(original_dtype) == 'datetime64[ns]':
             df_output = df.apply(lambda row : format_datetime64ns(row, feature_header, cleaned_header, original_format, target_format, dtime_unit, dtime_ref), axis=1)
             df_output[cleaned_header + ' (' + dtime_unit + ' since)'] = df_output[cleaned_header + ' (' + dtime_unit + ' since)'].astype(float)
@@ -479,14 +483,14 @@ def label_duplicates(df, feature_header, count_index_tag=None):
     count_index_tag_list = []
     df_output = df
 
-    print('Creating duplicate frequency lookup table... ', end='')
+    print('Inspecting duplicated data in column "' + feature_header + '"... ', end='')
     # Get the unique value count dataframe
     df_unique_values = unique_values(df, feature_header)
     value_unique_list = df_unique_values.iloc[:, 0].values.tolist()
     num_unique_list = df_unique_values.iloc[:, 1].values.tolist()
     print('[Done]')
     
-    print('Updating description label(s) on duplicate data... ', end='')
+    print('Attach description label(s) on duplicate data... ', end='')
     # Iterate through the data of the selected column and lookup selected values against a dictionary containing values and their count index
     for _, value in df[feature_header].iteritems():
         count_index, value_lookup = value_count(value, value_lookup)
