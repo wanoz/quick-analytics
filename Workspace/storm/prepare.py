@@ -659,9 +659,11 @@ def pca_check(df, target_header, encoder=None, numerical_imputer=None, scaler=No
         if encoder == 'one_hot':
             categorical = pd.get_dummies(categorical)
         print('[Done]')
+        # Join up categorical and non-categorical sub-datasets
+        df_x = pd.concat([categorical, non_categorical], axis=1)
+    else:
+        df_x = non_categorical
 
-    # Join up categorical and non-categorical sub-datasets
-    df_x = pd.concat([categorical, non_categorical], axis=1)
     feature_headers = df_x.columns
 
     print('Applying PCA transformation... ', end='')
