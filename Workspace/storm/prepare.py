@@ -463,7 +463,7 @@ def value_count(value, value_lookup):
     return count_index, value_lookup
 
 # Helper function for labelling duplicate count index information
-def label_duplicates(df, feature_header, count_index_tag=None):
+def label_duplicates(df, feature_header, duplicate_position=None):
     '''
     Helper function that produces an updated dataset containing the count index of duplicated values in the selected column.
 
@@ -471,7 +471,7 @@ def label_duplicates(df, feature_header, count_index_tag=None):
     -----------
     df : pd.dataframe, dataframe to be passed as input
     feature_header : string, the column with the header description that will be inspected for the count index information of duplicated values
-    count_index_tag : selection of 'last', 'first', the additional information of first or last description tagged to the count index
+    duplicate_position : selection of 'last', 'first', the additional information of first or last description tagged to the count index
 
     Returns:
     -----------
@@ -479,43 +479,43 @@ def label_duplicates(df, feature_header, count_index_tag=None):
 
     '''
     value_lookup = {}
-    count_index_list = []
-    count_index_tag_list = []
+    duplicate_index_list = []
+    duplicate_position_list = []
     df_output = df
 
-    print('Inspecting duplicated data in column "' + feature_header + '"... ', end='')
+    print('Inspecting duplicate data in column "' + feature_header + '"... ', end='')
     # Get the unique value count dataframe
     df_unique_values = unique_values(df, feature_header)
     value_unique_list = df_unique_values.iloc[:, 0].values.tolist()
     num_unique_list = df_unique_values.iloc[:, 1].values.tolist()
     print('[Done]')
     
-    print('Attach description label(s) on duplicate data... ', end='')
+    print('Append description label(s) to duplicate data... ', end='')
     # Iterate through the data of the selected column and lookup selected values against a dictionary containing values and their count index
     for _, value in df[feature_header].iteritems():
         count_index, value_lookup = value_count(value, value_lookup)
 
         # Get the duplicated count numbering order of the value label
-        count_index_list.append(count_index)
+        duplicate_index_list.append(count_index)
 
         # Get the duplicated count numbering description tag of the value label
         if count_index_tag == 'first':
             if count_index == 1:
-                count_index_tag_list.append('first')
+                duplicate_position_list.append('first')
             else:
-                count_index_tag_list.append(np.nan)
+                duplicate_position_list.append(np.nan)
         elif count_index_tag == 'last':
             max_count_index = value_unique_list.index(value)
             if count_index == num_unique_list[max_count_index]:
-                count_index_tag_list.append('last')
+                duplicate_position_list.append('last')
             else:
-                count_index_tag_list.append(np.nan)
+                duplicate_position_list.append(np.nan)
         else:
             pass
     
     # Add the count index, and count index tag information as columns in the output dataset
-    df_output[feature_header + ' (count index)'] = pd.Series(count_index_list)
-    df_output[feature_header + ' (count index tag)'] = pd.Series(count_index_tag_list)
+    df_output[feature_header + ' (duplicate #)'] = pd.Series(duplicate_index_list)
+    df_output[feature_header + ' (duplicate position)'] = pd.Series(duplicate_position_list)
 
     print('[Done]')
 
