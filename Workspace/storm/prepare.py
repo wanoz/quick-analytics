@@ -499,12 +499,12 @@ def label_duplicates(df, feature_header, duplicate_position=None):
         duplicate_index_list.append(count_index)
 
         # Get the duplicated count numbering description tag of the value label
-        if count_index_tag == 'first':
+        if duplicate_position == 'first':
             if count_index == 1:
                 duplicate_position_list.append('first')
             else:
                 duplicate_position_list.append(np.nan)
-        elif count_index_tag == 'last':
+        elif duplicate_position == 'last':
             max_count_index = value_unique_list.index(value)
             if count_index == num_unique_list[max_count_index]:
                 duplicate_position_list.append('last')
