@@ -1294,14 +1294,14 @@ def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_co
     ax.set_ylabel('Principal component ' + str(pc_axes[1]))
 
 # Plot 2D distribution
-def distplot_features(df, feature_header_list, target_header=None, compare_labels=(None, None), plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='plasma'):
+def distplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='plasma'):
     """
     Produce a feature distributions plot against all target labels.
 
     Arguments:
     -----------
     df : pd.dataframe, PCA components dataframe as input data
-    feature_header_list : list, list of column headers containing the feature labels to be plotted
+    feature_header : string, column header containing the feature labels to be plotted
     target_header : string, column header of the target label
     compare_labels : tuple, target labels required for comparison in the plot
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
@@ -1324,9 +1324,8 @@ def distplot_features(df, feature_header_list, target_header=None, compare_label
     
     # If the task is for producing a vanilla distribution plot of a selected range of feature values
     if target_header is None:
-        for feature_header in feature_header_list:
-            data_series = df[feature_header].dropna()
-            ax = sns.kdeplot(data=data_series)
+        data_series = df[feature_header].dropna()
+        ax = sns.kdeplot(data=data_series)
 
     # If the task is for producing a distribution plot of feature values against selected/all target value categories
     else:
@@ -1336,10 +1335,9 @@ def distplot_features(df, feature_header_list, target_header=None, compare_label
         if compare_labels[0] != None and compare_labels[1] != None:
             plot_labels = compare_labels
             for label in plot_labels:
-                for feature_header in feature_header_list:
-                    data_series = df.loc[df[target_header] == label][feature_header].dropna()
-                    ax = sns.distplot(a=data_series, kde=True, kde_kws={'label' : label})
-                    legend_labels.append(label)
+                data_series = df.loc[df[target_header] == label][feature_header].dropna()
+                ax = sns.distplot(a=data_series, kde=True, kde_kws={'label' : label})
+                legend_labels.append(label)
             handles, _ = ax.get_legend_handles_labels()
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
             ax.set_xlabel(feature_header)
@@ -1349,10 +1347,9 @@ def distplot_features(df, feature_header_list, target_header=None, compare_label
         else:
             plot_labels = target_labels
             for label in plot_labels:
-                for feature_header in feature_header_list:
-                    data_series = df.loc[df[target_header] == label][feature_header].dropna()
-                    ax = sns.kdeplot(data=data_series)
-                    legend_labels.append(label)
+                data_series = df.loc[df[target_header] == label][feature_header].dropna()
+                ax = sns.kdeplot(data=data_series)
+                legend_labels.append(label)
             handles, _ = ax.get_legend_handles_labels()
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
             ax.set_xlabel(feature_header)
