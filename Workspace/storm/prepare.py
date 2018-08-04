@@ -1247,7 +1247,7 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
     df_pca_comp : pd.dataframe, dataframe containing PCA components attribution as the input data
     n_features : integer, number of top features in variance contribution to include in the plot
     n_comps : integer, maximum number of principal components to be displayed in the heatmap
-    sns_cmap : selection of 'plasma' etc, type of color map setting for heatmap
+    sns_cmap : selection of 'hot', 'afmhot', 'gist_heat', 'viridis', 'plasma' etc, type of color map setting for heatmap
     annot : boolean, choice of true/false for display or not display value annotations on the heatmap
 
     Returns:
@@ -1277,10 +1277,12 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
     
     # Plot the PCA heatmap
     # Adjust the plot size w.r.t. features and principal components displayed
-    if df_pca_comp.shape[1] <= 5:
-        plot_width = df_pca_comp.shape[1]*3
+    if df_pca_comp.shape[1] <= 3:
+        plot_width = 8
+    elif df_pca_comp.shape[1] > 3 and df_pca_comp.shape[1] <= 6:
+        plot_width = 10
     else:
-        plot_width = df_pca_comp.shape[1]*2
+        plot_width = 12
     
     if df_pca_comp.shape[0] <= 8:
         plot_height = df_pca_comp.shape[0]*0.9
