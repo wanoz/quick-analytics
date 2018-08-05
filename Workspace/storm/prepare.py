@@ -25,6 +25,18 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 # ===============================
 # === Inspection and analysis ===
 
+# Jupyter notebook styling - centering function
+# from IPython.core.display import HTML
+# HTML("""
+# <style>
+# .output_png {
+#     display: table-cell;
+#     text-align: center;
+#     vertical-align: middle;
+# }
+# </style>
+# """)
+
 # Create dataframe for initial step of data analysis using Pandas.
 def create_dataframe(data_folder='Data', file_name='unknown', dtype_dict=None):
     """
@@ -571,7 +583,7 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
         # Select the relevant column of the specified target value as per input
         target_headers = df_y.columns.tolist()
 
-        if target_label != None:
+        if target_label is not None:
             target_header = target_header + '_' + target_label
         else:
             target_header = target_headers[0]
@@ -614,7 +626,7 @@ def transform_data(df, target_header, numerical_imputer, scaler, encoder):
     print('[Done]')
 
     # Apply numerical imputation processing to data
-    if numerical_imputer != None:
+    if numerical_imputer is not None:
         if non_categorical.shape[1] > 0:
             print('Imputing numerical data... ', end='')
             numerical_imputation = Imputer(strategy=numerical_imputer)
@@ -623,7 +635,7 @@ def transform_data(df, target_header, numerical_imputer, scaler, encoder):
             print('[Done]')
 
     # Apply scaler to data
-    if scaler != None:
+    if scaler is not None:
         if non_categorical.shape[1] > 0:
             print('Scaling numerical data... ', end='')
             if scaler == 'standard':
@@ -640,7 +652,7 @@ def transform_data(df, target_header, numerical_imputer, scaler, encoder):
             print('[Done]')
 
     # Apply encoding to categorical value data
-    if encoder != None:
+    if encoder is not None:
         if categorical.shape[1] > 0:
             print('Encoding categorical data... ', end='')
             if encoder == 'one_hot':
@@ -767,7 +779,7 @@ def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical
         # Select the relevant column of the specified target value as per input
         target_headers = df_y.columns.tolist()
 
-        if target_label != None:
+        if target_label is not None:
             for header in target_headers:
                 if target_label in header:
                     y = df_y[header]
@@ -861,7 +873,7 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
         # Select the relevant column of the specified target value as per input
         target_headers = df_y.columns.tolist()
 
-        if target_label != None:
+        if target_label is not None:
             for header in target_headers:
                 if target_label in header:
                     y = df_y[header]
@@ -955,7 +967,7 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
         # Select the relevant column of the specified target value as per input
         target_headers = df_y.columns.tolist()
 
-        if target_label != None:
+        if target_label is not None:
             for header in target_headers:
                 if target_label in header:
                     y = df_y[header]
@@ -1176,7 +1188,7 @@ def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_co
     ax.set_ylabel('Principal component ' + str(pc_axes[1]))
 
 # Plot 2D distribution
-def distplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='plasma'):
+def distplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=None, sns_style='white', sns_context='talk', sns_palette='plasma'):
     """
     Produce a feature distributions plot against all target labels.
 
@@ -1208,13 +1220,15 @@ def distplot_features(df, feature_header, target_header=None, compare_labels=(No
     if target_header is None:
         data_series = df[feature_header].dropna()
         ax = sns.kdeplot(data=data_series)
+        if xlim is not None:
+            ax.set_xlim(xlim)
 
     # If the task is for producing a distribution plot of feature values against selected/all target value categories
     else:
         target_labels = df[target_header].unique()
 
         # If task requires comparing the distribution plots of feature values w.r.t. two different target value categories
-        if compare_labels[0] != None and compare_labels[1] != None:
+        if compare_labels[0] is not None and compare_labels[1] is not None:
             plot_labels = compare_labels
             for label in plot_labels:
                 data_series = df.loc[df[target_header] == label][feature_header].dropna()
@@ -1224,6 +1238,8 @@ def distplot_features(df, feature_header, target_header=None, compare_labels=(No
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
             ax.set_xlabel(feature_header)
             ax.set_ylabel('Frequency')
+            if xlim is not None:
+                ax.set_xlim(xlim)
 
         # If task is for distribution plots of feature values w.r.t. all target value categories.
         else:
@@ -1236,6 +1252,8 @@ def distplot_features(df, feature_header, target_header=None, compare_labels=(No
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
             ax.set_xlabel(feature_header)
             ax.set_ylabel('Frequency')
+            if xlim is not None:
+                ax.set_xlim(xlim)
     
 # Display PCA heatmap based on feature variance contribution across selected principal components
 def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=False):
