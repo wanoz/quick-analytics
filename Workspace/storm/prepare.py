@@ -1188,9 +1188,9 @@ def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_co
     ax.set_ylabel('Principal component ' + str(pc_axes[1]))
 
 # Plot 2D distribution
-def distplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=None, sns_style='white', sns_context='talk', sns_palette='plasma'):
+def kdeplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=None, sns_style='white', sns_context='talk', sns_palette='plasma'):
     """
-    Produce a feature distributions plot against all target labels.
+    Produce a feature distributions kde plot against all target labels.
 
     Arguments:
     -----------
