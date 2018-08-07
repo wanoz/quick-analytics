@@ -1187,24 +1187,129 @@ def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_co
     ax.set_xlabel('Principal component ' + str(pc_axes[0]))
     ax.set_ylabel('Principal component ' + str(pc_axes[1]))
 
-# Plot 2D distribution
-def kdeplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=None, sns_style='white', sns_context='talk', sns_palette='plasma'):
+# Secondary helper function for matplotlib plot
+def set_theme(theme_style):
+    theme = {}
+    if theme_style == 'red':
+        theme['facecolor'] = 'salmon'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'orangered'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
+    elif theme_style == 'blue':
+        theme['facecolor'] = 'royalblue'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'blue'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
+    elif theme_style == 'green':
+        theme['facecolor'] = 'forestgreen'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'darkgreen'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
+    elif theme_style == 'gray':
+        theme['facecolor'] = 'darkgray'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'dimgray'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
+    elif theme_style == 'brown':
+        theme['facecolor'] = 'peru'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'sienna'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
+    elif theme_style == 'purple':
+        theme['facecolor'] = 'mediumpurple'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'darkviolet'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
+
+    return theme
+
+# Plot 2D distribution normal
+def distplot_features(df, feature_header, target_header_value=(None, None), bin_scale=0.5, plot_size=(10, 7), xlim=(None, None), theme_style='blue'):
+    """
+    Produce a feature distributions plot against all target labels.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, input data for plotting
+    feature_header : string, column header containing the feature labels to be plotted
+    target_header_value : tuple, column header containing the target label, and the value of the target label
+    bin_scale : float (between 0 and 1), the scaling factor to set the number of bins for the distribution plot
+    plot_size : tuple, defines the size of the plot
+    xlim : tuple, defines the x-axis limits for the plot
+    theme : selection of 'red', 'blue', 'green', etc for colour themes of the plot
+
+    Returns:
+    -----------
+    Display of distributions plot for the selected feature(s) in the dataset
+    """
+    
+    # Set the plot size
+    plt.figure(figsize=plot_size)
+    
+    # Set the plot colour themes
+    theme = set_theme(theme_style)
+
+    # If the task is for producing a distribution plot of all range of feature values
+    if target_header_value[0] is None or target_header_value[1] is None:
+        data_series = df[feature_header].dropna()
+    # If the task is for producing a distribution plot of a selected range of feature values w.r.t. to a target description
+    else:
+        data_series = df[df[target_header_value[0]] == target_header_value[1]][feature_header].dropna()
+
+    plot_bins = int(round(data_series.max()*bin_scale))
+
+    # Create the plot
+    n, bins, patches = plt.hist(
+        x=data_series, 
+        bins=plot_bins, 
+        color=theme['color'], 
+        facecolor=theme['facecolor'], 
+        edgecolor=theme['edgecolor'], 
+        alpha=theme['alpha'], 
+        linewidth=theme['linewidth'],
+        linestyle=theme['linestyle'])
+
+    plt.title('Distribution plot for "' + feature_header + '"')
+    plt.xlabel(feature_header)
+    plt.ylabel('Frequency')
+    if target_header_value[1] is not None:
+        plt.legend(labels=[target_header_value[1]], loc=2, bbox_to_anchor=(1.05, 1))
+
+    if xlim[0] is not None and xlim[1] is not None:
+        plt.xlim([xlim[0], xlim[1]])
+
+# Plot 2D distribution kde
+def kdeplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=(None, None), sns_style='white', sns_context='talk', sns_palette='plasma'):
     """
     Produce a feature distributions kde plot against all target labels.
 
     Arguments:
     -----------
-    df : pd.dataframe, PCA components dataframe as input data
+    df : pd.dataframe, input data for plotting
     feature_header : string, column header containing the feature labels to be plotted
     target_header : string, column header of the target label
     compare_labels : tuple, target labels required for comparison in the plot
+    plot_size : tuple, defines the size of the plot
+    xlim : tuple, defines the x-axis limits for the plot
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
     sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
     sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
 
     Returns:
     -----------
-    Display of distributions plot for the selected feature(s) in the dataset
+    Display of distributions kde plot for the selected feature(s) in the dataset
     """
     
     # Define the style of the Seaborn plot
@@ -1220,8 +1325,8 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
     if target_header is None:
         data_series = df[feature_header].dropna()
         ax = sns.kdeplot(data=data_series)
-        if xlim is not None:
-            ax.set_xlim(xlim)
+        if xlim[0] is not None and xlim[1] is not None:
+            plt.xlim([xlim[0], xlim[1]])
 
     # If the task is for producing a distribution plot of feature values against selected/all target value categories
     else:
@@ -1237,9 +1342,9 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
             handles, _ = ax.get_legend_handles_labels()
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
             ax.set_xlabel(feature_header)
-            ax.set_ylabel('Frequency')
-            if xlim is not None:
-                ax.set_xlim(xlim)
+            ax.set_ylabel('Frequency (normalised)')
+            if xlim[0] is not None and xlim[1] is not None:
+                plt.xlim([xlim[0], xlim[1]])
 
         # If task is for distribution plots of feature values w.r.t. all target value categories.
         else:
@@ -1251,9 +1356,9 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
             handles, _ = ax.get_legend_handles_labels()
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
             ax.set_xlabel(feature_header)
-            ax.set_ylabel('Frequency')
-            if xlim is not None:
-                ax.set_xlim(xlim)
+            ax.set_ylabel('Frequency (normalised)')
+            if xlim[0] is not None and xlim[1] is not None:
+                plt.xlim([xlim[0], xlim[1]])
     
 # Display PCA heatmap based on feature variance contribution across selected principal components
 def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=False):
