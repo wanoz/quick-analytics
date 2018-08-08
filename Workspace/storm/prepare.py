@@ -1268,11 +1268,11 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
     else:
         plot_data = df[df[target_header_value[0]] == target_header_value[1]][[feature_header]].dropna()
 
-    plot_bins = int(round(plot_data.iloc[0].max()*bin_scale))
+    plot_bins = int(round(plot_data[feature_header].max()*bin_scale))
 
     # Create the plot
     n, bins, patches = plt.hist(
-        x=plot_data.iloc[0], 
+        x=plot_data[feature_header], 
         bins=plot_bins, 
         color=theme['color'], 
         facecolor=theme['facecolor'], 
@@ -1286,7 +1286,7 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
         plt.legend(labels=[target_header_value[1] + '(samples: ' + str(n_total) + ')'], loc=2, bbox_to_anchor=(1.05, 1))
 
     if xlim[0] is not None and xlim[1] is not None:
-        n_samples = plot_data[(plot_data.iloc[:, 0] > xlim[0]) & (plot_data.iloc[:, 0] < xlim[1])].shape[0]
+        n_samples = plot_data[(plot_data[feature_header] > xlim[0]) & (plot_data[feature_header] < xlim[1])].shape[0]
         plt.xlabel(feature_header + ' (samples displayed: ' + str(n_samples) + ')')
         plt.xlim([xlim[0], xlim[1]])
     else:
