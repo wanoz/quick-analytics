@@ -1283,7 +1283,7 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
     
     if target_header_value[1] is not None:
         n_total = plot_data.shape[0]
-        plt.legend(labels=[target_header_value[1] + '(samples: ' + str(n_total) + ')'], loc=2, bbox_to_anchor=(1.05, 1))
+        plt.legend(labels=[target_header_value[1] + ' (samples: ' + str(n_total) + ')'], loc=2, bbox_to_anchor=(1.05, 1))
 
     if xlim[0] is not None and xlim[1] is not None:
         n_samples = plot_data[(plot_data[feature_header] > xlim[0]) & (plot_data[feature_header] < xlim[1])].shape[0]
