@@ -1197,6 +1197,13 @@ def set_theme(theme_style):
         theme['linewidth'] = 1.5
         theme['linestyle'] = '-'
         theme['alpha'] = 0.5
+    if theme_style == 'darkred':
+        theme['facecolor'] = 'red'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'firebrick'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
     elif theme_style == 'blue':
         theme['facecolor'] = 'royalblue'
         theme['color'] = 'white'
@@ -1204,8 +1211,22 @@ def set_theme(theme_style):
         theme['linewidth'] = 1.5
         theme['linestyle'] = '-'
         theme['alpha'] = 0.5
+    elif theme_style == 'darkblue':
+        theme['facecolor'] = 'blue'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'navy'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
     elif theme_style == 'green':
         theme['facecolor'] = 'forestgreen'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'darkgreen'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
+    elif theme_style == 'darkgreen':
+        theme['facecolor'] = 'green'
         theme['color'] = 'white'
         theme['edgecolor'] = 'darkgreen'
         theme['linewidth'] = 1.5
@@ -1218,6 +1239,13 @@ def set_theme(theme_style):
         theme['linewidth'] = 1.5
         theme['linestyle'] = '-'
         theme['alpha'] = 0.5
+    elif theme_style == 'darkgray':
+        theme['facecolor'] = 'gray'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'black'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
     elif theme_style == 'brown':
         theme['facecolor'] = 'peru'
         theme['color'] = 'white'
@@ -1225,10 +1253,24 @@ def set_theme(theme_style):
         theme['linewidth'] = 1.5
         theme['linestyle'] = '-'
         theme['alpha'] = 0.5
+    elif theme_style == 'darkbrown':
+        theme['facecolor'] = 'brown'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'maroon'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
     elif theme_style == 'purple':
         theme['facecolor'] = 'mediumpurple'
         theme['color'] = 'white'
         theme['edgecolor'] = 'darkviolet'
+        theme['linewidth'] = 1.5
+        theme['linestyle'] = '-'
+        theme['alpha'] = 0.5
+    elif theme_style == 'darkpurple':
+        theme['facecolor'] = 'blueviolet'
+        theme['color'] = 'white'
+        theme['edgecolor'] = 'rebeccapurple'
         theme['linewidth'] = 1.5
         theme['linestyle'] = '-'
         theme['alpha'] = 0.5
