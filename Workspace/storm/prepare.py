@@ -1263,16 +1263,16 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
 
     # If the task is for producing a distribution plot of all range of feature values
     if target_header_value[0] is None or target_header_value[1] is None:
-        data_series = df[feature_header].dropna()
+        plot_data = df[[feature_header]].dropna()
     # If the task is for producing a distribution plot of a selected range of feature values w.r.t. to a target description
     else:
-        data_series = df[df[target_header_value[0]] == target_header_value[1]][feature_header].dropna()
+        plot_data = df[df[target_header_value[0]] == target_header_value[1]][[feature_header]].dropna()
 
-    plot_bins = int(round(data_series.max()*bin_scale))
+    plot_bins = int(round(plot_data.iloc[0].max()*bin_scale))
 
     # Create the plot
     n, bins, patches = plt.hist(
-        x=data_series, 
+        x=plot_data.iloc[0], 
         bins=plot_bins, 
         color=theme['color'], 
         facecolor=theme['facecolor'], 
@@ -1280,15 +1280,19 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
         alpha=theme['alpha'], 
         linewidth=theme['linewidth'],
         linestyle=theme['linestyle'])
-
-    plt.title('Distribution plot for "' + feature_header + '"')
-    plt.xlabel(feature_header)
-    plt.ylabel('Frequency')
+    
     if target_header_value[1] is not None:
-        plt.legend(labels=[target_header_value[1]], loc=2, bbox_to_anchor=(1.05, 1))
+        n_total = plot_data.shape[0]
+        plt.legend(labels=[target_header_value[1] + '(samples: ' + str(n_total) + ')'], loc=2, bbox_to_anchor=(1.05, 1))
 
     if xlim[0] is not None and xlim[1] is not None:
+        n_samples = plot_data[(plot_data.iloc[:, 0] > xlim[0]) & (plot_data.iloc[:, 0] < xlim[1])].shape[0]
+        plt.xlabel(feature_header + ' (samples displayed: ' + str(n_samples) + ')')
         plt.xlim([xlim[0], xlim[1]])
+    else:
+        plt.xlabel(feature_header)
+
+    plt.ylabel('Frequency')
 
 # Plot 2D distribution kde
 def kdeplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=(None, None), sns_style='white', sns_context='talk', sns_palette='plasma'):
@@ -1323,7 +1327,7 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
     
     # If the task is for producing a vanilla distribution plot of a selected range of feature values
     if target_header is None:
-        data_series = df[feature_header].dropna()
+        plot_data = df[feature_header].dropna()
         ax = sns.kdeplot(data=data_series)
         if xlim[0] is not None and xlim[1] is not None:
             plt.xlim([xlim[0], xlim[1]])
@@ -1336,8 +1340,8 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
         if compare_labels[0] is not None and compare_labels[1] is not None:
             plot_labels = compare_labels
             for label in plot_labels:
-                data_series = df.loc[df[target_header] == label][feature_header].dropna()
-                ax = sns.distplot(a=data_series, kde=True, kde_kws={'label' : label})
+                plot_data = df.loc[df[target_header] == label][feature_header].dropna()
+                ax = sns.distplot(a=plot_data, kde=True, kde_kws={'label' : label})
                 legend_labels.append(label)
             handles, _ = ax.get_legend_handles_labels()
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
@@ -1350,8 +1354,8 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
         else:
             plot_labels = target_labels
             for label in plot_labels:
-                data_series = df.loc[df[target_header] == label][feature_header].dropna()
-                ax = sns.kdeplot(data=data_series)
+                plot_data = df.loc[df[target_header] == label][feature_header].dropna()
+                ax = sns.kdeplot(data=plot_data)
                 legend_labels.append(label)
             handles, _ = ax.get_legend_handles_labels()
             ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
