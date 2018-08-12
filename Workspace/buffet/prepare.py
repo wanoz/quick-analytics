@@ -39,16 +39,14 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 # """)
 
 # Secondary helper function to get a list of all files within a directory tree (for file search)
-def scan_dir(dir):
-    file_list = []
-
+def scan_dir(dir, file_list=[]):
     # Look through the directory tree and append file name and file path 
     for name in os.listdir(dir):
         path = os.path.join(dir, name)
         if os.path.isfile(path):
             file_list.append((name, path))
         else:
-            scan_dir(path)
+            scan_dir(path, file_list)
 
     return file_list
 
@@ -84,7 +82,7 @@ def locate_file(file_name):
                 file_dir = f_dir
                 break
 
-    return original_file_name, actual_file_dir
+    return original_file_name, file_dir
 
 # Create dataframe for initial step of data analysis using Pandas.
 def create_dataframe(file_name):
@@ -103,27 +101,28 @@ def create_dataframe(file_name):
     original_file_name, file_dir = locate_file(file_name)
 
     # Read the file content into a dataframe
+    df_read = None
     if file_dir is not None:
         if file_dir.endswith('.csv'):
             try:
-                df_original = pd.read_csv(file_dir, encoding='cp1252', low_memory=False)
-                print('Status: ' + original_file_name + ' imported!')
+                df_read = pd.read_csv(file_dir, encoding='cp1252', low_memory=False)
+                print('Status: "' + original_file_name + '" imported!')
             except:
-                print('Status: ' + original_file_name + ' cannot be read into dataframe. CSV file format is detected.)
+                print('Status: "' + original_file_name + '" cannot be read into dataframe. CSV file format is detected.')
         elif file_dir.endswidth('.xlsx'):
             try:
-                df_original = pd.read_excel(file_dir, sheet_name='Sheet1')
-                print('Status: ' + original_file_name + ' imported!')
+                df_read = pd.read_excel(file_dir, sheet_name='Sheet1')
+                print('Status: "' + original_file_name + '" imported!')
             except:
-                print('Status: ' + original_file_name + ' cannot be read into dataframe. Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
+                print('Status: "' + original_file_name + '" cannot be read into dataframe. Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
         elif file_dir.endswidth('.xls'):
             try:
-                df_original = pd.read_excel(file_dir, sheet_name='Sheet1')
-                print('Status: ' + original_file_name + ' imported!')
+                df_read = pd.read_excel(file_dir, sheet_name='Sheet1')
+                print('Status: "' + original_file_name + '" imported!')
             except:
-                print('Status: ' + original_file_name + ' cannot be read into dataframe. Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
+                print('Status: "' + original_file_name + '" cannot be read into dataframe. Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
     else:
-        print('Status: ' + file_name + ' cannot be located within the current file directory (and its sub-directories)')
+        print('Status: "' + file_name + '" cannot be located within the current file directory (and its sub-directories)')
 
     return df_read
 
