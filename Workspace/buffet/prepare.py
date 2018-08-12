@@ -44,7 +44,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # Secondary helper function to get a list of all files within a directory tree (for file search)
 def scan_dir(dir, file_list=[]):
-    
     # Recursively search through the directory tree and append file name and file path 
     try:
         # For native directory files
@@ -103,8 +102,8 @@ def locate_file(file_name):
 
     return original_file_name, file_dir
 
-# Create dataframe for initial step of data analysis using Pandas.
-def create_dataframe(file_name):
+# Read raw data into Pandas dataframe for analysis.
+def read_data(file_name):
     """
     Read data into dataframe for analysis.
 
