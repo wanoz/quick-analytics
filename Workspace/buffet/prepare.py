@@ -40,7 +40,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # Secondary helper function to get a list of all files within a directory tree (for file search)
 def scan_dir(dir, file_list=[]):
-    # Look through the directory tree and append file name and file path 
+    
+    # Recursively search through the directory tree and append file name and file path 
     for name in os.listdir(dir):
         path = os.path.join(dir, name)
         if os.path.isfile(path):
