@@ -110,7 +110,7 @@ def create_dataframe(file_name):
     if file_dir is not None:
         if file_dir.endswith('.csv'):
             try:
-                df_original = pd.read_csv(file_dir, encoding='cp1252', low_memory=False, dtype=dtype_dict)
+                df_original = pd.read_csv(file_dir, encoding='cp1252', low_memory=False)
                 print('Status: ' + original_file_name + ' imported!')
             except:
                 print('Status: ' + original_file_name + ' cannot be read into dataframe. CSV file format is detected.)
