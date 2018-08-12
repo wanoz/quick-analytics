@@ -67,19 +67,19 @@ def locate_file(file_name):
     for f_name, f_dir in file_list:
         if f_name.endswith('.csv'):
             f_name_base = f_name.replace('.csv', '').lower()
-            if file_name_base = f_name_base:
+            if file_name_base == f_name_base:
                 original_file_name = f_name
                 file_dir = f_dir
                 break
         if f_name.endswith('.xlsx'):
             f_name_base = f_name.replace('.xlsx', '').lower()
-            if file_name_base = f_name_base:
+            if file_name_base == f_name_base:
                 original_file_name = f_name
                 file_dir = f_dir
                 break
         if f_name.endswith('.xls'):
             f_name_base = f_name.replace('.xls', '').lower()
-            if file_name_base = f_name_base:
+            if file_name_base == f_name_base:
                 original_file_name = f_name
                 file_dir = f_dir
                 break
