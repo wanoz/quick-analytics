@@ -21,6 +21,10 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
 from datetime import datetime, date
+try:
+    from google.colab import files
+except:
+    pass
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # ===============================
@@ -42,12 +46,26 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 def scan_dir(dir, file_list=[]):
     
     # Recursively search through the directory tree and append file name and file path 
-    for name in os.listdir(dir):
-        path = os.path.join(dir, name)
-        if os.path.isfile(path):
-            file_list.append((name, path))
-        else:
-            scan_dir(path, file_list)
+    try:
+        # For native directory files
+        for name in os.listdir(dir):
+            path = os.path.join(dir, name)
+            if os.path.isfile(path):
+                file_list.append((name, path))
+            else:
+                scan_dir(path, file_list)
+    except:
+        try:
+            # For Google Drive files
+            dir = os.path.join(dir, 'drive')
+            for name in files.os.listdir(dir):
+                path = os.path.join(dir, name)
+                if os.path.isfile(path):
+                    file_list.append((name, path))
+                else:
+                    scan_dir(path, file_list)
+        except:
+            pass
 
     return file_list
 
