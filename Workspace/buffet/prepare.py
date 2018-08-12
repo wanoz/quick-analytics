@@ -124,19 +124,19 @@ def read_data(file_name):
         if file_dir.endswith('.csv'):
             try:
                 df_read = pd.read_csv(file_dir, encoding='cp1252', low_memory=False)
-                print('Status: "' + original_file_name + '" imported!')
+                print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
             except:
                 print('Status: "' + original_file_name + '" cannot be read into dataframe. CSV file format is detected.')
         elif file_dir.endswidth('.xlsx'):
             try:
                 df_read = pd.read_excel(file_dir, sheet_name='Sheet1')
-                print('Status: "' + original_file_name + '" imported!')
+                print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
             except:
                 print('Status: "' + original_file_name + '" cannot be read into dataframe. Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
         elif file_dir.endswidth('.xls'):
             try:
                 df_read = pd.read_excel(file_dir, sheet_name='Sheet1')
-                print('Status: "' + original_file_name + '" imported!')
+                print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
             except:
                 print('Status: "' + original_file_name + '" cannot be read into dataframe. Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
     else:
