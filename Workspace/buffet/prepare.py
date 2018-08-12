@@ -4,6 +4,7 @@
 # Setup data processing dependencies
 import time
 import os
+import os.path
 import gc
 import warnings
 import numpy as np
@@ -37,39 +38,98 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 # </style>
 # """)
 
+# Secondary helper function to get a list of all files within a directory tree (for file search)
+def scan_dir(dir):
+    file_list = []
+
+    # Look through the directory tree and append file name and file path 
+    for name in os.listdir(dir):
+        path = os.path.join(dir, name)
+        if os.path.isfile(path):
+            file_list.append((name, path))
+        else:
+            scan_dir(path)
+
+    return file_list
+
+# Secondary helper function for file search
+def locate_file(file_name):
+    base_dir = os.path.dirname(os.path.realpath('__file__'))
+    
+    file_name_base = file_name.lower()
+    original_file_name = None
+    file_dir = None
+
+    # Get a list containing all the files within the base directory tree
+    file_list = scan_dir(base_dir)
+
+    # Look for the specific file in the file list that matches the required file name
+    for f_name, f_dir in file_list:
+        if f_name.endswith('.csv'):
+            f_name_base = f_name.replace('.csv', '').lower()
+            if file_name_base = f_name_base:
+                original_file_name = f_name
+                file_dir = f_dir
+                break
+        if f_name.endswith('.xlsx'):
+            f_name_base = f_name.replace('.xlsx', '').lower()
+            if file_name_base = f_name_base:
+                original_file_name = f_name
+                file_dir = f_dir
+                break
+        if f_name.endswith('.xls'):
+            f_name_base = f_name.replace('.xls', '').lower()
+            if file_name_base = f_name_base:
+                original_file_name = f_name
+                file_dir = f_dir
+                break
+
+    return original_file_name, actual_file_dir
+
 # Create dataframe for initial step of data analysis using Pandas.
-def create_dataframe(data_folder='Data', file_name='unknown', dtype_dict=None):
+def create_dataframe(file_name):
     """
-    Import original data for analysis.
+    Read data into dataframe for analysis.
 
     Arguments:
     -----------
-    file_name : string, name of the data file (excludes extension descriptions like '.csv' or '.xlsx')
-    dtype_dict : dict, dictionary to specify the variable data type(s) to be read via the Pandas read_csv() function
+    file_name : string, name of the data file (excludes extension descriptions e.g. '.csv', '.xlsx' or 'xls')
 
     Returns:
     -----------
-    df_original : pd.dataframe, dataframe of the original dataset
+    df_read : pd.dataframe, the dataframe read from the dataset
     """
 
     base_dir = os.path.dirname(os.path.realpath('__file__'))
-    data_dir = os.path.join(base_dir, data_folder)
-    file_dir_csv = os.path.join(data_dir, file_name + '.csv')
+    file_name_base = file_name.lower()
 
-    file_dir_xlsx = os.path.join(data_dir, file_name + '.xlsx')
-    df_original = None
+    # Get the directory of the data file
+    original_file_name, file_dir = locate_file(file_name)
 
-    try:
-        df_original = pd.read_csv(file_dir_csv, encoding='cp1252', low_memory=False, dtype=dtype_dict)
-        print('Status: ' + file_name + ' imported!')
-    except:
-        try:
-            df_original = pd.read_excel(file_dir_xlsx, sheet_name='Sheet1')
-            print('Status: ' + file_name + ' imported!')
-        except:
-            print('Status: ' + file_name + ' is unable to be read! Please ensure file content is not corrupted or if the file is of .xlsx format, the sheetname is titled as "Sheet1".')
+    # Read the file content into a dataframe
+    if file_dir is not None:
+        if file_dir.endswith('.csv'):
+            try:
+                df_original = pd.read_csv(file_dir, encoding='cp1252', low_memory=False, dtype=dtype_dict)
+                print('Status: ' + original_file_name + ' imported!')
+            except:
+                print('Status: ' + original_file_name + ' cannot be read into dataframe. CSV file format is detected.)
+        elif file_dir.endswidth('.xlsx'):
+            try:
+                df_original = pd.read_excel(file_dir, sheet_name='Sheet1')
+                print('Status: ' + original_file_name + ' imported!')
+            except:
+                print('Status: ' + original_file_name + ' cannot be read into dataframe. Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
+        elif file_dir.endswidth('.xls'):
+            try:
+                df_original = pd.read_excel(file_dir, sheet_name='Sheet1')
+                print('Status: ' + original_file_name + ' imported!')
+            except:
+                print('Status: ' + original_file_name + ' cannot be read into dataframe. Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
+    else:
+        print('Status: ' + file_name + ' cannot be located within the current file directory (and its sub-directories)')
 
-    return df_original
+    return df_read
 
 # Get high level information about the imported datasets
 def data_overview(df_list):
