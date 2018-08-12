@@ -99,10 +99,6 @@ def create_dataframe(file_name):
     -----------
     df_read : pd.dataframe, the dataframe read from the dataset
     """
-
-    base_dir = os.path.dirname(os.path.realpath('__file__'))
-    file_name_base = file_name.lower()
-
     # Get the directory of the data file
     original_file_name, file_dir = locate_file(file_name)
 
@@ -474,7 +470,6 @@ def cleaned_datetime(df, feature_header, cleaned_header=None, original_format=No
     Returns:
     -----------
     df_output : pd.dataframe, resulting dataframe as output
-
     '''
     print('Inspecting date/time data in column "' + feature_header + '"... ', end='')
     df_output = df
