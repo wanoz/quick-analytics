@@ -127,13 +127,13 @@ def read_data(file_name):
                 print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
             except:
                 print('Status: "' + original_file_name + '" cannot be read into dataframe. CSV file format is detected.')
-        elif file_dir.endswidth('.xlsx'):
+        elif file_dir.endswith('.xlsx'):
             try:
                 df_read = pd.read_excel(file_dir, sheet_name='Sheet1')
                 print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
             except:
                 print('Status: "' + original_file_name + '" cannot be read into dataframe. Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
-        elif file_dir.endswidth('.xls'):
+        elif file_dir.endswith('.xls'):
             try:
                 df_read = pd.read_excel(file_dir, sheet_name='Sheet1')
                 print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
