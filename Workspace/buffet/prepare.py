@@ -209,6 +209,39 @@ def join_dataframes(df_list, axis=0):
 
     return df_output, df_cleared
 
+def word_count(df_series, top_count=None, min_count=None, max_count=None):
+    """
+    Helper function to determine the words and the respective counts of the words.
+    Arguments:
+    -----------
+    df_series : pd.series, pandas dataframe series containing the groups of words
+    top_count : int, the top most common words and counts
+    min_count : int, filtering of greater than or equal to the minimum specified word count in the result
+    max_count : int, filtering of less than or equal to the maximum specified word count in the result
+    
+    Returns:
+    -----------
+    df_word_count : pd.dataframe, the dataframe output as result
+    """
+    
+    # Splits on whitespace
+    df_words = [str(words).split() for words in df_series]
+    # Flatten text groups into a flat list of words
+    df_words_flat = [word for group in df_words for word in group]
+    
+    # Get top common words and counts
+    common_words = [word for word, count in Counter(df_words_flat).most_common(top_count)]
+    common_word_count = [count for word, count in Counter(df_words_flat).most_common(top_count)]
+    df_word_count = pd.DataFrame({'Word' : common_words, 'Word count' : common_word_count})
+    
+    # Filter further by min or max word count parameters
+    if min_count is not None:
+        df_word_count = df_word_count[df_word_count['Word count'] >= min_count]
+    if max_count is not None:
+        df_word_count = df_word_count[df_word_count['Word count'] <= max_count]
+    
+    return df_word_count
+
 # Compare and find common column features between given dataframes.
 def compare_common(df_list):
     """
