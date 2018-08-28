@@ -209,6 +209,7 @@ def join_dataframes(df_list, axis=0):
 
     return df_output, df_cleared
 
+# Get the words and word count info overview
 def word_count(df_series, top_count=None, min_count=None, max_count=None):
     """
     Helper function to determine the words and the respective counts of the words.
