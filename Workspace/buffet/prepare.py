@@ -1577,6 +1577,44 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
     plot_size = (plot_width, plot_height)
     plt.figure(figsize=plot_size)
     g = sns.heatmap(data=df_pca_comp, annot=annot, cmap=sns_cmap, cbar_kws={'label': 'Variance contribution %'})
+    
+# Display barplot
+def barplot_general(df, x_header, y_header, order='descending', plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='coolwarm_r'):
+    """
+    Produce a general barplot.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe as input data to be plotted
+    x_header : string, column header of the x data (independent variable)
+    y_header : string, column header of the y data (dependent variable)
+    order : selection of 'descending', or 'ascending' for barplot display
+    plot_size : tuple, the setting of the plot size
+    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
+    sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
+    sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+
+    Returns:
+    -----------
+    Display of barplot
+    """
+    # Sort data prior to plotting
+    if order == 'descending':
+        ascending_order = False
+    elif order == 'ascending':
+        ascending_order = True
+    else:
+        ascending_order = False
+        
+    df = df.sort_values([y_header], ascending=ascending_order)
+    plot_order = df[y_header].tolist()
+
+    # Create the plot
+    plt.figure(figsize=plot_size)
+    sns.set(context=sns_context)
+    sns.set(style=sns_style)
+    ax = sns.barplot(x=x_header, y=y_header, data=df, order=plot_order, palette='sns_palette)
+    ax.set_xticklabels(df[target_header].tolist(), rotation=45)
 
 # Get dataframe that transforms/encodes discrete numbered features (e.g. 0 or 1, or 2, 10, 15) into continuous set of numbers
 # Note: this adds some degree of randomisation of data, and applying encode based on the average of other samples (with exclusion
