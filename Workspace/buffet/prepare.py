@@ -124,7 +124,7 @@ def read_data(file_name, sheet_name='Sheet1'):
     if file_dir is not None:
         if file_dir.endswith('.csv'):
             try:
-                df_read = pd.read_csv(file_dir, encoding='cp1252', low_memory=False)
+                df_read = pd.read_csv(file_dir)
                 print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
             except:
                 try:
@@ -132,6 +132,7 @@ def read_data(file_name, sheet_name='Sheet1'):
                     print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
                 except:
                     print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: CSV file format is detected.')
+                    raise
         elif file_dir.endswith('.xlsx'):
             try:
                 df_read = pd.read_excel(file_dir, sheet_name=sheet_name)
