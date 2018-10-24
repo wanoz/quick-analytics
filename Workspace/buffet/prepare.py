@@ -1131,6 +1131,152 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
 
     return df_features
 
+# Secondary helper function for matplotlib plot
+def set_theme(theme_style):
+    theme = {}
+    if theme_style == 'red':
+        theme = {
+            'facecolor' : 'salmon',
+            'color' : 'white',
+            'edgecolor' : 'orangered',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    if theme_style == 'darkred':
+        theme = {
+            'facecolor' : 'red',
+            'color' : 'white',
+            'edgecolor' : 'firebrick',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    elif theme_style == 'blue':
+        theme = {
+            'facecolor' : 'royalblue',
+            'color' : 'white',
+            'edgecolor' : 'blue',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    elif theme_style == 'darkblue':
+        theme = {
+            'facecolor' : 'blue',
+            'color' : 'white',
+            'edgecolor' : 'navy',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    elif theme_style == 'green':
+        theme = {
+            'facecolor' : 'forestgreen',
+            'color' : 'white',
+            'edgecolor' : 'darkgreen',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    elif theme_style == 'darkgreen':
+        theme = {
+            'facecolor' : 'green',
+            'color' : 'white',
+            'edgecolor' : 'darkgreen',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    elif theme_style == 'gray':
+        theme = {
+            'facecolor' : 'darkgray',
+            'color' : 'white',
+            'edgecolor' : 'dimgray',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    elif theme_style == 'darkgray':
+        theme = {
+            'facecolor' : 'gray',
+            'color' : 'white',
+            'edgecolor' : 'black',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    elif theme_style == 'brown':
+        theme = {
+            'facecolor' : 'peru',
+            'color' : 'white',
+            'edgecolor' : 'sienna',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    elif theme_style == 'darkbrown':
+        theme = {
+            'facecolor' : 'brown',
+            'color' : 'white',
+            'edgecolor' : 'maroon',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    elif theme_style == 'purple':
+        theme = {
+            'facecolor' : 'mediumpurple',
+            'color' : 'white',
+            'edgecolor' : 'darkviolet',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+        
+    elif theme_style == 'darkpurple':
+        theme = {
+            'facecolor' : 'blueviolet',
+            'color' : 'white',
+            'edgecolor' : 'rebeccapurple',
+            'linewidth' : 1.5,
+            'linestyle' : '-',
+            'alpha' : 0.5
+        }
+
+    return theme
+
+# Secondary helper function for matplotlib fonts
+def set_fonts():
+    title_fonts = {
+        'fontname' : 'sans-serif',
+        'fontweight' : 550, 
+        'fontsize' : 'xx-large',
+        'fontstyle' : 'normal',
+        'fontvariant' : 'normal',
+        'fontstretch' : 800
+    }
+    label_fonts = {
+        'fontname' : 'sans-serif',
+        'fontweight' : 500, 
+        'fontsize' : 'large',
+        'fontstyle' : 'normal',
+        'fontvariant' : 'normal',
+        'fontstretch' : 700
+    }
+
+    return title_fonts, label_fonts
+
 # Secondary helper function to check whether column(s) contain binary 0 and 1 values
 def get_binary_headers(df, column_headers):
     binary_col_headers = []
@@ -1174,7 +1320,7 @@ def get_tickers(df_plot, base_interval=0.05):
     return xticks_range, xmax, xmin
 
 # Plot the correlations of the features with respect to a target column header in the dataset.
-def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(12, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(12, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm', title=None):
     """
     Helper function that outputs a plot of feature correlations against a specified column in the dataset.
 
@@ -1187,6 +1333,7 @@ def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(1
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
     sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
     sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+    title : string, title description of the chart
 
     Returns:
     -----------
@@ -1210,15 +1357,20 @@ def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(1
     sns.set_style(sns_style)
     sns.set_context(sns_context)
 
+    # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
+
     # Create the plot
     plt.figure(figsize=plot_size)
     plt.xticks(xticks_range)
     plt.xlim(xmin=xmin, xmax=xmax)
     ax = sns.barplot(data=df_plot, x=df_plot.columns[0], y=df_plot.index.tolist(), palette=sns_palette)
-    ax.set_xlabel(x_label_desc)
+    ax.set_xlabel(x_label_desc, **label_fonts)
+    if title is not None:
+        plt.title(title, **title_fonts)
 
 # Plot the PCA features contributions chart with respect to a specified principal component index.
-def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='Variance contribution %', remove_zeros=True, plot_size=(12, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm'):
+def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='Variance contribution %', remove_zeros=True, plot_size=(12, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm', title=None):
     """
     Helper function that outputs a plot of PCA features contributions on specified a principal component.
 
@@ -1232,6 +1384,7 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='Variance contrib
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
     sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
     sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+    title : string, title description of the chart
 
     Returns:
     -----------
@@ -1260,15 +1413,20 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='Variance contrib
     sns.set_style(sns_style)
     sns.set_context(sns_context)
 
+    # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
+
     # Create the plot
     plt.figure(figsize=plot_size)
     plt.xticks(xticks_range)
     plt.xlim(xmin=xmin, xmax=xmax)
     ax = sns.barplot(data=df_plot, x=target_header, y=df_plot.index.tolist(), palette=sns_palette)
-    ax.set_xlabel(x_label_desc + ' in principal component ' + str(pc_index))
+    ax.set_xlabel(x_label_desc + ' in principal component ' + str(pc_index), **label_fonts)
+    if title is not None:
+        plt.title(title, **title_fonts)
 
 # Plot 2D scatter of PCA biplot
-def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_context='talk', sns_palette='plasma'):
+def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_context='talk', sns_palette='plasma', title='PCA scatter plot'):
     """
     Produce a PCA scatter plot.
 
@@ -1280,6 +1438,7 @@ def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_co
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
     sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
     sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+    title : string, title description of the chart
 
     Returns:
     -----------
@@ -1289,106 +1448,19 @@ def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_co
     # Define the style of the Seaborn plot
     sns.set_style(sns_style)
     sns.set_context(sns_context)
+
+    # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
     
     # Create the plot
     sns.lmplot(data=df_pca, x='PC_' + str(pc_axes[0]), y='PC_' + str(pc_axes[1]), hue=target_header, fit_reg=False, palette=sns_palette, size=8, aspect=1.5)
     ax = plt.gca()
-    ax.set_title('PCA scatter plot')
-    ax.set_xlabel('Principal component ' + str(pc_axes[0]))
-    ax.set_ylabel('Principal component ' + str(pc_axes[1]))
-
-# Secondary helper function for matplotlib plot
-def set_theme(theme_style):
-    theme = {}
-    if theme_style == 'red':
-        theme['facecolor'] = 'salmon'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'orangered'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    if theme_style == 'darkred':
-        theme['facecolor'] = 'red'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'firebrick'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    elif theme_style == 'blue':
-        theme['facecolor'] = 'royalblue'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'blue'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    elif theme_style == 'darkblue':
-        theme['facecolor'] = 'blue'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'navy'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    elif theme_style == 'green':
-        theme['facecolor'] = 'forestgreen'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'darkgreen'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    elif theme_style == 'darkgreen':
-        theme['facecolor'] = 'green'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'darkgreen'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    elif theme_style == 'gray':
-        theme['facecolor'] = 'darkgray'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'dimgray'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    elif theme_style == 'darkgray':
-        theme['facecolor'] = 'gray'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'black'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    elif theme_style == 'brown':
-        theme['facecolor'] = 'peru'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'sienna'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    elif theme_style == 'darkbrown':
-        theme['facecolor'] = 'brown'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'maroon'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    elif theme_style == 'purple':
-        theme['facecolor'] = 'mediumpurple'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'darkviolet'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-    elif theme_style == 'darkpurple':
-        theme['facecolor'] = 'blueviolet'
-        theme['color'] = 'white'
-        theme['edgecolor'] = 'rebeccapurple'
-        theme['linewidth'] = 1.5
-        theme['linestyle'] = '-'
-        theme['alpha'] = 0.5
-
-    return theme
+    ax.set_title(title, **title_fonts)
+    ax.set_xlabel('Principal component ' + str(pc_axes[0]), **label_fonts)
+    ax.set_ylabel('Principal component ' + str(pc_axes[1]), **label_fonts)
 
 # Plot 2D distribution normal
-def distplot_features(df, feature_header, target_header_value=(None, None), bin_scale=0.5, plot_size=(10, 7), xlim=(None, None), theme_style='blue'):
+def distplot_features(df, feature_header, target_header_value=(None, None), bin_scale=0.5, plot_size=(10, 7), xlim=(None, None), theme_style='blue', title=None):
     """
     Produce a feature distributions plot against all target labels.
 
@@ -1401,6 +1473,7 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
     plot_size : tuple, defines the size of the plot
     xlim : tuple, defines the x-axis limits for the plot
     theme : selection of 'red', 'blue', 'green', etc for colour themes of the plot
+    title : string, title description of the chart
 
     Returns:
     -----------
@@ -1412,6 +1485,9 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
     
     # Set the plot colour themes
     theme = set_theme(theme_style)
+    
+    # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
 
     # If the task is for producing a distribution plot of all range of feature values
     if target_header_value[0] is None or target_header_value[1] is None:
@@ -1421,6 +1497,7 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
         plot_data = df[df[target_header_value[0]] == target_header_value[1]][[feature_header]].dropna()
 
     plot_bins = int(round(plot_data[feature_header].max()*bin_scale))
+    n_total = plot_data.shape[0]
 
     # Create the plot
     n, bins, patches = plt.hist(
@@ -1434,20 +1511,24 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
         linestyle=theme['linestyle'])
     
     if target_header_value[1] is not None:
-        n_total = plot_data.shape[0]
-        plt.legend(labels=[target_header_value[1]], loc=2, bbox_to_anchor=(1.05, 1))
+        plt.legend(labels=[target_header_value[1]], loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'])
+    else:
+        plt.legend(labels=[feature_header], loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'])
 
     if xlim[0] is not None and xlim[1] is not None:
         n_samples = plot_data[(plot_data[feature_header] > xlim[0]) & (plot_data[feature_header] < xlim[1])].shape[0]
-        plt.xlabel(feature_header + ' (samples displayed: ' + str(n_samples) + ', samples total: ' + str(n_total) + ')')
+        plt.xlabel(feature_header + ' (samples displayed: ' + str(n_samples) + ', samples total: ' + str(n_total) + ')', **label_fonts)
         plt.xlim([xlim[0], xlim[1]])
     else:
-        plt.xlabel(feature_header + ' (samples total: ' + str(n_total) + ')')
+        plt.xlabel(feature_header + ' (samples total: ' + str(n_total) + ')', **label_fonts)
 
-    plt.ylabel('Frequency')
+    plt.ylabel('Frequency', **label_fonts)
+
+    if title is not None:
+        plt.title(title, **title_fonts)
 
 # Plot 2D distribution kde
-def kdeplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=(None, None), sns_style='white', sns_context='talk', sns_palette='plasma'):
+def kdeplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=(None, None), sns_style='white', sns_context='talk', sns_palette='plasma', title=None):
     """
     Produce a feature distributions kde plot against all target labels.
 
@@ -1462,6 +1543,7 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
     sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
     sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+    title : string, title description of the chart
 
     Returns:
     -----------
@@ -1471,6 +1553,9 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
     # Define the style of the Seaborn plot
     sns.set_style(sns_style)
     sns.set_context(sns_context)
+
+    # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
 
     # Create the plot
     plt.figure(figsize=plot_size)
@@ -1496,9 +1581,9 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
                 ax = sns.distplot(a=plot_data, kde=True, kde_kws={'label' : label})
                 legend_labels.append(label)
             handles, _ = ax.get_legend_handles_labels()
-            ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
-            ax.set_xlabel(feature_header)
-            ax.set_ylabel('Frequency (normalised)')
+            ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'])
+            ax.set_xlabel(feature_header, **label_fonts)
+            ax.set_ylabel('Frequency (normalised)', **label_fonts)
             if xlim[0] is not None and xlim[1] is not None:
                 plt.xlim([xlim[0], xlim[1]])
 
@@ -1510,14 +1595,17 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
                 ax = sns.kdeplot(data=plot_data)
                 legend_labels.append(label)
             handles, _ = ax.get_legend_handles_labels()
-            ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1))
-            ax.set_xlabel(feature_header)
-            ax.set_ylabel('Frequency (normalised)')
+            ax.legend(handles, legend_labels, loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'])
+            ax.set_xlabel(feature_header, **label_fonts)
+            ax.set_ylabel('Frequency (normalised)', **label_fonts)
             if xlim[0] is not None and xlim[1] is not None:
                 plt.xlim([xlim[0], xlim[1]])
+
+    if title is not None:
+        plt.title(title, **title_fonts)
     
 # Display PCA heatmap based on feature variance contribution across selected principal components
-def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=False):
+def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=False, title=None):
     """
     Produce a PCA heatmap based on variance contributions of features across principal components using the Seaborn library.
 
@@ -1528,6 +1616,7 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
     n_comps : integer, maximum number of principal components to be displayed in the heatmap
     sns_cmap : selection of 'hot', 'afmhot', 'gist_heat', 'viridis', 'plasma' etc, type of color map setting for heatmap
     annot : boolean, choice of true/false for display or not display value annotations on the heatmap
+    title : string, title description of the chart
 
     Returns:
     -----------
@@ -1555,6 +1644,9 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
     df_pca_comp = df_pca_comp.applymap(np.square)*100
     
     # Plot the PCA heatmap
+    # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
+
     # Adjust the plot size w.r.t. features and principal components displayed
     if df_pca_comp.shape[1] <= 3:
         plot_width = 8
@@ -1574,9 +1666,15 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
     plot_size = (plot_width, plot_height)
     plt.figure(figsize=plot_size)
     g = sns.heatmap(data=df_pca_comp, annot=annot, cmap=sns_cmap, cbar_kws={'label': 'Variance contribution %'})
+
+    if title is not None:
+        plt.title(title, **title_fonts)
+
+    plt.xlabel(**label_fonts)
+    plt.ylabel(**label_fonts)
     
 # Display barplot
-def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='coolwarm_r'):
+def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='coolwarm_r', title=None):
     """
     Produce a general barplot.
 
@@ -1591,6 +1689,7 @@ def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45,
     sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
     sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
     sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+    title : string, title description of the chart
 
     Returns:
     -----------
@@ -1611,8 +1710,18 @@ def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45,
     plt.figure(figsize=plot_size)
     sns.set(context=sns_context)
     sns.set(style=sns_style)
+
+    # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
+
     ax = sns.barplot(x=x_header, y=y_header, data=df, order=plot_order, palette=sns_palette)
     ax.set_xticklabels(df[target_header].tolist(), rotation=xlabel_angle)
+
+    if title is not None:
+        plt.title(title, **title_fonts)
+
+    plt.xlabel(**label_fonts)
+    plt.ylabel(**label_fonts)
 
 # Get dataframe that transforms/encodes discrete numbered features (e.g. 0 or 1, or 2, 10, 15) into continuous set of numbers
 # Note: this adds some degree of randomisation of data, and applying encode based on the average of other samples (with exclusion
