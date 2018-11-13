@@ -1363,7 +1363,7 @@ def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(1
     # Create the plot
     plt.figure(figsize=plot_size)
     plt.xticks(xticks_range)
-    plt.xlim(xmin=xmin, xmax=xmax)
+    plt.xlim(left=xmin, right=xmax)
     ax = sns.barplot(data=df_plot, x=df_plot.columns[0], y=df_plot.index.tolist(), palette=sns_palette)
     ax.set_xlabel(x_label_desc, **label_fonts)
     if title is not None:
@@ -1419,7 +1419,7 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='Variance contrib
     # Create the plot
     plt.figure(figsize=plot_size)
     plt.xticks(xticks_range)
-    plt.xlim(xmin=xmin, xmax=xmax)
+    plt.xlim(left=xmin, right=xmax)
     ax = sns.barplot(data=df_plot, x=target_header, y=df_plot.index.tolist(), palette=sns_palette)
     ax.set_xlabel(x_label_desc + ' in principal component ' + str(pc_index), **label_fonts)
     if title is not None:
