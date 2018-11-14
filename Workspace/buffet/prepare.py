@@ -717,7 +717,7 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
     return df_correlations
 
 # Secondary helper function for categorical value encoding, numerical imputation and scaling
-def transform_data(df, target_header, numerical_imputer, scaler, encoder):
+def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary):
     print('Inspecting data values... ', end='')
     # Separate features and target data
     df_y = df[[target_header]].copy()
@@ -728,12 +728,13 @@ def transform_data(df, target_header, numerical_imputer, scaler, encoder):
     
     # Isolate sub-dataset containing non-categorical values
     non_categorical = df_x.loc[:, df_x.dtypes != object].copy()
-
-    if non_categorical.shape[1] > 0:
-        binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
-        non_categorical.drop(columns=binary_col_headers, inplace=True)
-        non_categorical_headers = non_categorical.columns.tolist()
-    print('[Done]')
+    
+    if remove_binary:
+        if non_categorical.shape[1] > 0:
+            binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
+            non_categorical.drop(columns=binary_col_headers, inplace=True)
+            non_categorical_headers = non_categorical.columns.tolist()
+        print('[Done]')
 
     # Apply numerical imputation processing to data
     if numerical_imputer is not None:
@@ -780,7 +781,7 @@ def transform_data(df, target_header, numerical_imputer, scaler, encoder):
     return df_x, df_y
 
 # Feature analysis with PCA
-def pca_check(df, target_header, pca_components=10, numerical_imputer=None, scaler=None, encoder=None):
+def pca_check(df, target_header, pca_components=10, numerical_imputer=None, scaler=None, encoder=None, remove_binary=False):
     """
     Helper function that outputs PCA transformation and the associated features contributions. Also outputs explained variance attributes.
 
@@ -792,6 +793,7 @@ def pca_check(df, target_header, pca_components=10, numerical_imputer=None, scal
     numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+    remove_binary : boolean, option to remove columns containing binary values
 
     Returns:
     -----------
@@ -801,7 +803,7 @@ def pca_check(df, target_header, pca_components=10, numerical_imputer=None, scal
     """
 
     # Apply the optional data transformation (imputing, scaling, encoding) if required 
-    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder)
+    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
         
     feature_headers = df_x.columns
 
@@ -851,7 +853,7 @@ def pca_check(df, target_header, pca_components=10, numerical_imputer=None, scal
     return df_pca, df_pca_comp
 
 # Feature analysis with logistic regression
-def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical_imputer=None, scaler=None, encoder=None):
+def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical_imputer=None, scaler=None, encoder=None, remove_binary=False):
     """
     Helper function that outputs feature weights from the trained one-class SVM model (with linear kernel).
 
@@ -864,14 +866,15 @@ def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical
     numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
-
+    remove_binary : boolean, option to remove columns containing binary values
+    
     Returns:
     -----------
     df_features : pd.dataframe, resulting dataframe of model feature weights as output
     """
 
     # Apply the optional data transformation (imputing, scaling, encoding) if required 
-    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder)
+    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
 
     feature_headers = df_x.columns
     X = df_x.values
@@ -944,7 +947,7 @@ def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical
     return df_features
 
 # Feature analysis with logistic regression
-def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_norm='l2', numerical_imputer=None, scaler=None, encoder=None):
+def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_norm='l2', numerical_imputer=None, scaler=None, encoder=None, remove_binary=False):
     """
     Helper function that outputs feature weights from the trained logistic regression model.
 
@@ -965,7 +968,7 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
     """
 
     # Apply the optional data transformation (imputing, scaling, encoding) if required 
-    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder)
+    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
 
     feature_headers = df_x.columns
     X = df_x.values
@@ -1037,7 +1040,7 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
     return df_features
 
 # Feature analysis with random forest model
-def random_forest_features(df, target_header, target_label=None, n_trees=10, max_depth=None, min_samples_leaf=10, numerical_imputer=None, scaler=None, encoder=None):
+def random_forest_features(df, target_header, target_label=None, n_trees=10, max_depth=None, min_samples_leaf=10, numerical_imputer=None, scaler=None, encoder=None, remove_binary=False):
     """
     Helper function that outputs feature weights from the trained random forest model.
 
@@ -1052,14 +1055,15 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
     numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
-
+    remove_binary : boolean, option to remove columns containing binary values
+    
     Returns:
     -----------
     df_features : pd.dataframe, resulting dataframe of model feature weights as output
     """
 
     # Apply the optional data transformation (imputing, scaling, encoding) if required 
-    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder)
+    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
 
     feature_headers = df_x.columns
     X = df_x.values
