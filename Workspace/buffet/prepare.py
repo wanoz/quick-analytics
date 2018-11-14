@@ -1674,7 +1674,7 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
     if title is not None:
         plt.title(title, **title_fonts)
 
-    plt.xlabel(xlabel='Principle components', **label_fonts)
+    plt.xlabel(xlabel='Principal components', **label_fonts)
     plt.ylabel('Features', **label_fonts)
     
 # Display barplot
