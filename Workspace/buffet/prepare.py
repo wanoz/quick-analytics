@@ -643,6 +643,72 @@ def label_duplicates(df, feature_header, duplicate_position=None):
 
     return df_output
 
+
+# Secondary helper function for categorical value encoding, numerical imputation and scaling
+def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary):
+    print('Inspecting data values... ', end='')
+    # Separate features and target data
+    df_y = df[[target_header]].copy()
+    df_x = df.drop(columns=[target_header]).copy()
+    
+    # Isolate sub-dataset containing categorical values
+    categorical = df_x.loc[:, df_x.dtypes == object].copy()
+    
+    # Isolate sub-dataset containing non-categorical values
+    non_categorical = df_x.loc[:, df_x.dtypes != object].copy()
+    
+    if remove_binary:
+        if non_categorical.shape[1] > 0:
+            binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
+            non_categorical.drop(columns=binary_col_headers, inplace=True)
+        print('[Done]')
+    
+    non_categorical_headers = non_categorical.columns.tolist()
+    
+    # Apply numerical imputation processing to data
+    if numerical_imputer is not None:
+        if non_categorical.shape[1] > 0:
+            print('Imputing numerical data... ', end='')
+            numerical_imputation = Imputer(strategy=numerical_imputer)
+            non_categorical_data = numerical_imputation.fit_transform(non_categorical)
+            non_categorical = pd.DataFrame(data=non_categorical_data, columns=non_categorical_headers)
+            print('[Done]')
+
+    # Apply scaler to data
+    if scaler is not None:
+        if non_categorical.shape[1] > 0:
+            print('Scaling numerical data... ', end='')
+            if scaler == 'standard':
+                scaler = StandardScaler()
+                scaler.fit(non_categorical)
+            elif scaler == 'minmax':
+                scaler = MinMaxScaler()
+                scaler.fit(non_categorical)
+            else:
+                scaler = RobustScaler()
+                scaler.fit(non_categorical)
+            non_categorical_data = scaler.transform(non_categorical)
+            non_categorical = pd.DataFrame(data=non_categorical_data, columns=non_categorical_headers)
+            print('[Done]')
+
+    # Apply encoding to categorical value data
+    if encoder is not None:
+        if categorical.shape[1] > 0:
+            print('Encoding categorical data... ', end='')
+            if encoder == 'one_hot':
+                categorical = pd.get_dummies(categorical)
+            print('[Done]')
+            
+    # Join up categorical and non-categorical sub-datasets
+    if non_categorical.shape[1] > 0 and categorical.shape[1] > 0:
+        df_x = pd.concat([non_categorical, categorical], axis=1)
+    elif non_categorical.shape[1] == 0:
+        df_x = categorical
+    else:
+        df_x = non_categorical
+
+    return df_x, df_y
+
 # Feature analysis with correlations
 def correlations_check(df, target_header, target_label=None, encoder=None):
     """
@@ -718,70 +784,32 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
 
     return df_correlations
 
-# Secondary helper function for categorical value encoding, numerical imputation and scaling
-def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary):
-    print('Inspecting data values... ', end='')
-    # Separate features and target data
-    df_y = df[[target_header]].copy()
-    df_x = df.drop(columns=[target_header]).copy()
-    
-    # Isolate sub-dataset containing categorical values
-    categorical = df_x.loc[:, df_x.dtypes == object].copy()
-    
-    # Isolate sub-dataset containing non-categorical values
-    non_categorical = df_x.loc[:, df_x.dtypes != object].copy()
-    
-    if remove_binary:
-        if non_categorical.shape[1] > 0:
-            binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
-            non_categorical.drop(columns=binary_col_headers, inplace=True)
-        print('[Done]')
-    
-    non_categorical_headers = non_categorical.columns.tolist()
-    
-    # Apply numerical imputation processing to data
-    if numerical_imputer is not None:
-        if non_categorical.shape[1] > 0:
-            print('Imputing numerical data... ', end='')
-            numerical_imputation = Imputer(strategy=numerical_imputer)
-            non_categorical_data = numerical_imputation.fit_transform(non_categorical)
-            non_categorical = pd.DataFrame(data=non_categorical_data, columns=non_categorical_headers)
-            print('[Done]')
+# Get the dataframe containing the top specified correlations
+def correlated_features(df, corr, n_upper=5, n_lower=5):
+    """
+    Produces a subset dataframe containing the top specified correlation features
 
-    # Apply scaler to data
-    if scaler is not None:
-        if non_categorical.shape[1] > 0:
-            print('Scaling numerical data... ', end='')
-            if scaler == 'standard':
-                scaler = StandardScaler()
-                scaler.fit(non_categorical)
-            elif scaler == 'minmax':
-                scaler = MinMaxScaler()
-                scaler.fit(non_categorical)
-            else:
-                scaler = RobustScaler()
-                scaler.fit(non_categorical)
-            non_categorical_data = scaler.transform(non_categorical)
-            non_categorical = pd.DataFrame(data=non_categorical_data, columns=non_categorical_headers)
-            print('[Done]')
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    corr : pd.dataframe, the custom dataframe containing preprocessed correlation values as input
+    upper_corr : integer, the specified number of upper correlation features to be retained
+    lower_corr : integer, the specified number of lower correlation features to be retained
 
-    # Apply encoding to categorical value data
-    if encoder is not None:
-        if categorical.shape[1] > 0:
-            print('Encoding categorical data... ', end='')
-            if encoder == 'one_hot':
-                categorical = pd.get_dummies(categorical)
-            print('[Done]')
-            
-    # Join up categorical and non-categorical sub-datasets
-    if non_categorical.shape[1] > 0 and categorical.shape[1] > 0:
-        df_x = pd.concat([non_categorical, categorical], axis=1)
-    elif non_categorical.shape[1] == 0:
-        df_x = categorical
-    else:
-        df_x = non_categorical
+    Returns:
+    -----------
+    df_features : pd.dataframe, resulting dataframe as output
+    """
 
-    return df_x, df_y
+    # Get the upper and lower correlation features from the dataset
+    upper_corr_features = corr.head(n_upper).index.tolist()
+    lower_corr_features = corr.tail(n_lower).index.tolist()
+
+    # Obtain output dataset containing just the specified top correlated features
+    corr_features = upper_corr_features + lower_corr_features
+    df_features = df[corr_features]
+
+    return df_features
 
 # Feature analysis with PCA
 def pca_check(df, target_header, pca_components=10, numerical_imputer=None, scaler=None, encoder=None, remove_binary=False):
