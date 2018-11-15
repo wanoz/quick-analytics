@@ -684,20 +684,22 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
     print('Inspect target data type... ', end='')
-    if len(df_y[target_header].unique()) == 2 and (0 in df_y[target_header].unique()) and (1 in df_y[target_header].unique()):
-        pass
-    else:
-        # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
-        df_y = pd.get_dummies(df_y)
-
-        # Select the relevant column of the specified target value as per input
-        target_headers = df_y.columns.tolist()
-
-        if target_label is not None:
-            target_header = target_header + '_' + target_label
+    all_categorical_headers = df.loc[:, df.dtypes == object].columns.tolist()
+    if target_header in all_categorical_headers:
+        if len(df_y[target_header].unique()) == 2 and (0 in df_y[target_header].unique()) and (1 in df_y[target_header].unique()):
+            pass
         else:
-            target_header = target_headers[0]
-            print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
+            # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
+            df_y = pd.get_dummies(df_y)
+
+            # Select the relevant column of the specified target value as per input
+            target_headers = df_y.columns.tolist()
+
+            if target_label is not None:
+                target_header = target_header + '_' + target_label
+            else:
+                target_header = target_headers[0]
+                print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
     print('[Done]')
 
     print('Extracting data correlations... ', end='')
@@ -977,26 +979,28 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
     print('Inspect target data type... ', end='')
-    binary_col_headers = get_binary_headers(df_y, [target_header])
-    if target_header in binary_col_headers:
-        y = df_y[target_header]
-    else:
-        # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
-        df_y = pd.get_dummies(df_y)
-
-        # Select the relevant column of the specified target value as per input
-        target_headers = df_y.columns.tolist()
-
-        if target_label is not None:
-            for header in target_headers:
-                if target_label in header:
-                    y = df_y[header]
-                    break
-                else:
-                    pass
+    all_categorical_headers = df.loc[:, df.dtypes == object].columns.tolist()
+    if target_header in all_categorical_headers:
+        binary_col_headers = get_binary_headers(df_y, [target_header])
+        if target_header in binary_col_headers:
+            y = df_y[target_header]
         else:
-            y = df_y.iloc[:, 0]
-            print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
+            # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
+            df_y = pd.get_dummies(df_y)
+
+            # Select the relevant column of the specified target value as per input
+            target_headers = df_y.columns.tolist()
+
+            if target_label is not None:
+                for header in target_headers:
+                    if target_label in header:
+                        y = df_y[header]
+                        break
+                    else:
+                        pass
+            else:
+                y = df_y.iloc[:, 0]
+                print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis. ')
     print('[Done]')
 
     # Split train and test data for model fitting
@@ -1072,26 +1076,28 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
     print('Inspecting target data type... ', end='')
-    binary_col_headers = get_binary_headers(df_y, [target_header])
-    if target_header in binary_col_headers:
-        y = df_y[target_header]
-    else:
-        # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
-        df_y = pd.get_dummies(df_y)
-
-        # Select the relevant column of the specified target value as per input
-        target_headers = df_y.columns.tolist()
-
-        if target_label is not None:
-            for header in target_headers:
-                if target_label in header:
-                    y = df_y[header]
-                    break
-                else:
-                    pass
+    all_categorical_headers = df.loc[:, df.dtypes == object].columns.tolist()
+    if target_header in all_categorical_headers:
+        binary_col_headers = get_binary_headers(df_y, [target_header])
+        if target_header in binary_col_headers:
+            y = df_y[target_header]
         else:
-            y = df_y.iloc[:, 0]
-            print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
+            # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
+            df_y = pd.get_dummies(df_y)
+
+            # Select the relevant column of the specified target value as per input
+            target_headers = df_y.columns.tolist()
+
+            if target_label is not None:
+                for header in target_headers:
+                    if target_label in header:
+                        y = df_y[header]
+                        break
+                    else:
+                        pass
+            else:
+                y = df_y.iloc[:, 0]
+                print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis. ')
     print('[Done]')
 
     # Split train and test data for model fitting
@@ -1677,6 +1683,43 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
 
     plt.xlabel(xlabel='Principal components', **label_fonts)
     plt.ylabel('Features', **label_fonts)
+    
+# Correlation matrix plot
+def correlations_plot(df, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_cmap='plasma', annot=False, title=None):
+    """
+    Produce a correlation matrix plot.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe as input data to be plotted
+    plot_size : tuple, the setting of the plot size
+    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
+    sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
+    sns_cmap : selection of 'hot', 'afmhot', 'gist_heat', 'viridis', 'plasma' etc, type of color map setting for heatmap
+    annot : boolean, choice of true/false for display or not display value annotations on the heatmap
+    title : string, title description of the chart
+
+    Returns:
+    -----------
+    Display of correlation matrix plot
+    """
+    # calculate the correlation matrix
+    corr = df.corr()
+
+    # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
+
+    # Define the style of the Seaborn plot
+    sns.set_style(sns_style)
+    sns.set_context(sns_context)
+
+    plt.figure(figsize=plot_size)
+
+    # Plot the heatmap
+    sns.heatmap(corr, xticklabels=corr.columns, yticklabels=corr.columns, annot=annot, cmap=sns_cmap)
+
+    if title is not None:
+        plt.title(title, **title_fonts)
     
 # Display barplot
 def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='coolwarm_r', title=None):
