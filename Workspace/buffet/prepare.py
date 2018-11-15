@@ -733,9 +733,10 @@ def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove
         if non_categorical.shape[1] > 0:
             binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
             non_categorical.drop(columns=binary_col_headers, inplace=True)
-            non_categorical_headers = non_categorical.columns.tolist()
         print('[Done]')
-
+    
+    non_categorical_headers = non_categorical.columns.tolist()
+    
     # Apply numerical imputation processing to data
     if numerical_imputer is not None:
         if non_categorical.shape[1] > 0:
