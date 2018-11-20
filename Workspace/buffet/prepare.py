@@ -643,7 +643,6 @@ def label_duplicates(df, feature_header, duplicate_position=None):
 
     return df_output
 
-
 # Secondary helper function for categorical value encoding, numerical imputation and scaling
 def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary):
     print('Inspecting data values... ', end='')
@@ -656,15 +655,16 @@ def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove
     
     # Isolate sub-dataset containing non-categorical values
     non_categorical = df_x.loc[:, df_x.dtypes != object].copy()
+    non_categorical = non_categorical.astype(np.float64)
     
     if remove_binary:
         if non_categorical.shape[1] > 0:
             binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
             non_categorical.drop(columns=binary_col_headers, inplace=True)
         print('[Done]')
-    
+
     non_categorical_headers = non_categorical.columns.tolist()
-    
+
     # Apply numerical imputation processing to data
     if numerical_imputer is not None:
         if non_categorical.shape[1] > 0:
@@ -679,15 +679,15 @@ def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove
         if non_categorical.shape[1] > 0:
             print('Scaling numerical data... ', end='')
             if scaler == 'standard':
-                scaler = StandardScaler()
-                scaler.fit(non_categorical)
+                scaler_function = StandardScaler()
+                scaler_function.fit(non_categorical)
             elif scaler == 'minmax':
-                scaler = MinMaxScaler()
-                scaler.fit(non_categorical)
+                scaler_function = MinMaxScaler()
+                scaler_function.fit(non_categorical)
             else:
-                scaler = RobustScaler()
-                scaler.fit(non_categorical)
-            non_categorical_data = scaler.transform(non_categorical)
+                scaler_function = RobustScaler()
+                scaler_function.fit(non_categorical)
+            non_categorical_data = scaler_function.transform(non_categorical)
             non_categorical = pd.DataFrame(data=non_categorical_data, columns=non_categorical_headers)
             print('[Done]')
 
@@ -1748,6 +1748,72 @@ def correlations_plot(df, plot_size=(10, 7), sns_style='white', sns_context='tal
 
     if title is not None:
         plt.title(title, **title_fonts)
+        
+# Display lineplot
+def lineplot_general(df, y_header_list, x_label_desc=None, y_label_desc=None, title=None, scaler=None, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette=None):
+    """
+    Produce a general line plot.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe as input data to be plotted
+    y_header_list : list, list of header descriptions of y series data
+    x_label_desc : string, label description on x-axis
+    y_label_desc : string, label description on y-axis
+    scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
+    plot_size : tuple, the setting of the plot size
+    sns_style : selection of builtin Seaborn set_style, background color theme categories (e.g. 'whitegrid', 'white', 'darkgrid', 'dark', etc)
+    sns_context : selection of builtin Seaborn set_context, labels/lines categories (e.g. 'talk', 'paper', 'poster', etc)
+    sns_palette : selection of builtin Seaborn palette, graph color theme categories (e.g. 'coolwarm', 'Blues', 'BuGn_r', etc, note adding '_r' at the end reverses the displayed color order)
+    title : string, title description of the chart
+
+    Returns:
+    -----------
+    Display of line plot
+    """
+
+    # Create appropriate input dataframe for Seaborn lineplot function
+    df_plot = df[y_header_list].astype(np.float64)
+
+    # Apply scaler to data
+    if scaler is not None:
+        if df_plot.shape[1] > 0:
+            print('Scaling numerical data... ', end='')
+            if scaler == 'standard':
+                scaler_function = StandardScaler()
+                scaler_function.fit(df_plot)
+            elif scaler == 'minmax':
+                scaler_function = MinMaxScaler()
+                scaler_function.fit(df_plot)
+            else:
+                scaler_function = RobustScaler()
+                scaler_function.fit(df_plot)
+            df_plot_data = scaler_function.transform(df_plot)
+            df_plot = pd.DataFrame(data=df_plot_data, columns=y_header_list)
+            print('[Done]')
+        
+    # Create the plot
+    plt.figure(figsize=plot_size)
+    sns.set(context=sns_context)
+    sns.set(style=sns_style)
+
+    # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
+    
+    ax = sns.lineplot(data=df_plot, palette=sns_palette)
+
+    if title is not None:
+        plt.title(title, **title_fonts)
+
+    if x_label_desc is not None:
+        plt.xlabel(xlabel=x_label_desc, **label_fonts)
+
+    if y_label_desc is not None:
+        if scaler is not None:
+            y_label_desc = y_label_desc + ' (' + scaler + ' scaled)'
+        plt.ylabel(ylabel=y_label_desc, **label_fonts)
+        
+    plt.legend(loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'])
     
 # Display barplot
 def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='coolwarm_r', title=None):
