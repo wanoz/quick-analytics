@@ -1750,7 +1750,7 @@ def correlations_plot(df, plot_size=(10, 7), sns_style='white', sns_context='tal
         plt.title(title, **title_fonts)
         
 # Display lineplot
-def lineplot_general(df, y_header_list, x_label_desc=None, y_label_desc=None, title=None, scaler=None, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette=None):
+def lineplot_general(df, y_header_list, x_header=None, x_label_desc=None, y_label_desc=None, title=None, scaler=None, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette=None):
     """
     Produce a general line plot.
 
@@ -1758,6 +1758,7 @@ def lineplot_general(df, y_header_list, x_label_desc=None, y_label_desc=None, ti
     -----------
     df : pd.dataframe, dataframe as input data to be plotted
     y_header_list : list, list of header descriptions of y series data
+    x_header : string, header description of the x series data
     x_label_desc : string, label description on x-axis
     y_label_desc : string, label description on y-axis
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
@@ -1799,8 +1800,14 @@ def lineplot_general(df, y_header_list, x_label_desc=None, y_label_desc=None, ti
 
     # Set the plot fonts
     title_fonts, label_fonts = set_fonts()
-    
-    ax = sns.lineplot(data=df_plot, palette=sns_palette)
+
+    # Set x series for lineplot function if applicable
+    if x_header is not None:
+        df_plot = pd.concat([df[[x_header]], df_plot], axis=1)
+        for y_header in y_header_list:
+            ax = sns.lineplot(x=x_header, y=y_header, data=df_plot, palette=sns_palette)
+    else:
+        ax = sns.lineplot(data=df_plot, palette=sns_palette)
 
     if title is not None:
         plt.title(title, **title_fonts)
@@ -1812,8 +1819,8 @@ def lineplot_general(df, y_header_list, x_label_desc=None, y_label_desc=None, ti
         if scaler is not None:
             y_label_desc = y_label_desc + ' (' + scaler + ' scaled)'
         plt.ylabel(ylabel=y_label_desc, **label_fonts)
-        
-    plt.legend(loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'])
+
+    plt.legend(labels=y_header_list, loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'])
     
 # Display barplot
 def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='coolwarm_r', title=None):
