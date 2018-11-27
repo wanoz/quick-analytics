@@ -1822,8 +1822,27 @@ def lineplot_general(df, y_header_list, x_header=None, x_label_desc=None, y_labe
 
     plt.legend(labels=y_header_list, loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'])
     
+# Secondary helper function for annotating barplot labels
+def annotate_bars(ax):
+    bars = ax.patches
+    for bar in bars:
+        if bar.get_x() != bar.get_x():
+            x_pos = 0
+        else:
+            x_pos = bar.get_x()
+        if bar.get_width() != bar.get_width():
+            width = 0
+        else:
+            width = bar.get_width()
+        if bar.get_height() != bar.get_height():
+            height = 0
+        else:
+            height = bar.get_height()
+            
+        ax.text(x_pos + width/2, height*1.01, round(height, 1), ha="center")
+
 # Display barplot
-def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='coolwarm_r', title=None):
+def barplot_general(df, x_header, y_header, x_label_desc=None, y_label_desc=None, ymax=None, annotation=False, hue=None, order=None, xlabel_angle=45, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='coolwarm_r', title=None):
     """
     Produce a general barplot.
 
@@ -1832,6 +1851,11 @@ def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45,
     df : pd.dataframe, dataframe as input data to be plotted
     x_header : string, column header of the x data (independent variable)
     y_header : string, column header of the y data (dependent variable)
+    x_label_desc : string, label description on x-axis
+    y_label_desc : string, label description on y-axis
+    ymax : float, maximum value set for y-axis
+    annotation : boolean, setting for displaying annotation
+    hue : string, column header for faceting the seaborn plot
     order : selection of 'descending', or 'ascending' for barplot display
     xlabel_angle : int, the degree of rotation of xlabel descriptions
     plot_size : tuple, the setting of the plot size
@@ -1845,16 +1869,13 @@ def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45,
     Display of barplot
     """
     # Sort data prior to plotting
-    if order == 'descending':
-        ascending_order = False
-    elif order == 'ascending':
-        ascending_order = True
-    else:
-        ascending_order = False
-        
-    df = df.sort_values([y_header], ascending=ascending_order)
-    plot_order = df[y_header].tolist()
-
+    if order is not None:
+        if order == 'descending':
+            ascending_order = False
+        elif order == 'ascending':
+            ascending_order = True
+        df = df.sort_values([y_header], ascending=ascending_order)
+ 
     # Create the plot
     plt.figure(figsize=plot_size)
     sns.set(context=sns_context)
@@ -1862,15 +1883,26 @@ def barplot_general(df, x_header, y_header, order='descending', xlabel_angle=45,
 
     # Set the plot fonts
     title_fonts, label_fonts = set_fonts()
-
-    ax = sns.barplot(x=x_header, y=y_header, data=df, order=plot_order, palette=sns_palette)
-    ax.set_xticklabels(df[target_header].tolist(), rotation=xlabel_angle)
+    if hue is not None:
+        ax = sns.barplot(x=x_header, y=y_header, hue=hue, data=df, palette=sns_palette)
+        plt.legend(loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'])
+    else:
+        ax = sns.barplot(x=x_header, y=y_header, data=df, palette=sns_palette)
 
     if title is not None:
         plt.title(title, **title_fonts)
 
-    plt.xlabel(**label_fonts)
-    plt.ylabel(**label_fonts)
+    if x_label_desc is not None:
+        plt.xlabel(xlabel=x_label_desc, **label_fonts)
+
+    if y_label_desc is not None:
+        plt.ylabel(ylabel=y_label_desc, **label_fonts)
+
+    if ymax is not None:
+        plt.ylim(bottom=0, top=ymax)
+
+    if annotation == True:
+        annotate_bars(ax)
 
 # Get dataframe that transforms/encodes discrete numbered features (e.g. 0 or 1, or 2, 10, 15) into continuous set of numbers
 # Note: this adds some degree of randomisation of data, and applying encode based on the average of other samples (with exclusion
