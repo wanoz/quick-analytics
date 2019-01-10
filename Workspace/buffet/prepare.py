@@ -643,6 +643,50 @@ def label_duplicates(df, feature_header, duplicate_position=None):
 
     return df_output
 
+# Transform data via estimated fit to a polynomial function
+def transform_polyfit(df, degree=3, output_length=None):
+    '''
+    Helper function that transforms data values via estimated fit to a polynomial function.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    degree : int, the degree of the polynomial specified for the fitting function
+    output_length : int, the length of the x values for the transformed output dataset
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    
+    '''
+    
+    # Get x value intervals required for polyfit function
+    x_fit = np.linspace(1, df.shape[0], num=df.shape[0])
+    
+    # Set x value output intervals desired
+    x_output = x_fit
+    if output_length is not None:
+        x_output = np.linspace(1, df.shape[0], num=output_length)
+        
+    # Initialise output dataframe
+    df_output = pd.DataFrame({'Test column' : [i for i in range(len(x_output))]})
+        
+    # Get column headers
+    headers = df.columns.tolist()
+    
+    # Iterate through each column header to fit data series to polynomial function
+    for header in headers:
+        y_fit = df[header]
+        coeff = np.polyfit(x_fit, y_fit, degree)
+        function = np.poly1d(coeff)
+        y_est = function(x_output)
+        df_temp = pd.DataFrame({header : y_est})
+        df_output = pd.concat([df_output, df_temp], axis=1)
+    
+    df_output.drop(columns=['Test column'], inplace=True)
+    
+    return df_output
+
 # Secondary helper function for categorical value encoding, numerical imputation and scaling
 def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary):
     print('Inspecting data values... ', end='')
