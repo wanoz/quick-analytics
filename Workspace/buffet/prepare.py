@@ -1648,7 +1648,7 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
     # If the task is for producing a vanilla distribution plot of a selected range of feature values
     if target_header is None:
         plot_data = df[feature_header].dropna()
-        ax = sns.kdeplot(data=data_series)
+        ax = sns.kdeplot(data=plot_data)
         if xlim[0] is not None and xlim[1] is not None:
             plt.xlim([xlim[0], xlim[1]])
 
