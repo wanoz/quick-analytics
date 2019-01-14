@@ -1543,7 +1543,7 @@ def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_co
     ax.set_ylabel('Principal component ' + str(pc_axes[1]), **label_fonts)
 
 # Plot 2D distribution normal
-def distplot_features(df, feature_header, target_header_value=(None, None), bin_scale=0.5, plot_size=(10, 7), xlim=(None, None), theme_style='blue', title=None):
+def distplot_features(df, feature_header, target_header_value=(None, None), bin_scale=0.5, plot_size=(10, 7), xlim=(None, None), theme_style='blue', title=None, data_output=False):
     """
     Produce a feature distributions plot against all target labels.
 
@@ -1557,10 +1557,12 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
     xlim : tuple, defines the x-axis limits for the plot
     theme : selection of 'red', 'blue', 'green', etc for colour themes of the plot
     title : string, title description of the chart
+    data_output : boolean, an option to output data points of the plot
 
     Returns:
     -----------
     Display of distributions plot for the selected feature(s) in the dataset
+    Data points of the plot in a dataframe (optional)
     """
     
     # Set the plot size
@@ -1609,6 +1611,10 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
 
     if title is not None:
         plt.title(title, **title_fonts)
+
+    if data_output == True:
+        df_output = pd.DataFrame({'x' : bins[:-1], 'y' : n})
+        return df_output
 
 # Plot 2D distribution kde
 def kdeplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=(None, None), sns_style='white', sns_context='talk', sns_palette='plasma', title=None):
