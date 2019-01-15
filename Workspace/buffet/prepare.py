@@ -1541,8 +1541,44 @@ def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_co
     ax.set_title(title, **title_fonts)
     ax.set_xlabel('Principal component ' + str(pc_axes[0]), **label_fonts)
     ax.set_ylabel('Principal component ' + str(pc_axes[1]), **label_fonts)
+    
+# Plot pie chart
+def pieplot_features(df, feature_header, category_header=None, plot_size=(10, 7), title=None):
+    """
+    Produce a pie chart.
 
-# Plot 2D distribution normal
+    Arguments:
+    -----------
+    df : pd.dataframe, PCA components dataframe as input data
+    feature_header : string, column header of the numerical value
+    category_header : string, column header of the category value
+    plot_size : tuple, defines the size of the plot
+    title : string, title description of the chart
+
+    Returns:
+    -----------
+    Display of pie chart
+    """
+
+    # Set the plot size
+    plt.figure(figsize=plot_size)
+    
+    # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
+
+    # Create the plot
+    wedges, texts = plt.pie(df[feature_header])
+
+    if category_header is not None:
+        categories = df[category_header].tolist()
+        values = df[feature_header].tolist()
+        legend_labels = [str(categories[c]) + ' (' + str(round(values[c], 3)) + '%)' for c in range(len(categories))] 
+        plt.legend(labels=legend_labels, loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'], title=category_header)
+
+    if title is not None:
+        plt.title(title, **title_fonts)
+
+# Plot 2D distribution chart
 def distplot_features(df, feature_header, target_header_value=(None, None), bin_scale=0.5, plot_size=(10, 7), xlim=(None, None), theme_style='blue', title=None, data_output=False):
     """
     Produce a feature distributions plot against all target labels.
@@ -1616,7 +1652,7 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
         df_output = pd.DataFrame({'x' : bins[:-1], 'y' : n})
         return df_output
 
-# Plot 2D distribution kde
+# Plot 2D distribution kde chart
 def kdeplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=(None, None), sns_style='white', sns_context='talk', sns_palette='plasma', title=None):
     """
     Produce a feature distributions kde plot against all target labels.
@@ -1799,7 +1835,7 @@ def correlations_plot(df, plot_size=(10, 7), sns_style='white', sns_context='tal
     if title is not None:
         plt.title(title, **title_fonts)
         
-# Display lineplot
+# Plot line chart
 def lineplot_general(df, y_header_list, x_header=None, x_label_desc=None, y_label_desc=None, title=None, scaler=None, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette=None):
     """
     Produce a general line plot.
@@ -1891,7 +1927,7 @@ def annotate_bars(ax):
             
         ax.text(x_pos + width/2, height*1.01, round(height, 1), ha="center")
 
-# Display barplot
+# Plot bar chart
 def barplot_general(df, x_header, y_header, x_label_desc=None, y_label_desc=None, ymax=None, annotation=False, hue=None, order=None, xlabel_angle=45, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='coolwarm_r', title=None):
     """
     Produce a general barplot.
