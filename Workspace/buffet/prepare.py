@@ -9,6 +9,7 @@ import gc
 import warnings
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, Imputer
@@ -103,13 +104,14 @@ def locate_file(file_name):
     return original_file_name, file_dir
 
 # Read raw data into Pandas dataframe for analysis.
-def read_data(file_name, encoding='utf-8', sheet_name='Sheet1'):
+def read_data(file_name, file_type='csv_excel', encoding='utf-8', sheet_name='Sheet1'):
     """
     Read data into dataframe for analysis.
 
     Arguments:
     -----------
     file_name : string, name of the data file (excludes extension descriptions e.g. '.csv', '.xlsx' or 'xls')
+    file_type : selectio of "csv_excel" or "shape" for reading either csv/excel file or geolocation shape file
     sheet_name : string, name of the Excel sheet containing the data to be read
 
     Returns:
@@ -122,27 +124,38 @@ def read_data(file_name, encoding='utf-8', sheet_name='Sheet1'):
     # Read the file content into a dataframe
     df_read = None
     if file_dir is not None:
-        if file_dir.endswith('.csv'):
-            try:
-                df_read = pd.read_csv(file_dir, encoding=encoding)
-                print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
-            except:
-                print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: CSV file format is detected.')
-                raise
-        elif file_dir.endswith('.xlsx'):
-            try:
-                df_read = pd.read_excel(file_dir, sheet_name=sheet_name)
-                print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
-            except:
-                print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
-                raise
-        elif file_dir.endswith('.xls'):
-            try:
-                df_read = pd.read_excel(file_dir, sheet_name=sheet_name)
-                print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
-            except:
-                print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
-                raise
+        if file_type == 'csv_excel':
+            if file_dir.endswith('.csv'):
+                try:
+                    df_read = pd.read_csv(file_dir, encoding=encoding)
+                    print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
+                except:
+                    print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: CSV file format is detected.')
+                    raise
+            elif file_dir.endswith('.xlsx'):
+                try:
+                    df_read = pd.read_excel(file_dir, sheet_name=sheet_name)
+                    print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
+                except:
+                    print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
+                    raise
+            elif file_dir.endswith('.xls'):
+                try:
+                    df_read = pd.read_excel(file_dir, sheet_name=sheet_name)
+                    print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
+                except:
+                    print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
+                    raise
+        elif file_type == 'shape':
+            if file_dir.endswith('.shp'):
+                try:
+                    df_read = gpd.read_file(file_dir)
+                    print('Status: "' + original_file_name + '" has been successfully read!')
+                except:
+                    print('Status: "' + original_file_name + '" cannot be read. Note: Ensure the shapefile is correctly setup.')
+                    raise
+        else:
+            print('Status: The specified file type parameter is not recognized.')
     else:
         print('Status: "' + file_name + '" cannot be located within the current file directory (and its sub-directories)')
 
