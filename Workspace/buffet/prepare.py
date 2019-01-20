@@ -70,7 +70,7 @@ def scan_dir(dir, file_list=[]):
     return file_list
 
 # Secondary helper function for file search
-def locate_file(file_name):
+def locate_file(file_name, file_type):
     base_dir = os.path.dirname(os.path.realpath('__file__'))
     
     file_name_base = file_name.lower()
@@ -82,24 +82,32 @@ def locate_file(file_name):
 
     # Look for the specific file in the file list that matches the required file name
     for f_name, f_dir in file_list:
-        if f_name.endswith('.csv'):
-            f_name_base = f_name.replace('.csv', '').lower()
-            if file_name_base == f_name_base:
-                original_file_name = f_name
-                file_dir = f_dir
-                break
-        if f_name.endswith('.xlsx'):
-            f_name_base = f_name.replace('.xlsx', '').lower()
-            if file_name_base == f_name_base:
-                original_file_name = f_name
-                file_dir = f_dir
-                break
-        if f_name.endswith('.xls'):
-            f_name_base = f_name.replace('.xls', '').lower()
-            if file_name_base == f_name_base:
-                original_file_name = f_name
-                file_dir = f_dir
-                break
+        if file_type == 'csv_excel':
+            if f_name.endswith('.csv'):
+                f_name_base = f_name.replace('.csv', '').lower()
+                if file_name_base == f_name_base:
+                    original_file_name = f_name
+                    file_dir = f_dir
+                    break
+            if f_name.endswith('.xlsx'):
+                f_name_base = f_name.replace('.xlsx', '').lower()
+                if file_name_base == f_name_base:
+                    original_file_name = f_name
+                    file_dir = f_dir
+                    break
+            if f_name.endswith('.xls'):
+                f_name_base = f_name.replace('.xls', '').lower()
+                if file_name_base == f_name_base:
+                    original_file_name = f_name
+                    file_dir = f_dir
+                    break
+        elif file_type == 'shape':
+            if f_name.endswith('.shp'):
+                f_name_base = f_name.replace('.shp', '').lower()
+                if file_name_base == f_name_base:
+                    original_file_name = f_name
+                    file_dir = f_dir
+                    break
 
     return original_file_name, file_dir
 
@@ -119,7 +127,7 @@ def read_data(file_name, file_type='csv_excel', encoding='utf-8', sheet_name='Sh
     df_read : pd.dataframe, the dataframe read from the dataset
     """
     # Get the directory of the data file
-    original_file_name, file_dir = locate_file(file_name)
+    original_file_name, file_dir = locate_file(file_name, file_type)
 
     # Read the file content into a dataframe
     df_read = None
