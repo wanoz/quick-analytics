@@ -2012,7 +2012,7 @@ def barplot_general(df, x_header, y_header, x_label_desc=None, y_label_desc=None
         annotate_bars(ax)
         
 # Create 2D geospatial plot
-def geoplot_2d(df_geo, feature_header, scheme='quantiles', n_segment=5, plot_size=(14, 14), xlim=(None, None), ylim=(None, None), legend=True, legend_header=None, cmap='plasma', title=None):
+def geoplot_2d(df_geo, feature_header, scheme='quantiles', n_segment=5, plot_size=(13, 13), xlim=(None, None), ylim=(None, None), legend=True, legend_header=None, cmap='plasma', title=None):
     """
     Produce a 2D geoplot.
 
