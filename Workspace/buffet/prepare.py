@@ -1423,7 +1423,7 @@ def get_tickers(df_plot, base_interval=0.05):
 
     return xticks_range, xmax, xmin
 
-# Plot the correlations of the features with respect to a target column header in the dataset.
+# Create bar plot based on the correlations of the features with respect to a target column header in the dataset.
 def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(12, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm', title=None):
     """
     Helper function that outputs a plot of feature correlations against a specified column in the dataset.
@@ -1473,7 +1473,7 @@ def barplot_features(df, x_label_desc='x label', remove_zeros=True, plot_size=(1
     if title is not None:
         plt.title(title, **title_fonts)
 
-# Plot the PCA features contributions chart with respect to a specified principal component index.
+# Create bar plot based on PCA features contributions with respect to a specified principal component index.
 def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='Variance contribution %', remove_zeros=True, plot_size=(12, 10), sns_style='whitegrid', sns_context='talk', sns_palette='coolwarm', title=None):
     """
     Helper function that outputs a plot of PCA features contributions on specified a principal component.
@@ -1529,7 +1529,7 @@ def barplot_features_pca(df_pca_comp, pc_index=1, x_label_desc='Variance contrib
     if title is not None:
         plt.title(title, **title_fonts)
 
-# Plot 2D scatter of PCA biplot
+# Create 2D scatter of PCA biplot
 def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_context='talk', sns_palette='plasma', title='PCA scatter plot'):
     """
     Produce a PCA scatter plot.
@@ -1563,7 +1563,7 @@ def scatter_pca(df_pca, target_header, pc_axes=(1, 2), sns_style='white', sns_co
     ax.set_xlabel('Principal component ' + str(pc_axes[0]), **label_fonts)
     ax.set_ylabel('Principal component ' + str(pc_axes[1]), **label_fonts)
     
-# Plot pie chart
+# Create pie plot
 def pieplot_features(df, feature_header, category_header=None, plot_size=(10, 7), title=None):
     """
     Produce a pie chart.
@@ -1599,7 +1599,7 @@ def pieplot_features(df, feature_header, category_header=None, plot_size=(10, 7)
     if title is not None:
         plt.title(title, **title_fonts)
 
-# Plot 2D distribution chart
+# Create 2D distribution plot
 def distplot_features(df, feature_header, target_header_value=(None, None), bin_scale=0.5, plot_size=(10, 7), xlim=(None, None), theme_style='blue', title=None, data_output=False):
     """
     Produce a feature distributions plot against all target labels.
@@ -1673,7 +1673,7 @@ def distplot_features(df, feature_header, target_header_value=(None, None), bin_
         df_output = pd.DataFrame({'x' : bins[:-1], 'y' : n})
         return df_output
 
-# Plot 2D distribution kde chart
+# Create 2D distribution kde plot
 def kdeplot_features(df, feature_header, target_header=None, compare_labels=(None, None), plot_size=(10, 7), xlim=(None, None), sns_style='white', sns_context='talk', sns_palette='plasma', title=None):
     """
     Produce a feature distributions kde plot against all target labels.
@@ -1750,7 +1750,7 @@ def kdeplot_features(df, feature_header, target_header=None, compare_labels=(Non
     if title is not None:
         plt.title(title, **title_fonts)
     
-# Display PCA heatmap based on feature variance contribution across selected principal components
+# Create PCA heatmap plot based on feature variance contribution across selected principal components
 def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=False, title=None):
     """
     Produce a PCA heatmap based on variance contributions of features across principal components using the Seaborn library.
@@ -1819,7 +1819,7 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
     plt.xlabel(xlabel='Principal components', **label_fonts)
     plt.ylabel('Features', **label_fonts)
     
-# Correlation matrix plot
+# Create matrix plot for correlations data
 def correlations_plot(df, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_cmap='plasma', annot=False, title=None):
     """
     Produce a correlation matrix plot.
@@ -1856,7 +1856,7 @@ def correlations_plot(df, plot_size=(10, 7), sns_style='white', sns_context='tal
     if title is not None:
         plt.title(title, **title_fonts)
         
-# Plot line chart
+# Create line plot
 def lineplot_general(df, y_header_list, x_header=None, x_label_desc=None, y_label_desc=None, title=None, scaler=None, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette=None):
     """
     Produce a general line plot.
@@ -1948,7 +1948,7 @@ def annotate_bars(ax):
             
         ax.text(x_pos + width/2, height*1.01, round(height, 1), ha="center")
 
-# Plot bar chart
+# Create bar plot
 def barplot_general(df, x_header, y_header, x_label_desc=None, y_label_desc=None, ymax=None, annotation=False, hue=None, order=None, xlabel_angle=45, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_palette='coolwarm_r', title=None):
     """
     Produce a general barplot.
@@ -2010,6 +2010,50 @@ def barplot_general(df, x_header, y_header, x_label_desc=None, y_label_desc=None
 
     if annotation == True:
         annotate_bars(ax)
+        
+# Create 2D geospatial plot
+def geoplot_2d(df_geo, feature_header, scheme='quantiles', n_segment=5, plot_size=(14, 14), xlim=(None, None), ylim=(None, None), legend=True, legend_header=None, cmap='plasma', title=None):
+    """
+    Produce a 2D geoplot.
+
+    Arguments:
+    -----------
+    df_geo : geopandas dataframe, geopandas dataframe as input data to be plotted
+    feature_header : string, column header containing the numerical values as feature on the 2D geospatial plot.
+    scheme : selection of in-built pandas data segmentation method
+    n_segment : int, number of segments to split the data values in for plotting
+    plot_size : tuple, the setting of the plot size
+    xlim : tuple, defines the x-axis limits for the plot
+    ylim : tuple, defines the y-axis limits for the plot
+    legend : boolean, option to display the legend
+    legend_header : string, optional description of the legend header
+    cmap : selection of in-built matplotlib colour map options
+    title : string, title description of the chart
+
+    Returns:
+    -----------
+    Display of barplot
+    """
+     # Set the plot fonts
+    title_fonts, label_fonts = set_fonts()
+
+    # Process the plot
+    if legend_header is None:
+        legend_header=feature_header
+
+    leg_kwds = {'title' : legend_header, 'loc' : 2, 'bbox_to_anchor' : (1.05, 1)}
+    df_geo.plot(figsize=plot_size, column=feature_header, scheme=scheme, k=n_segment, legend=legend, legend_kwds=leg_kwds, cmap=cmap)
+        
+    ax = plt.gca()
+
+    if title is not None:
+        ax.set_title(title, **title_fonts)
+
+    if xlim[0] is not None and xlim[1] is not None:
+        ax.set_xlim([xlim[0], xlim[1]])
+    
+    if ylim[0] is not None and ylim[1] is not None:
+        ax.set_ylim([ylim[0], ylim[1]])
 
 # Get dataframe that transforms/encodes discrete numbered features (e.g. 0 or 1, or 2, 10, 15) into continuous set of numbers
 # Note: this adds some degree of randomisation of data, and applying encode based on the average of other samples (with exclusion
