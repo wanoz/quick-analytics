@@ -143,14 +143,14 @@ def read_data(file_name, file_type='csv_excel', encoding='utf-8', sheet_name='Sh
             elif file_dir.endswith('.xlsx'):
                 try:
                     df_read = pd.read_excel(file_dir, sheet_name=sheet_name)
-                    print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
+                    print('Status: "' + original_file_name + '", worksheet: "' + sheet_name + '" has been successfully read into dataframe!')
                 except:
                     print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
                     raise
             elif file_dir.endswith('.xls'):
                 try:
                     df_read = pd.read_excel(file_dir, sheet_name=sheet_name)
-                    print('Status: "' + original_file_name + '" has been successfully read into dataframe!')
+                    print('Status: "' + original_file_name + '", worksheet: "' + sheet_name + '" has been successfully read into dataframe!')
                 except:
                     print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
                     raise
