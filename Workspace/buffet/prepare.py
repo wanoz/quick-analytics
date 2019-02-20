@@ -44,12 +44,12 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 # """)
 
 # Secondary helper function to get a list of all files within a directory tree (for file search)
-def scan_dir(dir, file_list=[]):
+def scan_dir(file_dir, file_list=[]):
     # Recursively search through the directory tree and append file name and file path 
     try:
         # For native directory files
-        for name in os.listdir(dir):
-            path = os.path.join(dir, name)
+        for name in os.listdir(file_dir):
+            path = os.path.join(file_dir, name)
             if os.path.isfile(path):
                 file_list.append((name, path))
             else:
@@ -57,9 +57,9 @@ def scan_dir(dir, file_list=[]):
     except:
         try:
             # For Google Drive files
-            dir = os.path.join(dir, 'drive')
-            for name in files.os.listdir(dir):
-                path = os.path.join(dir, name)
+            file_dir = os.path.join(file_dir, 'drive')
+            for name in files.os.listdir(file_dir):
+                path = os.path.join(file_dir, name)
                 if os.path.isfile(path):
                     file_list.append((name, path))
                 else:
