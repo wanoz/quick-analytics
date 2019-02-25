@@ -112,7 +112,7 @@ def locate_file(file_name, file_type):
     return original_file_name, file_dir
 
 # Read raw data into Pandas dataframe for analysis.
-def read_data(file_name, file_type='csv_excel', encoding='utf-8', sheet_name='Sheet1'):
+def read_data(file_name, file_type='csv_excel', encoding='utf-8', sheet_name=0):
     """
     Read data into dataframe for analysis.
 
@@ -120,7 +120,7 @@ def read_data(file_name, file_type='csv_excel', encoding='utf-8', sheet_name='Sh
     -----------
     file_name : string, name of the data file (excludes extension descriptions e.g. '.csv', '.xlsx' or 'xls')
     file_type : selectio of "csv_excel" or "shape" for reading either csv/excel file or geolocation shape file
-    sheet_name : string, name of the Excel sheet containing the data to be read
+    sheet_name : int or string, the Excel sheet index or the sheet name containing the data to be read
 
     Returns:
     -----------
@@ -143,14 +143,22 @@ def read_data(file_name, file_type='csv_excel', encoding='utf-8', sheet_name='Sh
             elif file_dir.endswith('.xlsx'):
                 try:
                     df_read = pd.read_excel(file_dir, sheet_name=sheet_name)
-                    print('Status: "' + original_file_name + '", worksheet: "' + sheet_name + '" has been successfully read into dataframe!')
+                    if sheet_name != 0:
+                        print('Status: "' + original_file_name + '", worksheet: "' + sheet_name + '" has been successfully read into dataframe!')
+                    else:
+                        xl = pd.ExcelFile(file_dir)
+                        print('Status: "' + original_file_name + '", worksheet: "' + str(xl.sheet_names[0]) + '" has been successfully read into dataframe!')
                 except:
                     print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
                     raise
             elif file_dir.endswith('.xls'):
                 try:
                     df_read = pd.read_excel(file_dir, sheet_name=sheet_name)
-                    print('Status: "' + original_file_name + '", worksheet: "' + sheet_name + '" has been successfully read into dataframe!')
+                    if sheet_name != 0:
+                        print('Status: "' + original_file_name + '", worksheet: "' + sheet_name + '" has been successfully read into dataframe!')
+                    else:
+                        xl = pd.ExcelFile(file_dir)
+                        print('Status: "' + original_file_name + '", worksheet: "' + str(xl.sheet_names[0]) + '" has been successfully read into dataframe!')
                 except:
                     print('Status: "' + original_file_name + '" cannot be read into dataframe. Note: Excel file format is detected (ensure sheetname of the content is titled "sheet1".')
                     raise
