@@ -2000,9 +2000,11 @@ def barplot_general(df, x_header, y_header, x_label_desc=None, y_label_desc=None
     title_fonts, label_fonts = set_fonts()
     if hue is not None:
         ax = sns.barplot(x=x_header, y=y_header, hue=hue, data=df, palette=sns_palette)
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=xlabel_angle)
         plt.legend(loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'])
     else:
         ax = sns.barplot(x=x_header, y=y_header, data=df, palette=sns_palette)
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=xlabel_angle)
 
     if title is not None:
         plt.title(title, **title_fonts)
