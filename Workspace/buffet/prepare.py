@@ -817,7 +817,6 @@ def transform_polyfit(df, degree=3, output_length=None):
 
 # Secondary helper function for categorical value encoding, numerical imputation and scaling
 def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary):
-    print('Inspecting data values... ', end='')
     # Separate features and target data
     df_y = df[[target_header]].copy()
     df_x = df.drop(columns=[target_header]).copy()
@@ -830,6 +829,7 @@ def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove
     non_categorical = non_categorical.astype(np.float64)
     
     if remove_binary:
+        print('Inspecting data values... ', end='')
         if non_categorical.shape[1] > 0:
             binary_col_headers = get_binary_headers(non_categorical, non_categorical.columns.tolist())
             non_categorical.drop(columns=binary_col_headers, inplace=True)
