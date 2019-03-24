@@ -1086,6 +1086,8 @@ def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical
     # Check if target labels are binary 0 and 1
     print('Inspect target data type... ', end='')
     binary_col_headers = get_binary_headers(df_y, [target_header])
+    if len(binary_col_headers) == 0:
+        y = df[target_header]
     if target_header in binary_col_headers:
         y = df_y[target_header]
     else:
@@ -1180,6 +1182,8 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
     # Check if target labels are binary 0 and 1
     print('Inspect target data type... ', end='')
     all_categorical_headers = df.loc[:, df.dtypes == object].columns.tolist()
+    if len(all_categorical_headers) == 0:
+        y = df[target_header]
     if target_header in all_categorical_headers:
         binary_col_headers = get_binary_headers(df_y, [target_header])
         if target_header in binary_col_headers:
@@ -1277,6 +1281,8 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
     # Check if target labels are binary 0 and 1
     print('Inspecting target data type... ', end='')
     all_categorical_headers = df.loc[:, df.dtypes == object].columns.tolist()
+    if len(all_categorical_headers) == 0:
+        y = df[target_header]
     if target_header in all_categorical_headers:
         binary_col_headers = get_binary_headers(df_y, [target_header])
         if target_header in binary_col_headers:
