@@ -672,6 +672,105 @@ def label_duplicates(df, feature_header, duplicate_position=None):
 
     return df_output
 
+# Helper function to extract time relevant data features by grouping of specific identifier/label
+def group_time_features(df, time_header, group_header, time_measure='day'):
+    """
+    Helper function that extracts useful time related data features by grouping of specified identifier/label
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    time_header : string, the column header description containing the time measurement data
+    group_header : string, the column header description of the grouping label.
+    time_measure : string, selection of 'day', 'hour', 'month' or 'year', to specify the type of time measurement for the data feature value
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    """
+    current_name = ''
+    prev_name = ''
+    current_date = ''
+    prev_date = ''
+    time_prev = []
+    time_prev_mavg = []
+    time_prev_msum = []
+    time_prev_mmax = []
+    time_prev_mmin = []
+
+    # Extract time measure values based on grouping label
+    for index, row in df.iterrows():
+        current_date = row[header_time]
+        current_name = str(row[header_group])
+        if current_name == '':
+            time_prev.append(0)
+            time_prev_mavg.append(0)
+            time_prev_msum.append(0)
+            time_prev_mmax.append(0)
+            time_prev_mmin.append(0)
+            time_prev_window = []
+        else:
+            if current_name != prev_name:
+                time_prev.append(0)
+                time_prev_mavg.append(0)
+                time_prev_msum.append(0)
+                time_prev_mmax.append(0)
+                time_prev_mmin.append(0)
+                time_prev_window = []
+            else:
+                if time_measure == 'day':
+                    time_diff = (prev_date - current_date).days
+                    time_prev_window.append(time_diff)
+                    
+                    time_prev.append(time_diff)
+                    time_prev_mavg.append(np.mean(time_prev_window))
+                    time_prev_msum.append(np.sum(time_prev_window))
+                    time_prev_mmax.append(np.max(time_prev_window))
+                    time_prev_mmin.append(np.min(time_prev_window))
+                if time_measure == 'hour':
+                    time_diff = (prev_date - current_date).days*24
+                    time_prev_window.append(time_diff)
+                    
+                    time_prev.append(time_diff)
+                    time_prev_mavg.append(np.mean(time_prev_window))
+                    time_prev_msum.append(np.sum(time_prev_window))
+                    time_prev_mmax.append(np.max(time_prev_window))
+                    time_prev_mmin.append(np.min(time_prev_window))
+                elif time_measure == 'month':
+                    time_diff = (prev_date - current_date).days/30.4375
+                    time_prev_window.append(time_diff)
+                    
+                    time_prev.append(time_diff)
+                    time_prev_mavg.append(np.mean(time_prev_window))
+                    time_prev_msum.append(np.sum(time_prev_window))
+                    time_prev_mmax.append(np.max(time_prev_window))
+                    time_prev_mmin.append(np.min(time_prev_window))
+                elif time_measure == 'year':
+                    time_diff = (prev_date - current_date).days/365.25
+                    time_prev_window.append(time_diff)
+                    
+                    time_prev.append(time_diff)
+                    time_prev_mavg.append(np.mean(time_prev_window))
+                    time_prev_msum.append(np.sum(time_prev_window))
+                    time_prev_mmax.append(np.max(time_prev_window))
+                    time_prev_mmin.append(np.min(time_prev_window))
+                else:
+                    print('Time measure input is not recognized - please specify either "day", "hour", "month" or "year"')
+                    break
+
+        prev_name = current_name
+        prev_date = current_date
+
+    # Form final output dataframe
+    df_features = pd.DataFrame({str(time_measure) + ' since previous record' : time_prev, 
+                                str(time_measure) + ' since previous record (mavg)' : time_prev_mavg, 
+                                str(time_measure) + ' since previous record (msum)' : time_prev_msum, 
+                                str(time_measure) + ' since previous record (mmax)' : time_prev_mmax, 
+                                str(time_measure) + ' since previous record (mmin)' : time_prev_mmin})
+    df_output = pd.concat([df, df_features], axis=1)
+
+    return df_output
+
 # Transform data via estimated fit to a polynomial function
 def transform_polyfit(df, degree=3, output_length=None):
     '''
