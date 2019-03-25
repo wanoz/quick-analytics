@@ -701,7 +701,7 @@ def group_time_features(df, time_header, group_header, time_measure='day'):
     # Extract time measure values based on grouping label
     for index, row in df.iterrows():
         current_date = row[time_header]
-        current_name = str(row[header_group])
+        current_name = str(row[group_header])
         if current_name == '':
             time_prev.append(0)
             time_prev_mavg.append(0)
@@ -727,7 +727,7 @@ def group_time_features(df, time_header, group_header, time_measure='day'):
                     time_prev_msum.append(np.sum(time_prev_window))
                     time_prev_mmax.append(np.max(time_prev_window))
                     time_prev_mmin.append(np.min(time_prev_window))
-                if time_measure == 'hour':
+                elif time_measure == 'hour':
                     time_diff = (prev_date - current_date).days*24
                     time_prev_window.append(time_diff)
                     
