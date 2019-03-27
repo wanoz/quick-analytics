@@ -614,7 +614,7 @@ def value_count(value, value_lookup):
     return count_index, value_lookup
 
 # Helper function for labelling duplicate count index information
-def label_duplicates(df, feature_header, duplicate_position=None):
+def label_duplicates(df, feature_header, duplicate_position='last'):
     '''
     Helper function that produces an updated dataset containing the count index of duplicated values in the selected column.
 
