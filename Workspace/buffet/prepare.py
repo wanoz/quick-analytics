@@ -617,12 +617,18 @@ def label_duplicates(df, feature_header, duplicate_position='last', order='ascen
     df_output : pd.dataframe, resulting dataframe as output
 
     '''
-    print('Labelling duplicate data... ', end='')
-    if order == 'descending':
-        df = df.sort_values([feature_header], ascending=False)
-    else:
+    
+    if order == 'ascending':
         df = df.sort_values([feature_header])
+        print('Sorted dataset based on feature column in ascending order')
+    elif order == 'descending':
+        df = df.sort_values([feature_header], ascending=False)
+        print('Sorted dataset based on feature column in descending order')
+    elif order == 'original':
+        pass
     df = df.reset_index(drop=True)
+
+    print('Labelling duplicate data... ', end='')
     value_lookup = {}
     duplicate_index_list = []
     duplicate_position_list = []
@@ -673,7 +679,7 @@ def label_duplicates(df, feature_header, duplicate_position='last', order='ascen
                 duplicate_position_list[len(duplicate_position_list) - 1] = 'last'
             
         else:
-            print('Duplicate position input argument is not recognized - please specify either "first" or "last"')
+            print('\nDuplicate position input argument is not recognized - please specify either "first" or "last"')
             break
                     
         prev_id = current_id
