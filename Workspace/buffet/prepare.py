@@ -924,26 +924,28 @@ def filter_columns(df, target_header, include_words=None, exclude_words=None):
     column_list = df.columns.tolist()
     filtered_column_list = []
     
-    # Create filtered column headers based on include and exclude word sets
+    # Create filtered column headers based on include keywords list
     for column_header in column_list:
-        if include_words is not None:
+        if include_words is not None and len(include_words) > 0:
             for include_word in include_words:
-                if include_word in column_header.lower():
-                    if exclude_words is not None:
-                        for exclude_word in exclude_words:
-                            if exclude_word not in column_header.lower():
-                                if column_header not in filtered_column_list:
-                                    filtered_column_list.append(column_header)
-                    else:
-                        if column_header not in filtered_column_list:
-                            filtered_column_list.append(column_header)
-                    
+                if include_word.lower() in column_header.lower():
+                    if column_header not in filtered_column_list:
+                        filtered_column_list.append(column_header)
         else:
             filtered_column_list = column_list
-    
-    filtered_column_list = filtered_column_list + [target_header]
+
+    # Remove additional words based on exclude keywords list
+    remove_list = []
+    for column_header in filtered_column_list:
+        if exclude_words is not None and len(exclude_words) > 0:
+            for exclude_word in exclude_words:
+                if exclude_word.lower() in column_header.lower():
+                    remove_list.append(column_header)
+                    
+    filtered_column_list = list(set(filtered_column_list) - set(remove_list))
     
     # Apply column filter
+    filtered_column_list = filtered_column_list + [target_header]
     df_output = df[filtered_column_list]
     
     return df_output
