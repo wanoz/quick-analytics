@@ -18,7 +18,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import OneClassSVM
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
+from sklearn.neighbors.nearest_centroid import NearestCentroid
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, precision_recall_curve, roc_auc_score, auc
+from sklearn.metrics.pairwise import euclidean_distances
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
 from datetime import datetime, date
@@ -1727,7 +1729,10 @@ def pieplot_features(df, feature_header, category_header=None, plot_size=(10, 7)
     if category_header is not None:
         categories = df[category_header].tolist()
         values = df[feature_header].tolist()
-        legend_labels = [str(categories[c]) + ' (' + str(round(values[c], 3)) + '%)' for c in range(len(categories))] 
+        if '%' in feature_header:
+            legend_labels = [str(categories[c]) + ' (' + str(round(values[c], 3)) + '%)' for c in range(len(categories))] 
+        else:
+            legend_labels = [str(categories[c]) + ' (' + str(round(values[c], 3)) for c in range(len(categories))]
         plt.legend(labels=legend_labels, loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'], title=category_header)
 
     if title is not None:
