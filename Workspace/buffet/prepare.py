@@ -967,6 +967,7 @@ def centroids_features(df, target_header, target_cluster_label=None, metric='euc
     Returns:
     -----------
     df_output : pd.dataframe, resulting dataframe as output
+    df_centroids : pd.dataframe, resulting dataframe containing centroids as output
     """
 
     # Apply the optional data transformation (imputing, scaling, encoding) if required 
@@ -1173,6 +1174,22 @@ def pca_check(df, target_header, pca_components=10, numerical_imputer=None, scal
     
     return df_pca, df_pca_comp
 
+# Secondary helper function for applying uniform target label distribution across train test data split
+def train_test_uniform_split(df, target_header, test_size=0.3, random_state=None):
+    # Split datasets w.r.t to target label to enforce uniformity of result
+    df_train_1 = df[df[target_header] == 1]
+    df_train_0 = df[df[target_header] == 0]
+    X_train_1, X_test_1, y_train_1, y_test_1 = train_test_split(df_train_1.drop([target_header], axis=1), df_train_1[[target_header]], test_size=test_size, random_state=random_state)
+    X_train_0, X_test_0, y_train_0, y_test_0 = train_test_split(df_train_0.drop([target_header], axis=1), df_train_0[[target_header]], test_size=test_size, random_state=random_state)
+
+    # Rejoin splits tests for finalizing X_train, X_test, y_train, y_test partitions
+    X_train = pd.concat([X_train_0, X_train_1], axis=0)
+    X_test = pd.concat([X_test_0, X_test_1], axis=0)
+    y_train = pd.concat([y_train_0, y_train_1], axis=0)
+    y_test = pd.concat([y_test_0, y_test_1], axis=0)
+
+    return X_train, X_test, y_train, y_test
+
 # Feature analysis with logistic regression
 def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical_imputer=None, scaler=None, encoder=None, remove_binary=False):
     """
@@ -1228,7 +1245,9 @@ def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical
     print('[Done]')
 
     # Split train and test data for model fitting
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    df_train = pd.DataFrame(X, columns=feature_headers)
+    df_train[target_header] = y
+    X_train, X_test, y_train, y_test = train_test_uniform_split(df_train, target_header, test_size=0.3)
     
     print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
     # Perform model training and evaluation
@@ -1322,11 +1341,13 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
                         pass
             else:
                 y = df_y.iloc[:, 0]
-                print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis. ')
+                print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
     print('[Done]')
 
     # Split train and test data for model fitting
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    df_train = pd.DataFrame(X, columns=feature_headers)
+    df_train[target_header] = y
+    X_train, X_test, y_train, y_test = train_test_uniform_split(df_train, target_header, test_size=0.3)
     
     print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
     # Perform model training and evaluation
@@ -1421,11 +1442,13 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
                         pass
             else:
                 y = df_y.iloc[:, 0]
-                print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis. ')
+                print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
     print('[Done]')
 
     # Split train and test data for model fitting
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    df_train = pd.DataFrame(X, columns=feature_headers)
+    df_train[target_header] = y
+    X_train, X_test, y_train, y_test = train_test_uniform_split(df_train, target_header, test_size=0.3)
  
     print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
     # Perform model training and evaluation
@@ -2531,14 +2554,14 @@ def get_filepath(file_name='unknown'):
     return file_dir
 
 # Train/validation/test split function for specified data proportions of each category.
-def training_split(X, y, train_partition=0.6, dev_partition=0.2, test_partition=0.2, random_state=None):
+def training_split(df, target_header, train_partition=0.6, dev_partition=0.2, test_partition=0.2, random_state=None):
     """
     Split the data into training, validation and test portions.
 
     Arguments:
     -----------
-    X : np.array, feature samples for training
-    y : np.array, target samples for training
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description of the target label
     train_partition : float, the proportion of the data to be used as training samples
     dev_partition : float, the proportion of the data to be used as validation samples to optimize training
     test_partition : float, the proportion of the data to be used as test samples to evaluate model performance
@@ -2558,12 +2581,11 @@ def training_split(X, y, train_partition=0.6, dev_partition=0.2, test_partition=
     input_features = None
     partition = 0
     if train_partition + dev_partition + test_partition == 1:
-        X_train_dev, X_test, y_train_dev, y_test = train_test_split(
-            X, y, test_size=test_partition, random_state=random_state)
+        X_train_dev, X_test, y_train_dev, y_test = train_test_uniform_split(df, target_header, test_size=test_partition, random_state=random_state)
+        df_train_dev = pd.concat([X_train_dev, y_train_dev], axis=1)
         if dev_partition != 0:
             partition = dev_partition/(1 - test_partition)
-            X_train, X_dev, y_train, y_dev = train_test_split(
-                X_train_dev, y_train_dev, test_size=partition, random_state=random_state)
+            X_train, X_dev, y_train, y_dev = train_test_uniform_split(df_train_dev, target_header, test_size=partition, random_state=random_state)
         else:
             X_train = X_train_dev
             y_train = y_train_dev
@@ -2575,11 +2597,9 @@ def training_split(X, y, train_partition=0.6, dev_partition=0.2, test_partition=
         train_partition = 0.6
         dev_partition = 0.2
         test_partition = 0.2
-        X_train_dev, X_test, y_train_dev, y_test = train_test_split(
-            X, y, test_size=test_partition, random_state=random_state)
+        X_train_dev, X_test, y_train_dev, y_test = train_test_uniform_split(df, target_header, test_size=test_partition, random_state=random_state)
         partition = dev_partition/(1 - test_partition)
-        X_train, X_dev, y_train, y_dev = train_test_split(
-            X_train_dev, y_train_dev, test_size=partition, random_state=random_state)
+        X_train, X_dev, y_train, y_dev = train_test_uniform_split(df_train_dev, target_header, test_size=partition, random_state=random_state)
 
     # Get input_feature shape by checking X_train shape
     X_stats = len(X_train.shape)
