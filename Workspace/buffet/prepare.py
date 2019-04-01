@@ -839,7 +839,7 @@ def transform_polyfit(df, degree=3, output_length=None):
     return df_output
 
 # Secondary helper function for categorical value encoding, numerical imputation and scaling
-def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary):
+def transform_data(df, target_header, numerical_imputer=None, scaler=None, encoder=None, remove_binary=None):
     # Separate features and target data
     df_y = df[[target_header]].copy()
     df_x = df.drop(columns=[target_header]).copy()
@@ -903,6 +903,101 @@ def transform_data(df, target_header, numerical_imputer, scaler, encoder, remove
         df_x = non_categorical
 
     return df_x, df_y
+
+# Helper function for filter column headings with inclusion/exclusion of keywords
+def filter_columns(df, target_header, include_words=None, exclude_words=None):
+    """
+    Helper function for filter column headings with inclusion/exclusion of keywords in the dataset
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : int, the column containing the prediction target label
+    include_words : list, list of keyword strings to include in the filter
+    exclude_words : list, list of keyword strings to exclude in the filter
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    """
+    
+    column_list = df.columns.tolist()
+    filtered_column_list = []
+    
+    # Create filtered column headers based on include and exclude word sets
+    for column_header in column_list:
+        if include_words is not None:
+            for include_word in include_words:
+                if include_word in column_header.lower():
+                    if exclude_words is not None:
+                        for exclude_word in exclude_words:
+                            if exclude_word not in column_header.lower():
+                                if column_header not in filtered_column_list:
+                                    filtered_column_list.append(column_header)
+                    else:
+                        if column_header not in filtered_column_list:
+                            filtered_column_list.append(column_header)
+                    
+        else:
+            filtered_column_list = column_list
+    
+    filtered_column_list = filtered_column_list + [target_header]
+    
+    # Apply column filter
+    df_output = df[filtered_column_list]
+    
+    return df_output
+
+# Helper function for centroids distance association calculation
+def centroids_features(df, target_header, target_cluster_label=None, metric='euclidean', shrink_threshold=None, numerical_imputer=None, scaler=None, encoder=None, remove_binary=None):
+    """
+    Helper function for centroids distance association calculation in the dataset
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : int, the column containing the cluster label in integer format
+    metric : string, selection of 'euclidean' (minimizing sum of distances), 'manhanttan' (median of distances)
+    shrink_threshold : float, threshold for shrinking centroids to remove features
+    numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
+    encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+    remove_binary : boolean, option to remove columns containing binary values
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    """
+
+    # Apply the optional data transformation (imputing, scaling, encoding) if required 
+    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
+
+    print('Calculating data centroids... ', end='')
+    # Prepare data
+    y_train = df_y.values
+    X_train = df_x.values
+
+    df_output = df
+    target_centroid = None
+
+    # Fit data to model
+    model = NearestCentroid(metric=metric, shrink_threshold=shrink_threshold)
+    model.fit(X_train, y_train.ravel())
+    
+    centroids = model.centroids_
+    centroid_labels = [model.predict([centroid])[0] for centroid in centroids]
+
+    df_centroids = pd.DataFrame({'Centroid' : centroids.tolist(), 'Centroid label' : centroid_labels})
+    
+    # Get centroid for the target cluster label
+    if target_cluster_label is not None:
+        target_centroid = df_centroids[df_centroids['Centroid label'] == target_cluster_label]['Centroid'].item()
+        dists_from_target = euclidean_distances(X_train, [np.asarray(target_centroid)])
+        dists_from_target = [dist[0] for dist in dists_from_target.tolist()]
+        df_output['Association to cluster group: "' + target_header + '_' + str(target_cluster_label) + '"' ] = dists_from_target
+    print('[Done]')
+
+    return df_output, df_centroids
 
 # Feature analysis with correlations
 def correlations_check(df, target_header, target_label=None, encoder=None):
