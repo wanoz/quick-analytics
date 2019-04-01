@@ -1730,9 +1730,9 @@ def pieplot_features(df, feature_header, category_header=None, plot_size=(10, 7)
         categories = df[category_header].tolist()
         values = df[feature_header].tolist()
         if '%' in feature_header:
-            legend_labels = [str(categories[c]) + ' (' + str(round(values[c], 3)) + '%)' for c in range(len(categories))] 
+            legend_labels = [str(categories[c]) + ' (' + str(round(values[c], 3)) + '%)'  for c in range(len(categories))] 
         else:
-            legend_labels = [str(categories[c]) + ' (' + str(round(values[c], 3)) for c in range(len(categories))]
+            legend_labels = [str(categories[c]) + ' (' + str(round(values[c], 3)) + ')' for c in range(len(categories))]
         plt.legend(labels=legend_labels, loc=2, bbox_to_anchor=(1.05, 1), fontsize=label_fonts['fontsize'], title=category_header)
 
     if title is not None:
