@@ -906,14 +906,14 @@ def transform_data(df, target_header, numerical_imputer=None, scaler=None, encod
     return df_x, df_y
 
 # Helper function for filter column headings with inclusion/exclusion of keywords
-def filter_columns(df, target_header, include_words=None, exclude_words=None):
+def filter_column_headers(df, target_header, include_words=None, exclude_words=None):
     """
     Helper function for filter column headings with inclusion/exclusion of keywords in the dataset
 
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed as input
-    target_header : int, the column containing the prediction target label
+    target_header : integer, the column containing the prediction target label
     include_words : list, list of keyword strings to include in the filter
     exclude_words : list, list of keyword strings to exclude in the filter
 
@@ -948,6 +948,30 @@ def filter_columns(df, target_header, include_words=None, exclude_words=None):
     # Apply column filter
     filtered_column_list = filtered_column_list + [target_header]
     df_output = df[filtered_column_list]
+    
+    return df_output
+
+# Helper function for filter column headings with inclusion/exclusion of keywords
+def filter_quantile(df, target_header, quantile_range=(0.25, 0.75)):
+    """
+    Helper function for filter column headings with inclusion/exclusion of keywords in the dataset
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : integer, the column containing the values for filtering
+    quantile_range : tuple, the lower and upper limit values for specifying the filter range
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    """
+    
+    lower_val = df[target_header].quantile(quantile_range[0])
+    upper_val = df[target_header].quantile(quantile_range[1])
+
+    # Apply the filter
+    df_output = df[(df[target_header] >= lower_val) & (df[target_header] <= upper_val)]
     
     return df_output
 
