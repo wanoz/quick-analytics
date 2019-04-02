@@ -16,7 +16,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, Im
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import OneClassSVM
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, IsolationForest
+from sklearn.feature_selection import RFE
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
 from sklearn.neighbors.nearest_centroid import NearestCentroid
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, precision_recall_curve, roc_auc_score, auc
@@ -1291,7 +1292,7 @@ def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical
     return df_features
 
 # Feature analysis with logistic regression
-def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_norm='l2', numerical_imputer=None, scaler=None, encoder=None, remove_binary=False):
+def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_norm='l2', numerical_imputer=None, scaler=None, encoder=None, remove_binary=False, n_features=None):
     """
     Helper function that outputs feature weights from the trained logistic regression model.
 
@@ -1305,6 +1306,7 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
     numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+    n_features : integer, number of top features to extract in running the optional recursive feature elimination function
     
     Returns:
     -----------
@@ -1354,43 +1356,52 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
     print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
     # Perform model training and evaluation
     model = LogisticRegression(C=reg_C, penalty=reg_norm)
-    model.fit(X_train, y_train)
+
+    if n_features is not None:
+        model_rfe = RFE(model, n_features)
+        model_rfe_trained = model_rfe.fit(X_train, y_train)
+    else:
+        model.fit(X_train, y_train)
     print('[Done]')
     
     # Get the model performance
-    y_pred = model.predict(X_test)
-    y_score = model.predict_proba(X_test)[:, 1]
-    fpr, tpr, thresholds = roc_curve(y_test, y_score)
-    try:
-        roc_auc = auc(fpr, tpr)
-        roc_auc = round(roc_auc, 2)
-    except:
-        roc_auc = 'undefined'
-    roc_auc_label = 'ROC curve (area: ' + str(roc_auc) + ')'
-    
-    # Get the important features from the model in a dataframe format
-    df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
-    df_features.columns=['Feature weight']
-    df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
-    
-    print('\nLogistic Regression with ' + reg_norm.capitalize() + ' regularization model evaluation:\n')
-    print(classification_report(y_test, y_pred))
+    if n_features is not None:
+        print('Selected number of features for RPE: ' + str(model_rfe_trained.n_features_))
+        df_features = pd.DataFrame({'Features' : df_train.drop([target_header], axis=1).columns, 'Support status' : model_rfe_trained.support_, 'Feature ranking' : model_rfe_trained.ranking_})
+    else:
+        y_pred = model.predict(X_test)
+        y_score = model.predict_proba(X_test)[:, 1]
+        fpr, tpr, thresholds = roc_curve(y_test, y_score)
+        try:
+            roc_auc = auc(fpr, tpr)
+            roc_auc = round(roc_auc, 2)
+        except:
+            roc_auc = 'undefined'
+        roc_auc_label = 'ROC curve (area: ' + str(roc_auc) + ')'
+        
+        # Get the important features from the model in a dataframe format
+        df_features = pd.DataFrame(data=model.coef_, columns=feature_headers).transpose()
+        df_features.columns=['Feature weight']
+        df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
+        
+        print('\nLogistic Regression with ' + reg_norm.capitalize() + ' regularization model evaluation:\n')
+        print(classification_report(y_test, y_pred))
 
-    plt.figure(figsize=(9, 7))
-    plt.plot(fpr, tpr, color='darkblue', lw=2, label=roc_auc_label)
-    plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic')
-    plt.legend(loc="lower right")
-    plt.show()
+        plt.figure(figsize=(9, 7))
+        plt.plot(fpr, tpr, color='darkblue', lw=2, label=roc_auc_label)
+        plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('Receiver operating characteristic')
+        plt.legend(loc="lower right")
+        plt.show()
     
     return df_features
 
 # Feature analysis with random forest model
-def random_forest_features(df, target_header, target_label=None, n_trees=10, max_depth=None, min_samples_leaf=10, numerical_imputer=None, scaler=None, encoder=None, remove_binary=False):
+def random_forest_features(df, target_header, target_label=None, n_trees=10, max_depth=None, min_samples_leaf=10, numerical_imputer=None, scaler=None, encoder=None, remove_binary=False, n_features=None):
     """
     Helper function that outputs feature weights from the trained random forest model.
 
@@ -1406,6 +1417,7 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
     remove_binary : boolean, option to remove columns containing binary values
+    n_features : integer, number of top features to extract in running the optional recursive feature elimination function
     
     Returns:
     -----------
@@ -1455,39 +1467,48 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
     print('Training model... no. of training examples: ' + str(X_train.shape[0]) + ', no. of features: ' + str(X_train.shape[1]) + '. ', end='')
     # Perform model training and evaluation
     model = RandomForestClassifier(n_estimators=n_trees, max_depth=max_depth, min_samples_leaf=min_samples_leaf)
-    model.fit(X_train, y_train)
+
+    if n_features is not None:
+        model_rfe = RFE(model, n_features)
+        model_rfe_trained = model_rfe.fit(X_train, y_train)
+    else:
+        model.fit(X_train, y_train)
     print('[Done]')
     
     # Get the model performance
-    y_pred = model.predict(X_test)
-    y_score = model.predict_proba(X_test)[:, 1]
-    fpr, tpr, thresholds = roc_curve(y_test, y_score)
-    try:
-        roc_auc = auc(fpr, tpr)
-        roc_auc = round(roc_auc, 2)
-    except:
-        roc_auc = 'undefined'
-    roc_auc_label = 'ROC curve (area: ' + str(roc_auc) + ')'
-    
-    # Get the important features from the model in a dataframe format
-    df_features = pd.DataFrame(data=model.feature_importances_, index=feature_headers)
-    df_features.columns=['Feature weight']
-    df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
-    
-    print('\nRandom Forest model evaluation:\n')
-    print(classification_report(y_test, y_pred))
+    if n_features is not None:
+        print('Selected number of features for RPE: ' + str(model_rfe_trained.n_features_))
+        df_features = pd.DataFrame({'Features' : df_train.drop([target_header], axis=1).columns, 'Support status' : model_rfe_trained.support_, 'Feature ranking' : model_rfe_trained.ranking_})
+    else:
+        y_pred = model.predict(X_test)
+        y_score = model.predict_proba(X_test)[:, 1]
+        fpr, tpr, thresholds = roc_curve(y_test, y_score)
+        try:
+            roc_auc = auc(fpr, tpr)
+            roc_auc = round(roc_auc, 2)
+        except:
+            roc_auc = 'undefined'
+        roc_auc_label = 'ROC curve (area: ' + str(roc_auc) + ')'
+        
+        # Get the important features from the model in a dataframe format
+        df_features = pd.DataFrame(data=model.feature_importances_, index=feature_headers)
+        df_features.columns=['Feature weight']
+        df_features.sort_values(by=['Feature weight'], ascending=False, inplace=True)
+        
+        print('\nRandom Forest model evaluation:\n')
+        print(classification_report(y_test, y_pred))
 
-    # ROC plot
-    plt.figure(figsize=(9, 7))
-    plt.plot(fpr, tpr, color='darkblue', lw=2, label=roc_auc_label)
-    plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic')
-    plt.legend(loc="lower right")
-    plt.show()
+        # ROC plot
+        plt.figure(figsize=(9, 7))
+        plt.plot(fpr, tpr, color='darkblue', lw=2, label=roc_auc_label)
+        plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('Receiver operating characteristic')
+        plt.legend(loc="lower right")
+        plt.show()
 
     return df_features
 
