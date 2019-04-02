@@ -972,6 +972,7 @@ def filter_quantile(df, target_header, quantile_range=(0.25, 0.75)):
 
     # Apply the filter
     df_output = df[(df[target_header] >= lower_val) & (df[target_header] <= upper_val)]
+    df_output = df_output.reset_index(drop=True)
     
     return df_output
 
