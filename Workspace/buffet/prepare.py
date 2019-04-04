@@ -1029,7 +1029,7 @@ def centroids_features(df, target_header, target_cluster_label=None, metric='euc
     return df_output, df_centroids
 
 # Feature analysis with correlations
-def correlations_check(df, target_header, target_label=None, encoder=None):
+def correlations_check(df, target_header, target_label=None, numerical_imputer=None, scaler=None, encoder=None, remove_binary=None):
     """
     Helper function that outputs a table of feature correlations against a specified column in the dataset
 
@@ -1038,7 +1038,10 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
     df : pd.dataframe, dataframe to be passed as input
     target_header : string, the column with the header description to run feature correlations against
     target_label : string, optional input if the target column is not yet encoded with binary 0 and 1 labels
+    numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+    remove_binary : boolean, option to remove columns containing binary values
 
     Returns:
     -----------
@@ -1046,27 +1049,9 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
     """
 
     print('Inspecting data values... ', end='')
-    # Get target data
-    df_y = df[[target_header]]
-    main_label = target_header
+    # Apply the optional data transformation (imputing, scaling, encoding) if required 
+    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
 
-    # Isolate sub-dataset containing categorical values
-    categorical = df.loc[:, df.dtypes == object]
-    
-    # Isolate sub-dataset containing non-categorical values
-    non_categorical = df.loc[:, df.dtypes != object]
-    print('[Done]')
-
-    # Apply encoding to categorical value data
-    if encoder == 'one_hot':
-        print('Encoding categorical data... ', end='')
-        categorical = pd.get_dummies(categorical)
-        print('[Done]')
-
-    # Join up categorical and non-categorical sub-datasets
-    df_x = pd.concat([categorical, non_categorical], axis=1)
-        
-    # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
     print('Inspect target data type... ', end='')
     all_categorical_headers = df.loc[:, df.dtypes == object].columns.tolist()
@@ -1084,18 +1069,18 @@ def correlations_check(df, target_header, target_label=None, encoder=None):
                 target_header = target_header + '_' + target_label
             else:
                 target_header = target_headers[0]
-                print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.\n')
+                print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.')
     print('[Done]')
 
     print('Extracting data correlations... ', end='')
     # Get the correlation values with respect to the target column
-    df_correlations = pd.DataFrame(df_x.corr()[target_header].sort_values(ascending=False))
+    df_correlations = pd.DataFrame(pd.concat([df_x, df_y], axis=1).corr()[target_header].sort_values(ascending=False))
     print('[Done]')
 
     # Drop the row with the index containing the original target header (i.e. drop the target label columns as correlation is relevant only for indepdent variables)
     index_labels = df_correlations.index.tolist()
     for label in index_labels:
-        if main_label in label:
+        if target_header in label:
             df_correlations.drop(df_correlations.index[df_correlations.index.get_loc(label)], inplace=True)
 
     # Drop rows containing NaN
@@ -1331,6 +1316,7 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
     numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+    remove_binary : boolean, option to remove columns containing binary values
     n_features : integer, number of top features to extract in running the optional recursive feature elimination function
     
     Returns:
