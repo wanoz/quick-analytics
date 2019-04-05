@@ -1050,41 +1050,51 @@ def correlations_check(df, target_header, target_label=None, numerical_imputer=N
     df_correlations : pd.dataframe, resulting dataframe as output
     """
 
-    print('Inspecting data values... ', end='')
     # Apply the optional data transformation (imputing, scaling, encoding) if required 
     df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
 
     # Check if target labels are binary 0 and 1
+    
     print('Inspect target data type... ', end='')
-    all_categorical_headers = df.loc[:, df.dtypes == object].columns.tolist()
-    if target_header in all_categorical_headers:
+    categorical_headers = df_y.loc[:, df_y.dtypes == object].copy()
+    if len(categorical_headers.columns.tolist()) > 0:
         if len(df_y[target_header].unique()) == 2 and (0 in df_y[target_header].unique()) and (1 in df_y[target_header].unique()):
             pass
         else:
-            # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
-            df_y = pd.get_dummies(df_y)
-
-            # Select the relevant column of the specified target value as per input
-            target_headers = df_y.columns.tolist()
-
             if target_label is not None:
+                # Else if column values not binary 0 and 1, proceed to encode target labels with one-hot encoding
+                df_y = pd.get_dummies(df_y)
+
+                # Select the relevant column of the specified target value as per input
                 target_header = target_header + '_' + target_label
+                df_y = df_y[[target_header]]
             else:
-                target_header = target_headers[0]
-                print('Note: Target column contains multiple labels. \nThe column is one-hot encoded and the first column of the encoded result is selected as the target label for feature influence analysis.')
+                print('Note: Target column appear to contain multiple labels. Please specify a target label.')
     print('[Done]')
 
-    print('Extracting data correlations... ', end='')
     # Get the correlation values with respect to the target column
-    df_correlations = pd.DataFrame(pd.concat([df_x, df_y], axis=1).corr()[target_header].sort_values(ascending=False))
-    print('[Done]')
+    df_correlations = pd.concat([df_x, df_y], axis=1).corr()[[target_header]]
+    
+    if len(df_correlations.columns.tolist()) == 1:
+        print('Extracting data correlations... ', end='')
+        df_correlations = df_correlations.sort_values(by=[target_header], ascending=False)
+        print('[Done]')
+    else:
+        print('Extracting data correlations... ', end='')
+        df_correlations = df_correlations.loc[:, ~df_correlations.columns.duplicated()]
+        df_correlations = df_correlations.sort_values(by=[target_header], ascending=False)
+        print('[Done]')
+        print('Note: Potential problem: target label is not unique in correlations dataframe. Duplicates were removed.')
 
     # Drop the row with the index containing the original target header (i.e. drop the target label columns as correlation is relevant only for indepdent variables)
-    index_labels = df_correlations.index.tolist()
-    for label in index_labels:
-        if target_header in label:
-            df_correlations.drop(df_correlations.index[df_correlations.index.get_loc(label)], inplace=True)
-
+    try:
+        index_labels = df_correlations.index.tolist()
+        for label in index_labels:
+            if target_header in label:
+                df_correlations.drop(df_correlations.index[df_correlations.index.get_loc(label)], inplace=True)
+    except:
+        pass
+    
     # Drop rows containing NaN
     df_correlations.dropna(inplace=True)
 
