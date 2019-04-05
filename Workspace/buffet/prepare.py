@@ -945,7 +945,7 @@ def filter_column_headers(df, include_words=None, exclude_words=None, target_hea
                     
     # Prepare column list
     filtered_column_list = list(set(filtered_column_list) - set(remove_list))
-    if target_header is not None:
+    if (target_header is not None) and (target_header not in filtered_column_list):
         filtered_column_list = filtered_column_list + [target_header]
 
     # Apply column filter
