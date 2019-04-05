@@ -906,16 +906,16 @@ def transform_data(df, target_header, numerical_imputer=None, scaler=None, encod
     return df_x, df_y
 
 # Helper function for filter column headings with inclusion/exclusion of keywords
-def filter_column_headers(df, target_header, include_words=None, exclude_words=None):
+def filter_column_headers(df, include_words=None, exclude_words=None, target_header=None):
     """
     Helper function for filter column headings with inclusion/exclusion of keywords in the dataset
 
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed as input
-    target_header : integer, the column containing the prediction target label
     include_words : list, list of keyword strings to include in the filter
     exclude_words : list, list of keyword strings to exclude in the filter
+    target_header : string, the header description of the column containing the prediction target label
 
     Returns:
     -----------
@@ -943,10 +943,12 @@ def filter_column_headers(df, target_header, include_words=None, exclude_words=N
                 if exclude_word.lower() in column_header.lower():
                     remove_list.append(column_header)
                     
+    # Prepare column list
     filtered_column_list = list(set(filtered_column_list) - set(remove_list))
-    
+    if target_header is not None:
+        filtered_column_list = filtered_column_list + [target_header]
+
     # Apply column filter
-    filtered_column_list = filtered_column_list + [target_header]
     df_output = df[filtered_column_list]
     
     return df_output
