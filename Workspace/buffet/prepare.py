@@ -1212,6 +1212,10 @@ def train_test_uniform_split(df, target_header, test_size=0.3, random_state=None
     X_test = pd.concat([X_test_0, X_test_1], axis=0)
     y_train = pd.concat([y_train_0, y_train_1], axis=0)
     y_test = pd.concat([y_test_0, y_test_1], axis=0)
+    
+    # Get target labels data as arrays
+    y_train = y_train[y_train.columns[0]]
+    y_test = y_test[y_test.columns[0]]
 
     return X_train, X_test, y_train, y_test
 
