@@ -795,6 +795,90 @@ def group_time_features(df, time_header, group_header, time_measure='day'):
 
     return df_output
 
+# Transform data containing sequence based data values into structured relational format
+def sequence_encoding(df, id_header, feature_headers, id_repeats_max_limit=10):
+    '''
+    Helper function that transforms sequence based data values into structured relational format.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    id_header : str, the header description of the column containing ID group of the sequence data
+    feature_headers : list of str, list of header descriptions of the columns containing the sequence data to be extracted
+    id_repeats_max_limit : int, the maximum number of sequence orders to be extracted
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    
+    '''
+    id_repeats = 0
+    current_id = None
+    prev_id = None
+    output_series = {}
+    
+    id_count = 0
+    row_count = 0
+    row_count_max = df.shape[0]
+    percent_progress = 0
+    
+    for index, row in df.iterrows():
+        if row_count == 0:
+            current_id = row[id_header]
+        
+            # Initialise data on multiple series sequences (at first row)
+            output_series[id_header] = []
+            output_series[id_header].append(row[id_header])
+            
+            for header in feature_headers:
+                for id_index in range(id_repeats_max_limit):
+                    output_series[header + '_seq' + str(id_index)] = [np.nan]
+                    
+            # Update data on multiple series sequences
+            for header in feature_headers:
+                for id_index in range(id_repeats_max_limit):
+                    if id_index == id_repeats:
+                        output_series[header + '_seq' + str(id_index)][id_count - 1] = row[header]
+                    else:
+                        output_series[header + '_seq' + str(id_index)][id_count - 1] = np.nan
+            
+            id_count += 1
+            prev_id = current_id
+        else:
+            # Check for next id that is repeating
+            current_id = row[id_header]
+            
+            if current_id == prev_id:
+                id_repeats += 1
+                # Update data on multiple series sequences
+                for header in feature_headers:
+                    for id_index in range(id_repeats_max_limit):
+                        if id_index == id_repeats:
+                            output_series[header + '_seq' + str(id_index)][id_count - 1] = row[header]
+            else:
+                id_repeats = 0
+                id_count += 1
+                # Append data on multiple series sequences
+                output_series[id_header].append(row[id_header])
+                
+                for header in feature_headers:
+                    for id_index in range(id_repeats_max_limit):
+                        if id_index == id_repeats:
+                            output_series[header + '_seq' + str(id_index)].append(row[header])
+                        else:
+                            output_series[header + '_seq' + str(id_index)].append(np.nan)
+            
+            prev_id = current_id
+            
+        row_count = row_count + 1
+        percent_progress = round((float(row_count)/float(row_count_max))*100, 2)
+        if percent_progress % 1 == 0:
+            print('\rData feature extraction in progress: ' + str(int(percent_progress)) + '%', end='')
+            
+    df_output = pd.DataFrame(output_series)
+    
+    return df_output
+
 # Transform data via estimated fit to a polynomial function
 def transform_polyfit(df, degree=3, output_length=None):
     '''
@@ -1245,6 +1329,7 @@ def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical
 
     feature_headers = df_x.columns
     X = df_x.values
+    y = df_y
     
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
@@ -1345,6 +1430,7 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
 
     feature_headers = df_x.columns
     X = df_x.values
+    y = df_y
     
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
@@ -1456,7 +1542,8 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
 
     feature_headers = df_x.columns
     X = df_x.values
-
+    y = df_y
+    
     # Get the encoded target labels if necessary
     # Check if target labels are binary 0 and 1
     print('Inspecting target data type... ', end='')
