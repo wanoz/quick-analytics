@@ -879,6 +879,37 @@ def sequence_encoding(df, id_header, feature_headers, id_repeats_max_limit=10):
     
     return df_output
 
+# Downsample data containing drastically higher number of negative label values compared to positive values (for model training)
+def downsample(df, target_header, frac=0.3):
+    '''
+    Helper function that downsamples a dataset and apply an weighted scalar to numerical values based on the downsampling ratio.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : str, the header description of the column containing the target label for model training
+    frac : float, fraction of downsampling desired, e.g. downsampled data that is 10% of the original dataset size is expressed as 0.1
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    
+    '''
+    
+    df_negative = df[df[target_header] == 0]
+    df_positive = df[df[target_header] == 1]
+    n_samples = round(df_negative.shape[0]*frac)
+    
+    # Downsample dataset
+    df_negative_samples = df_negative.sample(n=n_samples)
+    
+    # Apply weighting to downsampled dataset
+    df_negative_weighted = df_negative_samples.select_dtypes(include=[np.number])*round(1/frac, 2)
+    df_negative_samples[df_negative_weighted.columns] = df_negative_weighted
+    
+    df_output = pd.concat([df_negative_samples, df_positive])
+    
+    return df_output
+
 # Transform data via estimated fit to a polynomial function
 def transform_polyfit(df, degree=3, output_length=None):
     '''
