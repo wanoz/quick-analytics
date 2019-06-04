@@ -981,6 +981,8 @@ def transform_data(df, target_header, numerical_imputer=None, scaler=None, encod
             
     # Join up categorical and non-categorical sub-datasets
     if non_categorical.shape[1] > 0 and categorical.shape[1] > 0:
+        non_categorical.reset_index(drop=True, inplace=True)
+        categorical.reset_index(drop=True, inplace=True)
         df_x = pd.concat([non_categorical, categorical], axis=1)
     elif non_categorical.shape[1] == 0:
         df_x = categorical
@@ -1157,6 +1159,8 @@ def correlations_check(df, target_header, target_label=None, numerical_imputer=N
     print('[Done]')
 
     # Get the correlation values with respect to the target column
+    df_x.reset_index(drop=True, inplace=True)
+    df_y.reset_index(drop=True, inplace=True)
     df_correlations = pd.concat([df_x, df_y], axis=1).corr()[[target_header]]
     
     if len(df_correlations.columns.tolist()) == 1:
