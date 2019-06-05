@@ -910,6 +910,7 @@ def downsample(df, target_header, frac=0.3):
     df_negative_samples[df_negative_weighted.columns] = df_negative_weighted
     
     df_output = pd.concat([df_negative_samples, df_positive])
+    df_output.reset_index(drop=True, inplace=True)
     
     return df_output
 
