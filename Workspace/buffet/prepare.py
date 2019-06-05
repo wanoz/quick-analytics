@@ -20,6 +20,9 @@ from sklearn.ensemble import RandomForestClassifier, IsolationForest
 from sklearn.feature_selection import RFE
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
 from sklearn.neighbors.nearest_centroid import NearestCentroid
+from sklearn.cluster import KMeans
+from scipy.spatial.distance import cdist
+from sklearn import metrics
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, precision_recall_curve, roc_auc_score, auc
 from sklearn.metrics.pairwise import euclidean_distances
 from skimage.io import imread, imshow
@@ -2249,7 +2252,7 @@ def heatmap_pca(df_pca_comp, n_features=3, n_comps=3, sns_cmap='plasma', annot=F
     plt.ylabel('Features', **label_fonts)
     
 # Create matrix plot for correlations data
-def correlations_plot(df, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_cmap='plasma', annot=False, title=None):
+def correlation_matrix_plot(df, plot_size=(10, 7), sns_style='white', sns_context='talk', sns_cmap='plasma', annot=False, title=None):
     """
     Produce a correlation matrix plot.
 
