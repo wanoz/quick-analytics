@@ -1342,6 +1342,43 @@ def train_test_uniform_split(df, target_header, test_size=0.3, random_state=None
 
     return X_train, X_test, y_train, y_test
 
+# Kmeans clustering elbow analysis
+def kmeans_elbow_plot(df, target_header, max_clusters=10):
+    """
+    Helper function generates a Kmeans elbow plot (for finding optimal number of Kmeans clusters) over the input dataset.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the column with the header description of the target label
+    max_clusters : int, maximum number of clusters specified for the Kmeans models
+    
+    Returns:
+    -----------
+    Display of Kmeans elbow plot
+    """
+
+    distances_centroids = []
+
+    df_x = df.drop([target_header], axis=1)
+
+    K = range(1, max_clusters)
+
+    # Train the Kmeans model
+    for k in K:
+        model = Kmeans(n_clusters=k).fit(df_x)
+        model.fit(df_x)
+        centroids = model.cluster_centers_
+        distances_centroids.append(sum(np.min(cdist(df_x, centroids, 'euclidean'), axis=1))/df_x.shape[0])
+    
+    # Kemans elbow plot
+    plt.figure(figsize=(9, 7))
+    plt.plot(K, distances_centroids, color='darkblue')
+    plt.xlabel('Number of clusters')
+    plt.ylabel('Distance measure from centroids')
+    plt.title('Kmeans fit over varying clusters')
+    plt.show()
+    
 # Feature analysis with logistic regression
 def svm_anomaly_features(df, target_header, target_label=None, nu=0.2, numerical_imputer=None, scaler=None, encoder=None, remove_binary=False):
     """
