@@ -883,7 +883,7 @@ def sequence_encoding(df, id_header, feature_headers, id_repeats_max_limit=10):
     return df_output
 
 # Downsample data containing drastically higher number of negative label values compared to positive values (for model training)
-def downsample(df, target_header, frac=0.3):
+def downsample(df, target_header, frac=0.3, weight_scaling=0):
     '''
     Helper function that downsamples a dataset and apply an weighted scalar to numerical values based on the downsampling ratio.
 
@@ -892,6 +892,8 @@ def downsample(df, target_header, frac=0.3):
     df : pd.dataframe, dataframe to be passed as input
     target_header : str, the header description of the column containing the target label for model training
     frac : float, fraction of downsampling desired, e.g. downsampled data that is 10% of the original dataset size is expressed as 0.1
+    weight_scaling : float, {0, 1} magnitude of additional numerical weights to data after downsampling for dataset calibration.
+
     Returns:
     -----------
     df_output : pd.dataframe, resulting dataframe as output
@@ -900,17 +902,40 @@ def downsample(df, target_header, frac=0.3):
     
     df_negative = df[df[target_header] == 0]
     df_positive = df[df[target_header] == 1]
-    n_samples = round(df_negative.shape[0]*frac)
     
-    # Downsample dataset
-    df_negative_samples = df_negative.sample(n=n_samples)
+    neg_samples = df_negative.shape[0]
+    pos_samples = df_positive.shape[0]
+
+    print('Negative label has ' + str(neg_samples) + ' samples.')
+    print('Positive label has ' + str(pos_samples) + ' samples.')
+
+    exit_function = False
+
+    if neg_samples > pos_samples:
+        n_samples = round(df_negative.shape[0]*frac)
+        print('Extracted ' + str(n_samples) + ' record samples from negative label data.')
+    elif neg_samples < pos_samples:
+        n_samples = round(df_positive.shape[0]*frac)
+        print('Extracted ' + str(n_samples) + ' record samples from positive label data.')
+    else:
+        print('Negative and positive label samples are of equal size. Downsampling in the context of this function is only appropriate for dataset with imbalanced class distribution.')
+        exit_function = True
     
-    # Apply weighting to downsampled dataset
-    df_negative_weighted = df_negative_samples.select_dtypes(include=[np.number])*round(1/frac, 2)
-    df_negative_samples[df_negative_weighted.columns] = df_negative_weighted
-    
-    df_output = pd.concat([df_negative_samples, df_positive])
-    df_output.reset_index(drop=True, inplace=True)
+    if exit_function is False:
+        # Downsample dataset
+        df_negative_samples = df_negative.sample(n=n_samples)
+        
+        # Apply weighting to downsampled dataset
+        if weight_scaling > 1:
+            weight_scaling = 1
+        elif weight_scaling < 0:
+            weight_scaling = 0
+
+        df_negative_weighted = df_negative_samples.select_dtypes(include=[np.number])*int(round((1/frac)**weight_scaling))
+        df_negative_samples[df_negative_weighted.columns] = df_negative_weighted
+        
+        df_output = pd.concat([df_negative_samples, df_positive])
+        df_output.reset_index(drop=True, inplace=True)
     
     return df_output
 
