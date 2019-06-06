@@ -1389,7 +1389,7 @@ def kmeans_elbow_plot(df, target_header, max_clusters=10):
 
     K = range(1, max_clusters)
 
-    print('Apply data to KMeans models... ', end='')
+    print('Applying data to KMeans models... ', end='')
     # Train the Kmeans model
     for k in K:
         model = KMeans(n_clusters=k).fit(df_x)
