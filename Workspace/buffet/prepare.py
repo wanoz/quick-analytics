@@ -24,7 +24,7 @@ from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
 from sklearn import metrics
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, precision_recall_curve, roc_auc_score, auc
-from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.metrics.pairwise import euclidean_distances, manhattan_distances
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
 from datetime import datetime, date
@@ -1125,7 +1125,7 @@ def filter_quantile(df, target_header, quantile_range=(0.25, 0.75)):
     return df_output
 
 # Helper function for centroids distance association calculation
-def centroids_features(df, target_header, target_cluster_label=None, metric='euclidean', shrink_threshold=None, numerical_imputer=None, scaler=None, encoder=None, remove_binary=None):
+def centroids_features(df, target_header, target_cluster_label=1, metric='euclidean', shrink_threshold=None, numerical_imputer=None, scaler=None, encoder=None, remove_binary=None):
     """
     Helper function for centroids distance association calculation in the dataset
 
@@ -1143,7 +1143,6 @@ def centroids_features(df, target_header, target_cluster_label=None, metric='euc
     Returns:
     -----------
     df_output : pd.dataframe, resulting dataframe as output
-    df_centroids : pd.dataframe, resulting dataframe containing centroids as output
     """
 
     # Apply the optional data transformation (imputing, scaling, encoding) if required 
@@ -1167,14 +1166,66 @@ def centroids_features(df, target_header, target_cluster_label=None, metric='euc
     df_centroids = pd.DataFrame({'Centroid' : centroids.tolist(), 'Centroid label' : centroid_labels})
     
     # Get centroid for the target cluster label
-    if target_cluster_label is not None:
-        target_centroid = df_centroids[df_centroids['Centroid label'] == target_cluster_label]['Centroid'].item()
+    target_centroid = df_centroids[df_centroids['Centroid label'] == target_cluster_label]['Centroid'].item()
+    if metric == 'enclidean':
         dists_from_target = euclidean_distances(X_train, [np.asarray(target_centroid)])
-        dists_from_target = [dist[0] for dist in dists_from_target.tolist()]
-        df_output['Association to cluster group: "' + target_header + '_' + str(target_cluster_label) + '"' ] = dists_from_target
+    elif metric == 'manhanttan':
+        dists_from_target = manhattan_distances(X_train, [np.asarray(target_centroid)])
+    dists_from_target = [dist[0] for dist in dists_from_target.tolist()]
+    df_output['Association to cluster group: "' + target_header + '_' + str(target_cluster_label) + '"' ] = dists_from_target
+
     print('[Done]')
 
-    return df_output, df_centroids
+    return df_output
+
+# Helper function for Kmeans centroids distance association calculation
+def kmeans_centroids_features(df, target_header, n_clusters, target_cluster_label=1, metric='euclidean', numerical_imputer=None, scaler=None, encoder=None, remove_binary=None):
+    """
+    Helper function for Kmeans centroids distance association calculation in the dataset
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : int, the column containing the cluster label in integer format
+    n_clusters: int, the number of clusters specified for the Kmeans model
+    metric : string, selection of 'euclidean' (minimizing sum of distances), 'manhanttan' (median of distances)
+    numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
+    scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
+    encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
+    remove_binary : boolean, option to remove columns containing binary values
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    """
+
+    # Apply the optional data transformation (imputing, scaling, encoding) if required 
+    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
+
+    print('Calculating data centroids... ', end='')
+
+    model = KMeans(n_clusters=n_clusters).fit(df_x)
+    y_pred = model.predict(df_x)
+    df_pred = pd.DataFrame({'Centroid label' : y_pred.tolist()})
+    
+    centroids = model.cluster_centers_
+    centroid_labels = [model.predict([centroid])[0] for centroid in centroids]
+    df_centroids = pd.DataFrame({'Centroid' : centroids.tolist(), 'Centroid label' : centroid_labels})
+
+    # Get centroid for the target cluster label
+    y_pred_centroids = pd.merge(df_pred, df_centroids, how='left', on='Centroid label')
+    target_centroid = y_pred_centroids['Centroid'].item()
+
+    if metric == 'enclidean':
+        dists_from_target = euclidean_distances(df_x.values, [np.asarray(target_centroid)])
+    elif metric == 'manhanttan':
+        dists_from_target = manhattan_distances(df_x.values, [np.asarray(target_centroid)])
+    dists_from_target = [dist[0] for dist in dists_from_target.tolist()]
+    df_output['Association to Kmeans cluster group: "' + target_header + '_' + str(target_cluster_label) + '"' ] = dists_from_target
+
+    print('[Done]')
+
+    return df_output
 
 # Feature analysis with correlations
 def correlations_check(df, target_header, target_label=None, numerical_imputer=None, scaler=None, encoder=None, remove_binary=None):
