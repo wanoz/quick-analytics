@@ -1133,7 +1133,7 @@ def centroids_features(df, target_header, target_cluster_label=1, metric='euclid
     -----------
     df : pd.dataframe, dataframe to be passed as input
     target_header : int, the column containing the cluster label in integer format
-    metric : string, selection of 'euclidean' (minimizing sum of distances), 'manhanttan' (median of distances)
+    metric : string, selection of 'euclidean' (minimizing sum of distances), 'manhattan' (median of distances)
     shrink_threshold : float, threshold for shrinking centroids to remove features
     numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
@@ -1167,9 +1167,11 @@ def centroids_features(df, target_header, target_cluster_label=1, metric='euclid
     
     # Get centroid for the target cluster label
     target_centroid = df_centroids[df_centroids['Centroid label'] == target_cluster_label]['Centroid'].item()
-    if metric == 'enclidean':
+
+    dists_from_target = []
+    if metric == 'euclidean':
         dists_from_target = euclidean_distances(X_train, [np.asarray(target_centroid)])
-    elif metric == 'manhanttan':
+    elif metric == 'manhattan':
         dists_from_target = manhattan_distances(X_train, [np.asarray(target_centroid)])
     dists_from_target = [dist[0] for dist in dists_from_target.tolist()]
     df_output['Association to cluster group: "' + target_header + '_' + str(target_cluster_label) + '"' ] = dists_from_target
@@ -1188,7 +1190,7 @@ def kmeans_centroids_features(df, target_header, n_clusters, target_cluster_labe
     df : pd.dataframe, dataframe to be passed as input
     target_header : int, the column containing the cluster label in integer format
     n_clusters: int, the number of clusters specified for the Kmeans model
-    metric : string, selection of 'euclidean' (minimizing sum of distances), 'manhanttan' (median of distances)
+    metric : string, selection of 'euclidean' (minimizing sum of distances), 'manhattan' (median of distances)
     numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
     encoder : selection of 'one_hot', 'label_encoding', the type of encoding method for categorical data
@@ -1201,7 +1203,7 @@ def kmeans_centroids_features(df, target_header, n_clusters, target_cluster_labe
 
     # Apply the optional data transformation (imputing, scaling, encoding) if required 
     df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
-
+    df_output = df
     print('Calculating data centroids... ', end='')
 
     model = KMeans(n_clusters=n_clusters).fit(df_x)
@@ -1212,16 +1214,23 @@ def kmeans_centroids_features(df, target_header, n_clusters, target_cluster_labe
     centroid_labels = [model.predict([centroid])[0] for centroid in centroids]
     df_centroids = pd.DataFrame({'Centroid' : centroids.tolist(), 'Centroid label' : centroid_labels})
 
-    # Get centroid for the target cluster label
+    # Get centroid of the cluster label assigned to each data record
     y_pred_centroids = pd.merge(df_pred, df_centroids, how='left', on='Centroid label')
-    target_centroid = y_pred_centroids['Centroid'].item()
+    pred_centroid = y_pred_centroids['Centroid'].values.tolist()
 
-    if metric == 'enclidean':
-        dists_from_target = euclidean_distances(df_x.values, [np.asarray(target_centroid)])
-    elif metric == 'manhanttan':
-        dists_from_target = manhattan_distances(df_x.values, [np.asarray(target_centroid)])
-    dists_from_target = [dist[0] for dist in dists_from_target.tolist()]
-    df_output['Association to Kmeans cluster group: "' + target_header + '_' + str(target_cluster_label) + '"' ] = dists_from_target
+    dists_from_target = []
+    if metric == 'euclidean':
+        row_count = 0
+        for index, row in df_x.iterrows():
+            dists_from_target.append((sum((row.values.astype(float) - pred_centroid[row_count])**2))**(1/2))
+            row_count += 1
+    elif metric == 'manhattan':
+        row_count = 0
+        for index, row in df_x.iterrows():
+            dists_from_target.append(sum(abs(row.values.astype(float) - pred_centroid[row_count])))
+            row_count += 1
+ 
+    df_output['Association to nearest Kmeans cluster group'] = dists_from_target
 
     print('[Done]')
 
