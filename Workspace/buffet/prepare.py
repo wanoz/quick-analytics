@@ -1389,13 +1389,15 @@ def kmeans_elbow_plot(df, target_header, max_clusters=10):
 
     K = range(1, max_clusters)
 
+    print('Apply data to KMeans models... ', end='')
     # Train the Kmeans model
     for k in K:
-        model = Kmeans(n_clusters=k).fit(df_x)
+        model = KMeans(n_clusters=k).fit(df_x)
         model.fit(df_x)
         centroids = model.cluster_centers_
         distances_centroids.append(sum(np.min(cdist(df_x, centroids, 'euclidean'), axis=1))/df_x.shape[0])
-    
+    print('[Done]')
+
     # Kemans elbow plot
     plt.figure(figsize=(9, 7))
     plt.plot(K, distances_centroids, color='darkblue')
