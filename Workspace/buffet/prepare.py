@@ -890,7 +890,7 @@ def downsample(df, target_header, frac=0.3, weight_scaling=0):
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed as input
-    target_header : str, the header description of the column containing the target label for model training
+    target_header : string, the header description of the column containing the target label
     frac : float, fraction of downsampling desired, e.g. downsampled data that is 10% of the original dataset size is expressed as 0.1
     weight_scaling : float, {0, 1} magnitude of additional numerical weights to data after downsampling for dataset calibration.
 
@@ -936,6 +936,57 @@ def downsample(df, target_header, frac=0.3, weight_scaling=0):
         
         df_output = pd.concat([df_negative_samples, df_positive])
         df_output.reset_index(drop=True, inplace=True)
+    
+    return df_output
+
+# Helper function to apply custom log transform - (-1)*log(abs(x) + 1) if negative or (log(abs(x) + 1) if positive
+def transform_log(df, target_header):
+    """
+    Apply log transform to data to facilitate modelling.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the header description of the column containing the target label
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    """
+    
+    # Separate features and target data
+    df_x = df.drop(columns=[target_header])
+    df_y = df[[target_header]]
+    
+    # Isolate sub-dataset containing categorical values
+    categorical = df_x.loc[:, df_x.dtypes == object].copy()
+    
+    # Isolate sub-dataset containing non-categorical values
+    non_categorical = df_x.loc[:, df_x.dtypes != object].copy()
+    non_categorical = non_categorical.astype(np.float64)
+    
+    feature_headers = non_categorical.columns.tolist()
+    
+    # Store transformed data into dictionary
+    transformed_data = {}
+    
+    # Apply log transformation throughout the data
+    for header in feature_headers:
+        transformed_values = []
+        for index, row in non_categorical.iterrows():
+            log_val = 0
+            if row[header] < 0:
+                log_val = (-1)*np.log(np.abs(row[header]) + 1)
+            else:
+                log_val = np.log(np.abs(row[header]) + 1)
+            transformed_values.append(log_val)
+        transformed_data[header] = transformed_values
+    
+    non_categorical = pd.DataFrame(transformed_data)
+    
+    # Finalise dataset
+    df_x = pd.concat([non_categorical, categorical], axis=1)
+    df_output = pd.concat([df_x, df_y], axis=1)
     
     return df_output
 
@@ -1188,7 +1239,7 @@ def kmeans_centroids_features(df, target_header, n_clusters, target_cluster_labe
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed as input
-    target_header : int, the column containing the cluster label in integer format
+    target_header : string, the header description of the column containing the cluster label
     n_clusters: int, the number of clusters specified for the Kmeans model
     metric : string, selection of 'euclidean' (minimizing sum of distances), 'manhattan' (median of distances)
     numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
@@ -1244,7 +1295,7 @@ def correlations_check(df, target_header, target_label=None, numerical_imputer=N
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed as input
-    target_header : string, the column with the header description to run feature correlations against
+    target_header : string, the header description of the column to run feature correlations against
     target_label : string, optional input if the target column is not yet encoded with binary 0 and 1 labels
     numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
@@ -1435,7 +1486,7 @@ def kmeans_elbow_plot(df, target_header, max_clusters=10):
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed as input
-    target_header : string, the column with the header description of the target label
+    target_header : string, the header description of the column containing the target label
     max_clusters : int, maximum number of clusters specified for the Kmeans models
     
     Returns:
