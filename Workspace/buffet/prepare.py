@@ -1175,6 +1175,100 @@ def filter_quantile(df, target_header, quantile_range=(0.25, 0.75)):
     
     return df_output
 
+# Obtain normality, t-test scores on independent variables with respect to binary class groups
+def feature_class_stats(df, target_header, p_value_threshold=0.05):
+    """
+    Helper function for determining feature statistical significance between negative and positive binary class groups.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    target_header : string, the header description of the column containing the target label
+    p_value_threshold : float, the specified p-value for null hypothesis test (below the threshold means rejection of null hypothesis)
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    """
+    
+    df_positive = df[df[target_header] == 1]
+    df_negative = df[df[target_header] == 0]
+    
+    # Separate features and target data
+    df_positive_x = df_positive.drop(columns=[target_header])
+    df_negative_x = df_negative.drop(columns=[target_header])
+    
+    # Isolate sub-dataset containing categorical values
+    categorical_positive = df_positive_x.loc[:, df_positive_x.dtypes == object].copy()
+    categorical_negative = df_negative_x.loc[:, df_negative_x.dtypes == object].copy()
+    
+    # Isolate sub-dataset containing non-categorical values
+    non_categorical_positive = df_positive_x.loc[:, df_positive_x.dtypes != object].copy()
+    non_categorical_positive = non_categorical_positive.astype(np.float64)
+    non_categorical_negative = df_negative_x.loc[:, df_negative_x.dtypes != object].copy()
+    non_categorical_negative = non_categorical_negative.astype(np.float64)
+    
+    feature_headers = non_categorical_positive.columns.tolist()
+    n_samples = df.shape[0]
+    skewness_max = 2*(6/n_samples)**(1/2)
+    kurtosis_max = 2*(24/n_samples)**(1/2)
+    
+    # Get feature statistics with respect to binary class 
+    feature_desc = []
+    feature_mean_positive = []
+    feature_mean_negative = []
+    feature_mean_diff = []
+    t_scores = []
+    p_values = []
+    stat_significance = []
+    data_normality = []
+    for header in feature_headers:
+        samples_positive = non_categorical_positive[header]
+        samples_negative = non_categorical_negative[header]
+        t_score, p_value = ttest_ind(samples_positive, samples_negative)
+        skewness_positive = np.abs(skew(samples_positive))
+        skewness_negative = np.abs(skew(samples_negative))
+        kurtosis_positive = np.abs(kurtosis(samples_positive))
+        kurtosis_negative = np.abs(kurtosis(samples_negative))
+        
+        normality_flag = False
+        # Assess normality
+        if (skewness_positive > skewness_max) or (skewness_negative > skewness_max) or \
+            (kurtosis_positive > kurtosis_max) or (kurtosis_negative > kurtosis_max):
+            normality_flag = True
+            
+        # Assess statistical significance
+        stat_significance_flag = False
+        if (p_value < p_value_threshold) and (normality_flag == True):
+            stat_significance_flag = True
+        
+        # Gather stats scores
+        feature_desc.append(header)
+        feature_mean_positive.append(samples_positive.mean())
+        feature_mean_negative.append(samples_negative.mean())
+        feature_mean_diff.append(100*round((samples_positive.mean() - samples_negative.mean())/samples_negative.mean(), 4))
+        t_scores.append(t_score)
+        p_values.append(p_value)
+        stat_significance.append(stat_significance_flag)
+        data_normality.append(normality_flag)
+        
+    # Finalise output
+    df_output = pd.DataFrame({'Feature description' : feature_desc, 
+                              'Neg class mean' : feature_mean_negative, 
+                              'Pos class mean' : feature_mean_positive, 
+                              'Diff in mean (%)' : feature_mean_diff,
+                              'T-score (Neg/Pos)' : t_scores, 
+                              'P-value (Neg/Pos)' : p_values, 
+                              'Stat significance' : stat_significance,
+                              'Data normality (Neg/Pos)' : data_normality})
+    
+    df_output = df_output.sort_values(by='P-value (Neg/Pos)', ascending=True)
+    df_output = df_output.sort_values(by=['Data normality (Neg/Pos)', 'Stat significance'], ascending=False)
+    df_output.reset_index(drop=True, inplace=True)
+    print('Statistical significance threshold for P-value: ' + str(p_value_threshold))
+    
+    return df_output
+    
 # Helper function for centroids distance association calculation
 def centroids_features(df, target_header, target_cluster_label=1, metric='euclidean', shrink_threshold=None, numerical_imputer=None, scaler=None, encoder=None, remove_binary=None):
     """
