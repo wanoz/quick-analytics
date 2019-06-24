@@ -6,8 +6,7 @@ When creating scripts and building tools for data analytics or machine learning 
 ## Content inclusions
 Currently, only Python scripts and Jupyter notebooks are included in this package. These cover Sklearn and Keras/Tensorflow implementations of:
 - Data preprocessing (PCA, feature engineering, visualisation)
-- Model training (decision tree, logistic regression, SVM, neural networks, convolutional neural networks, etc)
-- Model evaluation
+- Preliminary model training and evaluation
 
 ### Note
 Place input data (csv, xlsx files) in the "Data" folder if using the Jupyter notebook template examples.
