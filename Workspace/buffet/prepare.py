@@ -12,6 +12,8 @@ import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy.stats import ttest_ind, kurtosis, skew
+from scipy.spatial.distance import cdist
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, Imputer
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
@@ -21,7 +23,6 @@ from sklearn.feature_selection import RFE
 from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
 from sklearn.neighbors.nearest_centroid import NearestCentroid
 from sklearn.cluster import KMeans
-from scipy.spatial.distance import cdist
 from sklearn import metrics
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, precision_recall_curve, roc_auc_score, auc
 from sklearn.metrics.pairwise import euclidean_distances, manhattan_distances
