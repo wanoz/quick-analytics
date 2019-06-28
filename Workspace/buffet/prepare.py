@@ -24,7 +24,8 @@ from sklearn.model_selection import train_test_split, KFold, ShuffleSplit
 from sklearn.neighbors.nearest_centroid import NearestCentroid
 from sklearn.cluster import KMeans
 from sklearn import metrics
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, precision_recall_curve, roc_auc_score, auc
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, classification_report, roc_curve, precision_recall_curve, roc_auc_score, auc, average_precision_score
+from sklearn.metrics.pairwise import euclidean_distances, manhattan_distances
 from sklearn.metrics.pairwise import euclidean_distances, manhattan_distances
 from skimage.io import imread, imshow
 from skimage.transform import rescale, resize, downscale_local_mean
@@ -1812,6 +1813,7 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
         print('\nLogistic Regression with ' + reg_norm.capitalize() + ' regularization model evaluation:\n')
         print(classification_report(y_test, y_pred))
 
+        # Show ROC plot
         plt.figure(figsize=(9, 7))
         plt.plot(fpr, tpr, color='darkblue', lw=2, label=roc_auc_label)
         plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
@@ -1821,6 +1823,19 @@ def logistic_reg_features(df, target_header, target_label=None, reg_C=10, reg_no
         plt.ylabel('True Positive Rate')
         plt.title('Receiver operating characteristic')
         plt.legend(loc="lower right")
+        plt.show()
+        
+        precision, recall, _ = precision_recall_curve(y_test, y_score)
+        average_precision = round(average_precision_score(y_test, y_score), 2)
+
+        # Show precision recall plot
+        plt.figure(figsize=(9, 7))
+        plt.plot(recall, precision, color='darkblue', lw=2)
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.title('PR plot, average precision: ' + str(average_precision))
         plt.show()
     
     return df_features
@@ -1924,7 +1939,7 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
         print('\nRandom Forest model evaluation:\n')
         print(classification_report(y_test, y_pred))
 
-        # ROC plot
+        # Show ROC plot
         plt.figure(figsize=(9, 7))
         plt.plot(fpr, tpr, color='darkblue', lw=2, label=roc_auc_label)
         plt.plot([0, 1], [0, 1], color='skyblue', lw=2, linestyle='--')
@@ -1934,6 +1949,19 @@ def random_forest_features(df, target_header, target_label=None, n_trees=10, max
         plt.ylabel('True Positive Rate')
         plt.title('Receiver operating characteristic')
         plt.legend(loc="lower right")
+        plt.show()
+        
+        precision, recall, _ = precision_recall_curve(y_test, y_score)
+        average_precision = round(average_precision_score(y_test, y_score), 2)
+
+        # Show precision recall plot
+        plt.figure(figsize=(9, 7))
+        plt.plot(recall, precision, color='darkblue', lw=2)
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.title('PR plot, average precision: ' + str(average_precision))
         plt.show()
 
     return df_features
