@@ -964,8 +964,8 @@ def rolling_window_features(df, feature_headers, window_period=10, window_functi
     mean_window = {}
     row_count = 0
     
-    print('Rolling window period: ' + str(window_period))
-    print('Rolling window calculations: ' + str(window_functions))
+    print('Processing rolling window period: ' + str(window_period))
+    print('Processing rolling window calculations: ' + str(window_functions))
     
     # Initialise output entries
     for header in feature_headers:
