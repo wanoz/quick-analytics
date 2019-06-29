@@ -949,7 +949,7 @@ def rolling_window_features(df, feature_headers, window_period=10, window_functi
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed as input
-    feature_headers : list, the descriptions of column headers that contain numerical values to be processed within the rolling window regime
+    feature_headers : list, the descriptions of column headers that contains numerical value to be processed within the rolling window regime
     window_period : int, the specified size of the rolling window
     window_functions : list of 'max', 'min', 'sum', 'mean', the set of calculation functions to be applied within the rolling window regime
 
@@ -970,8 +970,8 @@ def rolling_window_features(df, feature_headers, window_period=10, window_functi
     # Initialise output entries
     for header in feature_headers:
         for func in window_functions:
-            feature_window[header + ' ' + func] = []
-            feature_output[header + ' ' + func] = []
+            feature_window[header + ' rolling ' + func] = []
+            feature_output[header + ' rolling ' + func] = []
             
         feature_window_ref[header] = []
         sum_window[header] = 0
@@ -984,38 +984,38 @@ def rolling_window_features(df, feature_headers, window_period=10, window_functi
             if row_count <= window_period:
                 for func in window_functions:
                     if func == 'max':
-                        feature_output[header + ' ' + func].append(0)
+                        feature_output[header + ' rolling ' + func].append(0)
 
                     elif func == 'min':
-                        feature_output[header + ' ' + func].append(0)
+                        feature_output[header + ' rolling ' + func].append(0)
                         
                     elif func == 'sum':
-                        feature_output[header + ' ' + func].append(0)
+                        feature_output[header + ' rolling ' + func].append(0)
                         sum_window[header] = sum_window[header] + row[header]
                         
                     elif func == 'mean':
-                        feature_output[header + ' ' + func].append(0)
+                        feature_output[header + ' rolling ' + func].append(0)
                         mean_window[header] = (mean_window[header]*(row_count - 1) + row[header])/row_count
                         
                 feature_window_ref[header].append(row[header])
             else:
                 for func in window_functions:
-                    feature_window[header + ' ' + func] = feature_window_ref[header].copy()
+                    feature_window[header + ' rolling ' + func] = feature_window_ref[header].copy()
                     if func == 'max': 
-                        feature_window[header + ' ' + func].sort(reverse=True)
-                        feature_output[header + ' ' + func].append(feature_window[header + ' ' + func][0])
+                        feature_window[header + ' rolling ' + func].sort(reverse=True)
+                        feature_output[header + ' rolling ' + func].append(feature_window[header + ' rolling ' + func][0])
 
                     if func == 'min':
-                        feature_window[header + ' ' + func].sort(reverse=False) 
-                        feature_output[header + ' ' + func].append(feature_window[header + ' ' + func][0])
+                        feature_window[header + ' rolling ' + func].sort(reverse=False) 
+                        feature_output[header + ' rolling ' + func].append(feature_window[header + ' rolling ' + func][0])
                         
                     if func == 'sum':
                         sum_window[header] = sum_window[header] + row[header] - feature_window_ref[header][0]
-                        feature_output[header + ' ' + func].append(sum_window[header])
+                        feature_output[header + ' rolling ' + func].append(sum_window[header])
                     
                     if func == 'mean':
                         mean_window[header] = (mean_window[header]*window_period + row[header] - feature_window_ref[header][0])/window_period
-                        feature_output[header + ' ' + func].append(mean_window[header])
+                        feature_output[header + ' rolling ' + func].append(mean_window[header])
                         
                 feature_window_ref[header].append(row[header])
                 feature_window_ref[header] = feature_window_ref[header][1:]
