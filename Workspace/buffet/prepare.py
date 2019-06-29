@@ -942,7 +942,7 @@ def downsample(df, target_header, frac=0.3, weight_scaling=0):
     return df_output
 
 # Calculate values of rolling window outputs for time series analysis
-def rolling_window_features(df, feature_headers, window_period=10, window_functions=['mean']):
+def rolling_window_features(df, feature_headers, window_size=10, window_functions=['mean']):
     '''
     Helper function to process values in a rolling window fashion within a time series dataset
 
@@ -950,7 +950,7 @@ def rolling_window_features(df, feature_headers, window_period=10, window_functi
     -----------
     df : pd.dataframe, dataframe to be passed as input
     feature_headers : list, the descriptions of column headers that contains numerical value to be processed within the rolling window regime
-    window_period : int, the specified size of the rolling window
+    window_size : int, the specified size of the rolling window
     window_functions : list of 'max', 'min', 'sum', 'mean', the set of calculation functions to be applied within the rolling window regime
 
     Returns:
@@ -964,14 +964,14 @@ def rolling_window_features(df, feature_headers, window_period=10, window_functi
     mean_window = {}
     row_count = 0
     
-    print('Processing rolling window period: ' + str(window_period))
+    print('Processing rolling window period: ' + str(window_size))
     print('Processing rolling window calculations: ' + str(window_functions))
     
     # Initialise output entries
     for header in feature_headers:
         for func in window_functions:
-            feature_window[header + ' rolling ' + func] = []
-            feature_output[header + ' rolling ' + func] = []
+            feature_window[header + ' rolling ' + str(window_size) + ' sample ' + func] = []
+            feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func] = []
             
         feature_window_ref[header] = []
         sum_window[header] = 0
@@ -981,41 +981,41 @@ def rolling_window_features(df, feature_headers, window_period=10, window_functi
     for index, row in df.iterrows():
         row_count += 1
         for header in feature_headers:
-            if row_count <= window_period:
+            if row_count <= window_size:
                 for func in window_functions:
                     if func == 'max':
-                        feature_output[header + ' rolling ' + func].append(0)
+                        feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func].append(0)
 
                     elif func == 'min':
-                        feature_output[header + ' rolling ' + func].append(0)
+                        feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func].append(0)
                         
                     elif func == 'sum':
-                        feature_output[header + ' rolling ' + func].append(0)
+                        feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func].append(0)
                         sum_window[header] = sum_window[header] + row[header]
                         
                     elif func == 'mean':
-                        feature_output[header + ' rolling ' + func].append(0)
+                        feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func].append(0)
                         mean_window[header] = (mean_window[header]*(row_count - 1) + row[header])/row_count
                         
                 feature_window_ref[header].append(row[header])
             else:
                 for func in window_functions:
-                    feature_window[header + ' rolling ' + func] = feature_window_ref[header].copy()
+                    feature_window[header + ' rolling ' + str(window_size) + ' sample ' + func] = feature_window_ref[header].copy()
                     if func == 'max': 
-                        feature_window[header + ' rolling ' + func].sort(reverse=True)
-                        feature_output[header + ' rolling ' + func].append(feature_window[header + ' rolling ' + func][0])
+                        feature_window[header + ' rolling ' + str(window_size) + ' sample ' + func].sort(reverse=True)
+                        feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func].append(feature_window[header + ' rolling ' + str(window_size) + ' sample ' + func][0])
 
                     if func == 'min':
-                        feature_window[header + ' rolling ' + func].sort(reverse=False) 
-                        feature_output[header + ' rolling ' + func].append(feature_window[header + ' rolling ' + func][0])
+                        feature_window[header + ' rolling ' + str(window_size) + ' sample ' + func].sort(reverse=False) 
+                        feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func].append(feature_window[header + ' rolling ' + str(window_size) + ' sample ' + func][0])
                         
                     if func == 'sum':
                         sum_window[header] = sum_window[header] + row[header] - feature_window_ref[header][0]
-                        feature_output[header + ' rolling ' + func].append(sum_window[header])
+                        feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func].append(sum_window[header])
                     
                     if func == 'mean':
-                        mean_window[header] = (mean_window[header]*window_period + row[header] - feature_window_ref[header][0])/window_period
-                        feature_output[header + ' rolling ' + func].append(mean_window[header])
+                        mean_window[header] = (mean_window[header]*window_period + row[header] - feature_window_ref[header][0])/window_size
+                        feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func].append(mean_window[header])
                         
                 feature_window_ref[header].append(row[header])
                 feature_window_ref[header] = feature_window_ref[header][1:]
