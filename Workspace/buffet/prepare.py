@@ -941,6 +941,91 @@ def downsample(df, target_header, frac=0.3, weight_scaling=0):
     
     return df_output
 
+# Calculate values of rolling window outputs for time series analysis
+def rolling_window_features(df, feature_headers, window_period=10, window_functions=['mean']):
+    '''
+    Helper function to process values in a rolling window fashion within a time series dataset
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    feature_headers : list, the descriptions of column headers that contain numerical values to be processed within the rolling window regime
+    window_period : int, the specified size of the rolling window
+    window_functions : list of 'max', 'min', 'sum', 'mean', the set of calculation functions to be applied within the rolling window regime
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    '''
+    feature_window = {}
+    feature_window_ref = {}
+    feature_output = {}
+    sum_window = {}
+    mean_window = {}
+    row_count = 0
+    
+    print('Rolling window period: ' + str(window_period))
+    print('Rolling window calculations: ' + str(window_functions))
+    
+    # Initialise output entries
+    for header in feature_headers:
+        for func in window_functions:
+            feature_window[header + ' ' + func] = []
+            feature_output[header + ' ' + func] = []
+            
+        feature_window_ref[header] = []
+        sum_window[header] = 0
+        mean_window[header] = 0
+    
+    # Apply rolling window processing through data
+    for index, row in df.iterrows():
+        row_count += 1
+        for header in feature_headers:
+            if row_count <= window_period:
+                for func in window_functions:
+                    if func == 'max':
+                        feature_output[header + ' ' + func].append(0)
+
+                    elif func == 'min':
+                        feature_output[header + ' ' + func].append(0)
+                        
+                    elif func == 'sum':
+                        feature_output[header + ' ' + func].append(0)
+                        sum_window[header] = sum_window[header] + row[header]
+                        
+                    elif func == 'mean':
+                        feature_output[header + ' ' + func].append(0)
+                        mean_window[header] = (mean_window[header]*(row_count - 1) + row[header])/row_count
+                        
+                feature_window_ref[header].append(row[header])
+            else:
+                for func in window_functions:
+                    feature_window[header + ' ' + func] = feature_window_ref[header].copy()
+                    if func == 'max': 
+                        feature_window[header + ' ' + func].sort(reverse=True)
+                        feature_output[header + ' ' + func].append(feature_window[header + ' ' + func][0])
+
+                    if func == 'min':
+                        feature_window[header + ' ' + func].sort(reverse=False) 
+                        feature_output[header + ' ' + func].append(feature_window[header + ' ' + func][0])
+                        
+                    if func == 'sum':
+                        sum_window[header] = sum_window[header] + row[header] - feature_window_ref[header][0]
+                        feature_output[header + ' ' + func].append(sum_window[header])
+                    
+                    if func == 'mean':
+                        mean_window[header] = (mean_window[header]*window_period + row[header] - feature_window_ref[header][0])/window_period
+                        feature_output[header + ' ' + func].append(mean_window[header])
+                        
+                feature_window_ref[header].append(row[header])
+                feature_window_ref[header] = feature_window_ref[header][1:]
+
+    # Finalise output data
+    df_feature_output = pd.DataFrame(feature_output)
+    df_output = pd.concat([df, df_feature_output], axis=1)
+    
+    return df_output
+
 # Helper function to apply custom log transform - (-1)*log(abs(x) + 1) if negative or (log(abs(x) + 1) if positive
 def transform_log(df, target_header):
     """
