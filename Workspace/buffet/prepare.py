@@ -1297,8 +1297,8 @@ def feature_class_stats(df, target_header, p_value_threshold=0.05):
     
     feature_headers = non_categorical_positive.columns.tolist()
     n_samples = df.shape[0]
-    skewness_max = 2*(6/n_samples)**(1/2)
-    kurtosis_max = 2*(24/n_samples)**(1/2)
+    skewness_max = 2
+    kurtosis_max = 7
     
     # Get feature statistics with respect to binary class 
     feature_desc = []
@@ -1322,6 +1322,8 @@ def feature_class_stats(df, target_header, p_value_threshold=0.05):
         # Assess normality
         if (skewness_positive > skewness_max) or (skewness_negative > skewness_max) or \
             (kurtosis_positive > kurtosis_max) or (kurtosis_negative > kurtosis_max):
+            normality_flag = False
+        else:
             normality_flag = True
             
         # Assess statistical significance
