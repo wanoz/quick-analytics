@@ -1468,6 +1468,7 @@ def kmeans_centroids_features(df, n_clusters, target_header=None, target_cluster
             row_count += 1
  
     df_output['Association to nearest Kmeans cluster group'] = dists_from_target
+    df_output['Kmeans cluster group'] = y_pred
 
     print('[Done]')
 
