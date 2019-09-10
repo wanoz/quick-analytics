@@ -1415,15 +1415,15 @@ def centroids_features(df, target_header, target_cluster_label=1, metric='euclid
     return df_output
 
 # Helper function for Kmeans centroids distance association calculation
-def kmeans_centroids_features(df, target_header, n_clusters, target_cluster_label=1, metric='euclidean', numerical_imputer=None, scaler=None, encoder=None, remove_binary=None):
+def kmeans_centroids_features(df, n_clusters, target_header=None, target_cluster_label=1, metric='euclidean', numerical_imputer=None, scaler=None, encoder=None, remove_binary=None):
     """
     Helper function for Kmeans centroids distance association calculation in the dataset
 
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed as input
-    target_header : string, the header description of the column containing the cluster label
     n_clusters: int, the number of clusters specified for the Kmeans model
+    target_header : string, the header description of the column containing the cluster label
     metric : string, selection of 'euclidean' (minimizing sum of distances), 'manhattan' (median of distances)
     numerical_imputer : selection of 'mean', 'median', 'most_frequent', the type of imputation strategy for processing missing data
     scaler : string, selection of 'standard', 'minmax' or 'robust', type of scaler used for data processing
@@ -1435,8 +1435,11 @@ def kmeans_centroids_features(df, target_header, n_clusters, target_cluster_labe
     df_output : pd.dataframe, resulting dataframe as output
     """
 
-    # Apply the optional data transformation (imputing, scaling, encoding) if required 
-    df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
+    # Apply the optional data transformation (imputing, scaling, encoding) if required
+    if target_header is None:
+        df_x = df
+    else:
+        df_x, df_y = transform_data(df, target_header, numerical_imputer, scaler, encoder, remove_binary)
     df_output = df
     print('Calculating data centroids... ', end='')
 
@@ -1662,7 +1665,7 @@ def train_test_uniform_split(df, target_header, test_size=0.3, random_state=None
     return X_train, X_test, y_train, y_test
 
 # Kmeans clustering elbow analysis
-def kmeans_elbow_plot(df, target_header, max_clusters=10):
+def kmeans_elbow_plot(df, target_header=None, max_clusters=10):
     """
     Helper function generates a Kmeans elbow plot (for finding optimal number of Kmeans clusters) over the input dataset.
 
@@ -1678,8 +1681,11 @@ def kmeans_elbow_plot(df, target_header, max_clusters=10):
     """
 
     distances_centroids = []
-
-    df_x = df.drop([target_header], axis=1)
+    
+    if target_header is None:
+        df_x = df
+    else:
+        df_x = df.drop([target_header], axis=1)
 
     K = range(1, max_clusters + 1)
 
