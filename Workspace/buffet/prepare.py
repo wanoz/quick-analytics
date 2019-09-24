@@ -1262,6 +1262,38 @@ def filter_quantile(df, target_header, quantile_range=(0.25, 0.75)):
     
     return df_output
 
+# Helper function for applying feature weighting in dataset
+def feature_weighting(df, weighting):
+    """
+    Helper function for applying feature weighting in dataset
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    weighting : dictionary, input lookup matrix of feature names and corresponding weighting scalar i.e. {'feature name' : weighting scalar}
+
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    """
+
+    df_output = df.copy()
+
+    # Iterate to cover all feature names for processing
+    for key, value in weighting.items():
+
+        # Filter sub dataset based on feature names
+        df_features = filter_column_headers(df_output, include_words=[key])
+
+        # Apply the specified weighting scalar value
+        df_features = df_features*value
+
+        # Replace existing features with the weighting scaled features
+        df_output = filter_column_headers(df_output, exclude_words=[key])
+        df_output = pd.concat([df_output, df_features], axis=1)
+        
+    return df_output
+
 # Obtain normality, t-test scores on independent variables with respect to binary class groups
 def feature_class_stats(df, target_header, p_value_threshold=0.05):
     """
