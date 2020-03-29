@@ -978,7 +978,7 @@ def rolling_window_features(df, feature_headers, window_size=10, window_function
         mean_window[header] = 0
     
     # Apply rolling window processing through data
-    for index, row in df.iterrows():
+    for _, row in df.iterrows():
         row_count += 1
         for header in feature_headers:
             if row_count <= window_size:
@@ -1014,7 +1014,7 @@ def rolling_window_features(df, feature_headers, window_size=10, window_function
                         feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func].append(sum_window[header])
                     
                     if func == 'mean':
-                        mean_window[header] = (mean_window[header]*window_period + row[header] - feature_window_ref[header][0])/window_size
+                        mean_window[header] = (mean_window[header]*window_size + row[header] - feature_window_ref[header][0])/window_size
                         feature_output[header + ' rolling ' + str(window_size) + ' sample ' + func].append(mean_window[header])
                         
                 feature_window_ref[header].append(row[header])
