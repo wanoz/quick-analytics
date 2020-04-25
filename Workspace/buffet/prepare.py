@@ -608,6 +608,30 @@ def cleaned_datetime(df, feature_header, cleaned_header=None, original_format=No
 
     return df_output
 
+# Helper function for calculating date of weekdays
+def get_weekday(df, feature_header, weekday_index=0):
+    '''
+    Helper function that produces an updated dataset containing the date of the desired weekday in the selected column.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    feature_header : string, the column with the header description that contains date values
+    weekday_index : int, the index of the desired weekday, i.e. 0 is Monday, 1 is Tuesday, etc
+    
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+
+    '''
+    df_output = df
+    
+    weekday_headers = {0 : 'monday', 1 : 'tuesday', 2 : 'wednesday', 3 : 'thursday', 4 : 'friday', 5 : 'saturday', 6 : 'sunday'}
+    df_output[weekday_headers[weekday_index] + '_date'] = df_output[feature_header] - df_output[feature_header].dt.weekday.astype('timedelta64[D]') + pd.DateOffset(days=weekday_index)
+    df_output['days_from_index'] = (df_output[weekday_headers[weekday_index] + '_date'] - df_output[feature_header]).astype('timedelta64[D]')
+    
+    return df_output
+
 # Helper function for labelling duplicate count index information
 def label_duplicates(df, feature_header, duplicate_position='last', order='ascending'):
     '''
