@@ -609,14 +609,14 @@ def cleaned_datetime(df, feature_header, cleaned_header=None, original_format=No
     return df_output
 
 # Helper function for calculating date of weekdays
-def get_weekday(df, feature_header, weekday_index=0):
+def get_weekday(df, date_header, weekday_index=0):
     '''
     Helper function that produces an updated dataset containing the date of the desired weekday in the selected column.
 
     Arguments:
     -----------
     df : pd.dataframe, dataframe to be passed as input
-    feature_header : string, the column with the header description that contains date values
+    date_header : string, the column with the header description that contains date values
     weekday_index : int, the index of the desired weekday, i.e. 0 is Monday, 1 is Tuesday, etc
     
     Returns:
@@ -627,10 +627,57 @@ def get_weekday(df, feature_header, weekday_index=0):
     df_output = df
     
     weekday_headers = {0 : 'monday', 1 : 'tuesday', 2 : 'wednesday', 3 : 'thursday', 4 : 'friday', 5 : 'saturday', 6 : 'sunday'}
-    df_output[weekday_headers[weekday_index] + '_date'] = df_output[feature_header] - df_output[feature_header].dt.weekday.astype('timedelta64[D]') + pd.DateOffset(days=weekday_index)
-    df_output['days_from_index'] = (df_output[weekday_headers[weekday_index] + '_date'] - df_output[feature_header]).astype('timedelta64[D]')
+    df_output[weekday_headers[weekday_index] + '_date'] = df_output[date_header] - df_output[date_header].dt.weekday.astype('timedelta64[D]') + pd.DateOffset(days=weekday_index)
+    df_output['days_from_index'] = (df_output[weekday_headers[weekday_index] + '_date'] - df_output[date_header]).astype('timedelta64[D]')
     
     return df_output
+
+# Helper function for creating train/test splits based on grouping of month values in a time-series dataset
+def train_test_split_month(df, date_header, target_header, test_size=0.3, random_state=None):
+    '''
+    Helper function that produces an updated dataset containing the date of the desired weekday in the selected column.
+
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    date_header : string, the column with the header description that contains date values
+    target_header : string, the column with the header description that contains dependent variable values
+    test_size : float, the percentage split ratio between train and test datasets
+    random_state : int, the seed state of the split result
+    
+    Returns:
+    -----------
+    df_train_result : pd.dataframe, resulting dataframe as output
+    df_test_result : pd.dataframe, resulting dataframe as output
+    
+    '''
+    
+    df[date_header + '_month'] = df[date_header].astype('datetime64[M]')
+
+    month_count = 1
+    for month in df[date_header + '_month'].unique():
+        df_month = df[df[date_header + '_month'] == month]
+        X_train, X_test, y_train, y_test = train_test_split(df_month.drop(columns=[target_header]), df_month[target_header], test_size=test_size, random_state=random_state)
+        if month_count == 1:
+            df_y_train = pd.DataFrame({target_header : y_train})
+            df_train = pd.concat([X_train, df_y_train], axis=1)
+            df_train_result = df_train
+
+            df_y_test = pd.DataFrame({target_header : y_test})
+            df_test = pd.concat([X_test, df_y_test], axis=1)
+            df_test_result = df_test
+        else:
+            df_y_train = pd.DataFrame({target_header : y_train})
+            df_train = pd.concat([X_train, df_y_train], axis=1)
+            df_train_result = pd.concat([df_train_result, df_train], axis=0)
+
+            df_y_test = pd.DataFrame({target_header : y_test})
+            df_test = pd.concat([X_test, df_y_test], axis=1)
+            df_test_result = pd.concat([df_test_result, df_test], axis=0)
+
+        month_count += 1
+
+    return df_train_result, df_test_result
 
 # Helper function for labelling duplicate count index information
 def label_duplicates(df, feature_header, duplicate_position='last', order='ascending'):
