@@ -7,9 +7,10 @@ import os
 import os.path
 import gc
 import warnings
+import math
 import numpy as np
 import pandas as pd
-import geopandas as gpd
+# import geopandas as gpd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import ttest_ind, kurtosis, skew
@@ -3449,3 +3450,31 @@ def parse_image_data(img_folder_names=[], file_type='jpeg', grayscale=False, tar
         print('Images processed unsuccessfully!')
 
     return X, y
+
+# Helper function to round up number to the specified integer interval
+def roundup(x, interval):
+    return int(math.ceil(x/interval))*interval
+
+# Helper function to show elapsed time in an useful format.
+def show_time_elapsed(start_time, end_time):
+    """
+    Show the elapsed script running time in hours, minutes and/or seconds format.
+    """
+    time_elapsed = end_time - start_time
+    if time_elapsed < 60:
+        print('Time taken:', str(round((end_time - start_time), 2)) + 's')
+    elif time_elapsed >= 60 and time_elapsed < 3600:
+        minutes = math.floor(time_elapsed/60)
+        seconds = time_elapsed % 60
+        print('Time taken:', str(minutes) + 'mins', str(round(seconds, 2)) + 's')
+    else:
+        hours = math.floor(time_elapsed/3600)
+        remaining_seconds = time_elapsed % 3600
+        if remaining_seconds < 60:
+            minutes = 0
+            seconds = remaining_seconds
+            print('Time taken:', str(hours) + 'hrs', str(minutes) + 'mins', str(round(seconds, 2)) + 's')
+        else:
+            minutes = math.floor(remaining_seconds/60)
+            seconds = remaining_seconds % 60
+            print('Time taken:', str(hours) + 'hrs', str(minutes) + 'mins', str(round(seconds, 2)) + 's')
