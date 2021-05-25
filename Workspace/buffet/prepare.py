@@ -3455,6 +3455,27 @@ def parse_image_data(img_folder_names=[], file_type='jpeg', grayscale=False, tar
 def roundup(x, interval):
     return int(math.ceil(x/interval))*interval
 
+# Helper function to log computer progress during iterations loop
+def log_progress(current_iter, total_iter, log_interval_perc=5):
+    '''
+    Arguments:
+    -----------
+    current_iter : int, the current iteration count.
+    total_iter : int, total iteration count.
+    log_interval_perc : int (from 0 to 100), percentage integer specified for the interval display of the compute progress.
+    
+    Output:
+    -----------
+    Shows the current percentage of iteration progress
+    '''
+    if current_iter == 0:
+        progress_current = 0
+        print('Progress:', str(round(progress_current, 2)) + '%', end='\r')
+    else:
+        progress_current = round(current_iter/total_iter, 3)*100
+        if progress_current % log_interval_perc == 0:
+            print('Progress:', str(round(progress_current, 2)) + '%', end='\r')
+
 # Helper function to show elapsed time in an useful format.
 def show_time_elapsed(start_time, end_time):
     """
