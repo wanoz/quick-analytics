@@ -3451,6 +3451,144 @@ def parse_image_data(img_folder_names=[], file_type='jpeg', grayscale=False, tar
 
     return X, y
 
+# Helper function to create aggregated value of grouped features
+def agg_group_features(df, group_labels, target_column_label, method='mean'):
+    '''
+    Helper function that produces an updated dataset containing aggregated values of the specified group features.
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    group_labels : list, the column headers of the specified features used in the group operation
+    target_column_label : str, the column header of the target variable
+    operation: str, options of 'mean', 'sum', 'max', 'min' as the specified aggregation method
+    
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    '''
+    
+    # Data processing - grouping of specified features
+    agg_val_label = '_'.join(group_labels) + '_' + method
+    keyall = []
+    agg_val = []
+    data_records = []
+    count = 0
+    for key, group in df.groupby(group_labels):
+        keyall.append(key)
+        if method == 'mean':
+            agg_val.append(group[~pd.isnull(group[target_column_label])][target_column_label].mean())
+        elif method == 'sum':
+            agg_val.append(group[~pd.isnull(group[target_column_label])][target_column_label].sum())
+        elif method == 'max':
+            agg_val.append(group[~pd.isnull(group[target_column_label])][target_column_label].max())
+        elif method == 'min':
+            agg_val.append(group[~pd.isnull(group[target_column_label])][target_column_label].min())
+        data_records.append(group[~pd.isnull(group[target_column_label])].shape[0])
+        count += 1
+
+    # Data processing - create model data properties matrix
+    model_group = pd.DataFrame({'group_desc': keyall, 'data_records': data_records, 
+                                agg_val_label: agg_val})
+
+    print('Average data records of grouped features:', model_group['data_records'].mean())
+    print('Max data records of grouped features:', model_group['data_records'].max())
+    print('Min data records of grouped features:', model_group['data_records'].min())
+    
+    # Split the group desc column into individual columns by group label
+    for group_index, group_label in enumerate(group_labels):
+        for value_index, value in enumerate(zip(*model_group['group_desc'])):
+            if group_index == value_index:
+                model_group[group_label] = value
+
+    # Impute missing values
+    model_group[agg_val_label] = model_group[agg_val_label].fillna(0)
+    model_group = model_group[model_group_labels + [agg_val_label]]
+
+    # Join aggregated values to main dataset
+    print('Size before join:', df.shape)
+    df_output = pd.merge(df, model_group, on=model_group_labels, how='left')
+    print('Size after join:', df.shape)
+    
+    return df_output
+
+# Distribution plot for single feature exploration
+def explore_features_single(model_features, feature_plot, target, feature_filter=None, plot_style='kde', bins=None, xlim=None):
+    '''
+    Helper function to display distribution plot for single feature exploration.
+    
+    Arguments:
+    -----------
+    model_features: pd.dataframe, dataframe containing features dataset
+    feature_plot: str, column header of the feature variable of interest
+    target: str, column header of the target variable
+    feature_filter: str, column header containing onehot encoded data for filtering
+    plot_style: str, option of 'kde', 'hist' etc, type of distribution plot
+    bins: int, number of bins for distribution plot
+    xlim: tuple, specifies the min and max x axis on the chart for viewing
+    
+    Returns:
+    -----------
+    Display of single feature distribution plot
+    '''
+    if feature_filter is not None:
+        model_features_filter = model_features[model_features[feature_filter] == 1]
+    else:
+        model_features_filter = model_features
+    sns.set_style("whitegrid", {'axes.grid' : False})
+
+    feature = feature_plot
+    feature_desc = feature.replace('_', ' ').capitalize()
+    if bins is not None:
+        sns.displot(data=model_features_filter, x=feature, hue=target, kind=plot_style, height=7, aspect=1.2, bins=bins)
+    else:
+        sns.displot(data=model_features_filter, x=feature, hue=target, kind=plot_style, height=7, aspect=1.2)
+    if xlim is not None:
+        plt.xlim(xlim)
+    plt.title(feature_desc + ' on ' + target)
+    plt.xlabel(feature_desc)
+    plt.ylabel('Samples')
+    
+# Distribution plot for double feature exploration
+def explore_features_multi(model_features, feature_plot, target, plot_style='kde', feature_filter=None, bins=None, xlim=None):
+    '''
+    Helper function to display distribution plot for double feature exploration.
+     
+    Arguments:
+    -----------
+    model_features: pd.dataframe, dataframe containing features dataset
+    feature_plot: list, column headers of the feature variables of interest, where first element will be shown in x-axis, second element will be shown in y-axis.
+    target: str, column header of the target variable
+    feature_filter: str, column header containing onehot encoded data for filtering
+    plot_style: str, option of 'kde', 'hist' etc, type of distribution plot
+    bins: int, number of bins for distribution plot
+    xlim: tuple, specifies the min and max x axis on the chart for viewing
+    
+    Returns:
+    -----------
+    Display of multi feature distribution plot
+    '''
+    if feature_filter is not None:
+        model_features_filter = model_features[model_features[feature_filter] == 1]
+    else:
+        model_features_filter = model_features
+    model_features_filter = model_features_filter.sort_values(by=target, ascending=False)
+    sns.set_style("whitegrid", {'axes.grid' : False})
+
+    x_feature, y_feature = feature_plot
+    x_feature_desc = x_feature.replace('_', ' ').capitalize()
+    y_feature_desc = y_feature.replace('_', ' ').capitalize()
+    
+    if bins is not None:
+        sns.displot(data=model_features_filter, x=x_feature, y=y_feature, hue=target, kind=plot_style, height=7, aspect=1.2, bins=bins)
+    else:
+        sns.displot(data=model_features_filter, x=x_feature, y=y_feature, hue=target, kind=plot_style, height=7, aspect=1.2)
+        
+    if xlim is not None:
+        plt.xlim(xlim)
+    plt.title(x_feature_desc + ' and ' + y_feature_desc + ' on ' + target)
+    plt.xlabel(x_feature_desc)
+    plt.ylabel(y_feature_desc)
+    
 # Helper function to round up number to the specified integer interval
 def roundup(x, interval):
     return int(math.ceil(x/interval))*interval
