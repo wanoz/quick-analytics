@@ -3506,7 +3506,7 @@ def agg_group_features(df, group_labels, target_column_label, method='mean'):
 
     # Join aggregated values to main dataset
     print('Size before join:', df.shape)
-    df_output = pd.merge(df, model_group, on=model_group_labels, how='left')
+    df_output = pd.merge(df, model_group, on=group_labels, how='left')
     print('Size after join:', df.shape)
     
     return df_output
