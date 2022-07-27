@@ -3460,7 +3460,7 @@ def agg_group_features(df, group_labels, target_column_label, method='mean'):
     df : pd.dataframe, dataframe to be passed as input
     group_labels : list, the column headers of the specified features used in the group operation
     target_column_label : str, the column header of the target variable
-    operation: str, options of 'mean', 'sum', 'max', 'min' as the specified aggregation method
+    method: str, options of 'mean', 'sum', 'max', 'min' as the specified aggregation method
     
     Returns:
     -----------
