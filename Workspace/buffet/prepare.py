@@ -3511,6 +3511,45 @@ def agg_group_features(df, group_labels, target_column_label, method='mean'):
     
     return df_output
 
+# Helper function that generates additional feature columns based on keywords.
+def generate_keyword_features(df, feature_header, keywords_rules):
+    '''
+    Helper function that generates additional feature columns based on keywords.
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe to be passed as input
+    feature_header : str, the column header containing the keywords text
+    keywords_rules : dict, dict containing keywords tag rules, {'tag1': ['KEYWORD1', 'KEYWORD2'], 'tag2': ['KEYWORD3'], ...}
+    
+    Returns:
+    -----------
+    df_output : pd.dataframe, resulting dataframe as output
+    '''
+    
+    # Data processing - create tag labels for keywords
+    keywords_tags = []
+    keywords_tags_unique = []
+    for index, row in df.iterrows():
+        feature_words = str(row[feature_header]).split(' ')
+        keywords_tag = []
+        for word in feature_words:
+            for tag, keywords in keywords_rules.items():
+                for keyword in keywords:
+                    if keyword in word:
+                        keywords_tag.append(tag)
+                        if tag not in keywords_tags_unique:
+                            keywords_tags_unique.append(tag)
+        keywords_tag = ','.join(keywords_tag)
+        keywords_tags.append(keywords_tag)
+
+    df_output = df
+    df_output[feature_header + '_tag'] = keywords_tags
+
+    for tag in keywords_tags_unique:
+        df_output['tag_' + tag] = np.where(df_output[feature_header + '_tag'].str.contains(tag), 1, 0)
+        
+    return df_output
+
 # Distribution plot for single feature exploration
 def explore_features_single(model_features, feature_plot, target, feature_filter=None, plot_style='kde', bins=None, xlim=None):
     '''
