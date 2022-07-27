@@ -3502,7 +3502,7 @@ def agg_group_features(df, group_labels, target_column_label, method='mean'):
 
     # Impute missing values
     model_group[agg_val_label] = model_group[agg_val_label].fillna(0)
-    model_group = model_group[model_group_labels + [agg_val_label]]
+    model_group = model_group[group_labels + [agg_val_label]]
 
     # Join aggregated values to main dataset
     print('Size before join:', df.shape)
