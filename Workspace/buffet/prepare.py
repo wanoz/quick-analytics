@@ -3628,6 +3628,72 @@ def explore_features_multi(model_features, feature_plot, target, plot_style='kde
     plt.xlabel(x_feature_desc)
     plt.ylabel(y_feature_desc)
     
+# Forecast plot for time series modelling
+def plot_forecast(df, date_header, actual_header, forecast_header, x_label_desc, y_label_desc, title=None,
+                  plot_size=(10, 7), forecast_bounds_headers=None, xlabel_angle=45, include_legend=True):
+    """
+    Produce a forecast plot of actual (points visual), and forecast (line visual) chart.
+    
+    Arguments:
+    -----------
+    df : pd.dataframe, dataframe as input data to be plotted
+    date_header : string, header description of the x series date data
+    actual_header : string, header description of the y series actual data
+    forecast_header : string, header description of the y series forecast_header data
+    x_label_desc : string, label description on x-axis
+    y_label_desc : string, label description on y-axis
+    title: string, label description on title
+    plot_size : tuple, the setting of the plot size
+    forecast_bounds_headers : tuple, (h1, h2) where h1 is the lower bound header, and h2 is the upper bound header
+    xlabel_angle : int, angle of the x label text
+    include_legend: boolean, include legend of "Actual" and "Forecast" labels
+    
+    Returns:
+    -----------
+    Display of forecast plot
+    """
+    
+    # Set chart frame
+    ax = None
+    if ax is None:
+        fig = plt.figure(facecolor='w', figsize=plot_size)
+        ax = fig.add_subplot(111)
+    else:
+        fig = ax.get_figure()
+
+    # Set actual and forecast visuals
+    ax.plot(df[date_header], df[actual_header], 'k.', label='Actual')
+    ax.plot(df[date_header], df[forecast_header], ls='-', c='#0072B2', label='Forecast')
+
+    # Show range visuals of lower and upper forecast lines if available
+    if forecast_bounds_headers is not None:
+        ax.fill_between(df[date_header], df[forecast_bounds_headers[0]], df[forecast_bounds_headers[1]], color='#0072B2', alpha=0.2, label='Range')
+    
+    # Set chart grid lines
+    ax.grid(True, which='major', c='gray', ls='-', lw=0.3, alpha=0.2)
+    
+    # Set chart x and y axis labels
+    if x_label_desc is None:
+        x_label_desc = date_header
+    if y_label_desc is None:
+        y_label_desc = actual_header
+    ax.set_xlabel(x_label_desc)
+    ax.set_ylabel(y_label_desc)
+    
+    # Set angle of x axis label text
+    if xlabel_angle is not None:
+        plt.xticks(rotation=xlabel_angle)
+        
+    # Set chart title
+    if title is not None:
+        plt.title(title)
+    
+    # Chart legend
+    if include_legend:
+        ax.legend()
+        
+    fig.tight_layout()
+    
 # Helper function to round up number to the specified integer interval
 def roundup(x, interval):
     return int(math.ceil(x/interval))*interval
